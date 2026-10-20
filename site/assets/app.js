@@ -3,7 +3,7 @@
   'use strict';
 
   // ── 설정 ────────────────────────────────────────────────
-  // 편지 폰 케이스 안쪽 사진(패턴 단서)을 화면에도 보여 줄지. 실물 단서로 확정되면 false로.
+  // 제비 폰 케이스 안쪽 사진(패턴 단서)을 화면에도 보여 줄지. 실물 단서로 확정되면 false로.
   var SHOW_CASE_HINT = true;
   // 잘못 입력 몇 번이면 잠깐 막을지
   var LOCK_TRIES = 5, LOCK_SECONDS = 30;
@@ -735,7 +735,7 @@
   // 기기별 연락처 표시 이름 (저장 이름)
   var CONTACT = {
     S2: { seo_jeongui_doran: 'seo_jeongui_doran', late_letter: '나' },
-    S3: { late_letter: '편지', sojin_doran: '소진' },
+    S3: { late_letter: '제비', sojin_doran: '소진' },
     WIRO: { nare_doran: '나래' }
   };
   function cname(dev, id) { return (CONTACT[dev] && CONTACT[dev][id]) || nick(id); }
@@ -808,12 +808,12 @@
     }
     var hint = SHOW_CASE_HINT ? '<details class="case"><summary>케이스 안쪽에 접힌 사진이 끼워져 있다</summary><div class="case-ph"><div class="case-front">[바다 사진 출력물]</div><div class="case-back">702.<br>첫 글자만 그리면 돼요.</div></div></details>' : '';
     return { html: '<div class="locker open"><h2>보관함 1</h2><div class="lk-phones">' +
-      '<a class="lk-ph white" href="#/S2"><span class="lk-scr">' + (isOpen('S2') ? '🔓' : '🔒') + '</span><b>흰 케이스 휴대폰</b><small>그을린 이름표 ‘편지’ 옆에 있던 것</small></a>' +
+      '<a class="lk-ph white" href="#/S2"><span class="lk-scr">' + (isOpen('S2') ? '🔓' : '🔒') + '</span><b>흰 케이스 휴대폰</b><small>그을린 이름표 ‘제비’ 옆에 있던 것</small></a>' +
       '<a class="lk-ph dark" href="#/WIRO"><span class="lk-scr">' + (isOpen('WIRO') ? '🔓' : '🔒') + '</span><b>검은 휴대폰</b><small>진행자의 것</small></a></div>' + hint +
       '<p class="lk-note">다른 휴대폰 두 대는 이미 주인에게 돌아갔다.</p></div>', title: '보관함 1', skin: 'dev' };
   }
 
-  // ── S2 편지의 휴대폰 ────────────────────────────────────
+  // ── S2 제비의 휴대폰 ────────────────────────────────────
   function s2(parts) {
     if (!isOpen('locker')) return locker();
     if (!isOpen('S2')) {
@@ -827,13 +827,13 @@
         '<a href="' + href('S2', 'doran') + '"><i class="ic doran"><img src="img/icon/doran.png" alt=""></i>도란</a><a href="' + href('S2', 'sms') + '"><i class="ic sms"><img src="img/icon/chat.png" alt=""></i>문자</a>' +
         '<a href="' + href('S2', 'memo') + '"><i class="ic memo"><img src="img/icon/memo.png" alt=""></i>메모</a><a href="' + href('S2', 'photo') + '"><i class="ic photo"><img src="img/icon/photo.png" alt=""></i>사진첩</a></div>' +
         '<a class="ls-back" href="#/locker">‹ 보관함으로</a></div>';
-      return phone('p-s2', h, '편지의 휴대폰');
+      return phone('p-s2', h, '제비의 휴대폰');
     }
     if (app === 'doran') h = id ? appBar('S2', cname('S2', id), href('S2', 'doran')) + chatHTML(devThreads('S2', 'DORAN').find(function (t) { return t.who === id; }).list, OWNER.S2, 'doran') : appBar('S2', '도란') + threadList('S2', 'doran', 'DORAN');
     else if (app === 'sms') h = id ? appBar('S2', cname('S2', id), href('S2', 'sms')) + chatHTML(devThreads('S2', 'SMS').find(function (t) { return t.who === id; }).list, OWNER.S2, 'sms') : appBar('S2', '문자') + threadList('S2', 'sms', 'SMS');
     else if (app === 'memo') h = id ? appBar('S2', '메모', href('S2', 'memo')) + noteView(POST[id]) : appBar('S2', '메모') + notesList('S2', '메모', 'memo');
     else if (app === 'photo') h = id ? appBar('S2', '사진', href('S2', 'photo')) + photoView(POST[id]) : appBar('S2', '사진첩') + gallery('S2', '사진첩', 'photo');
-    return phone('p-s2 in', statusBar('19:16') + '<div class="d-app">' + h + '</div>', '편지의 휴대폰');
+    return phone('p-s2 in', statusBar('19:16') + '<div class="d-app">' + h + '</div>', '제비의 휴대폰');
   }
 
   // ── S3 이다음의 휴대폰 ──────────────────────────────────
