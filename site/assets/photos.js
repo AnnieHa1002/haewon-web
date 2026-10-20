@@ -48,5 +48,13 @@ window.HW_PHOTOS = {
   "S3-NOTE-002": "img/S3-NOTE-002.jpg",
   "S3-NOTE-003": "img/S3-NOTE-003.jpg",
   "S3-NOTE-004": "img/S3-NOTE-004.jpg",
-  "S3-NOTE-005": "img/S3-NOTE-005.jpg"
+  "S3-NOTE-005": "img/S3-NOTE-005.jpg",
+  "S3-NOTE-006": "img/S3-NOTE-006.jpg",
+  "S3-NOTE-007": "img/S3-NOTE-007.jpg",
+  "S3-NOTE-008": "img/S3-NOTE-008.jpg",
+  "S3-NOTE-009": "img/S3-NOTE-009.jpg",
+  "S3-NOTE-010": "img/S3-NOTE-010.jpg",
+  "S3-NOTE-011": "img/S3-NOTE-011.jpg",
+  "S4-FEED-011": "img/S4-FEED-011.jpg",
+  "S4-FEED-016": "img/S4-FEED-016.jpg"
 };
