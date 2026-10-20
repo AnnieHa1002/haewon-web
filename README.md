@@ -3,12 +3,34 @@
 4막에서 플레이어가 휴대폰으로 뒤지는 가짜 사이트 묶음(S1~S10, 휴대폰 3대).
 서버·DB·네트워크 없이 도는 정적 사이트이고, `site/index.html`을 그냥 열어도(file://) 동작한다.
 
+## QR 코드
+
+휴대폰 카메라로 찍으면 바로 그 사이트가 열린다. 주소는 GitHub Pages 기준이라 **배포가 켜져야 동작한다**.
+다른 주소로 배포했다면 `python3 tools/qr.py <새 주소>`로 다시 만든다 (`pip install segno` 필요).
+
+<!-- QR:START -->
+| 사이트 | QR | 주소 |
+| --- | --- | --- |
+| 허브 (홈 화면) | <img src="qr/hub.svg" width="140" alt="허브 (홈 화면) QR"> | `https://annieha1002.github.io/haewon-web/` |
+| S1 남은자리 | <img src="qr/s1.svg" width="140" alt="S1 남은자리 QR"> | `https://annieha1002.github.io/haewon-web/#/S1` |
+| 보관함 1 (S2 편지 폰 · 오십분 폰) | <img src="qr/s2-locker.svg" width="140" alt="보관함 1 (S2 편지 폰 · 오십분 폰) QR"> | `https://annieha1002.github.io/haewon-web/#/locker` |
+| S3 이다음의 휴대폰 | <img src="qr/s3.svg" width="140" alt="S3 이다음의 휴대폰 QR"> | `https://annieha1002.github.io/haewon-web/#/S3` |
+| S4 한컷 nare_nowhere | <img src="qr/s4.svg" width="140" alt="S4 한컷 nare_nowhere QR"> | `https://annieha1002.github.io/haewon-web/#/S4` |
+| S5 해원일보 | <img src="qr/s5.svg" width="140" alt="S5 해원일보 QR"> | `https://annieha1002.github.io/haewon-web/#/S5` |
+| S6 금방울당 | <img src="qr/s6.svg" width="140" alt="S6 금방울당 QR"> | `https://annieha1002.github.io/haewon-web/#/S6` |
+| S7 도원화학 사내망 | <img src="qr/s7.svg" width="140" alt="S7 도원화학 사내망 QR"> | `https://annieha1002.github.io/haewon-web/#/S7` |
+| S8 천명그룹 | <img src="qr/s8.svg" width="140" alt="S8 천명그룹 QR"> | `https://annieha1002.github.io/haewon-web/#/S8` |
+| S9 사원증 | <img src="qr/s9.svg" width="140" alt="S9 사원증 QR"> | `https://annieha1002.github.io/haewon-web/#/S9` |
+| S10 새벽의 방 | <img src="qr/s10.svg" width="140" alt="S10 새벽의 방 QR"> | `https://annieha1002.github.io/haewon-web/#/S10` |
+<!-- QR:END -->
+
 ## 구조
 
 ```
 data/          구글 시트 '꺼지지 않는 이름 사이트 데이터' 탭별 CSV (원본은 시트)
 tools/build.py CSV → site/assets/data.js (제작용 컬럼 제거, 비밀번호는 해시만)
 tools/smoke.mjs 390px 화면으로 모든 사이트를 열고 로그인·잠금 해제까지 돌려 보는 점검
+tools/qr.py    사이트별 QR(qr/*.svg) 만들고 README 표 갱신
 tools/package.sh 빌드 + site/를 dist/haewon-site.zip으로 묶기 (USB·오프라인 배포)
 site/          배포 산출물. index.html + assets/{app.js, style.css, data.js}, robots.txt
 ```
