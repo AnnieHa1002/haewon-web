@@ -40,9 +40,9 @@
 
   // ── 상태 (새로고침해도 이어진다) ─────────────────────────
   var KEY = 'hw4-stage';
-  var S = { i: 0, t0: 0, pausedAt: null, started: false, done: false, cue: -1, vol: .7, muted: false };
+  var S = { i: 0, t0: 0, pausedAt: null, started: false, done: false, cue: -1, vol: .7, muted: false, mix: { rain: 1, thunder: 1, drone: 1, bell: 1 } };
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { } }
-  function load() { try { var x = JSON.parse(localStorage.getItem(KEY) || 'null'); if (x) S = Object.assign(S, x); } catch (e) { } }
+  function load() { try { var x = JSON.parse(localStorage.getItem(KEY) || 'null'); if (x) { var m = Object.assign({}, S.mix, x.mix || {}); S = Object.assign(S, x); S.mix = m; } } catch (e) { } }
   function now() { return Date.now(); }
   function elapsed() { return ((S.pausedAt || now()) - S.t0) / 1000; }
   function phase() { return PHASES[S.i]; }
@@ -96,14 +96,14 @@
     if (!A) return;
     var t = A.ctx.currentTime, tc = quick ? .3 : 4;
     var paused = !!S.pausedAt;
-    A.rain.gain.setTargetAtTime(paused ? p.snd.rain * .35 : p.snd.rain, t, tc);
-    A.drone.gain.setTargetAtTime(paused ? 0 : p.snd.drone, t, tc);
+    A.rain.gain.setTargetAtTime((paused ? p.snd.rain * .35 : p.snd.rain) * S.mix.rain, t, tc);
+    A.drone.gain.setTargetAtTime(paused ? 0 : p.snd.drone * S.mix.drone, t, tc);
     A.oscs.forEach(function (o, k) {
       var mul = o.mul;
       if (k === 4) { o.g.gain.setTargetAtTime(p.snd.major ? .12 : 0, t, tc); mul = p.snd.major ? 1.25 : 1.2; }
       o.osc.frequency.setTargetAtTime(p.snd.root * mul, t, tc);
     });
-    A.thunderRate = paused ? 0 : p.snd.thunder;
+    A.thunderRate = paused || !S.mix.thunder ? 0 : p.snd.thunder;
   }
   // 천둥: 저역 잡음에 긴 꼬리. 가까운 천둥은 화면도 번쩍
   function thunder(force) {
@@ -111,7 +111,8 @@
     var ctx = A.ctx, t = ctx.currentTime + .05, near = force || Math.random() < .35;
     var src = A.loop(), lp = ctx.createBiquadFilter(), g = ctx.createGain();
     lp.type = 'lowpass'; lp.frequency.setValueAtTime(near ? 900 : 260, t); lp.frequency.exponentialRampToValueAtTime(90, t + 5);
-    var peak = (near ? .9 : .45) * (.7 + Math.random() * .3);
+    var peak = (near ? .9 : .45) * (.7 + Math.random() * .3) * S.mix.thunder;
+    if (!peak) return;
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(peak, t + (near ? .06 : .6));
     for (var k = 0; k < 3; k++) g.gain.linearRampToValueAtTime(peak * (.4 + Math.random() * .5), t + .4 + k * (.5 + Math.random()));
     g.gain.exponentialRampToValueAtTime(.001, t + 6 + Math.random() * 3);
@@ -120,16 +121,18 @@
   }
   // 방울 소리: 비조화 배음이 길게 사라지는 종
   function bell(f, vol) {
-    if (!A) return;
+    if (!A || !S.mix.bell) return;
+    vol = (vol || .35) * S.mix.bell;
     var ctx = A.ctx, t = ctx.currentTime + .02;
     [[1, 1, 4.5], [2.76, .5, 2.6], [5.4, .25, 1.4], [8.93, .12, .8]].forEach(function (p) {
       var o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = (f || 660) * p[0];
-      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime((vol || .35) * p[1], t + .005); g.gain.exponentialRampToValueAtTime(.0001, t + p[2]);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * p[1], t + .005); g.gain.exponentialRampToValueAtTime(.0001, t + p[2]);
       o.connect(g); g.connect(A.master); o.start(t); o.stop(t + p[2] + .1);
     });
   }
   // 지목 시간의 심장 박동
   function thump(t, v) {
+    v *= S.mix.drone; if (!v) return;
     var ctx = A.ctx, o = ctx.createOscillator(), g = ctx.createGain();
     o.frequency.setValueAtTime(70, t); o.frequency.exponentialRampToValueAtTime(38, t + .18);
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + .3);
@@ -299,7 +302,7 @@
     var li = e.target.closest('li'); if (!li) return;
     if (confirm('“' + PHASES[+li.dataset.i].act + ' · ' + PHASES[+li.dataset.i].what + '” 처음으로 옮길까요?')) { enter(+li.dataset.i); closePanel(); }
   });
-  function openPanel() { $('panel').hidden = false; renderList(); document.querySelector('[data-c=pause]').textContent = S.pausedAt ? '다시 시작' : '일시정지'; document.querySelector('[data-c=mute]').textContent = S.muted ? '소리 켜기' : '소리 끄기'; }
+  function openPanel() { $('panel').hidden = false; renderList(); syncMix(); document.querySelector('[data-c=pause]').textContent = S.pausedAt ? '다시 시작' : '일시정지'; document.querySelector('[data-c=mute]').textContent = S.muted ? '소리 켜기' : '소리 끄기'; }
   function closePanel() { $('panel').hidden = true; }
   $('panel').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
@@ -310,12 +313,21 @@
     else if (c === 'next') { if (S.i < PHASES.length - 1) enter(S.i + 1); else finish(); closePanel(); }
     else if (c === 'prev') { enter(Math.max(0, S.i - 1)); closePanel(); }
     else if (c === 'cards') { closePanel(); countdown(); }
+    else if (c === 'try-thunder') { audio(); thunder(true); }
+    else if (c === 'try-bell') { audio(); bell(660); }
+    else if (c === 'only-bell' || c === 'all-on') { var on = c === 'all-on' ? 1 : 0; S.mix = { rain: on, thunder: on, drone: on, bell: 1 }; save(); syncMix(); applySound(phase(), true); }
     else if (c === 'mute') { S.muted = !S.muted; save(); setVolume(); b.textContent = S.muted ? '소리 켜기' : '소리 끄기'; }
     else if (c === 'full') { var d = document.documentElement; (d.requestFullscreen || d.webkitRequestFullscreen || function () { }).call(d); }
     else if (c === 'reset') { if (confirm('타이머를 처음으로 되돌릴까요?')) { try { localStorage.removeItem(KEY); } catch (x) { } location.reload(); } }
     else if (c === 'close') closePanel();
   });
-  $('vol').addEventListener('input', function (e) { S.vol = +e.target.value; save(); setVolume(); });
+  // 소리 층마다 크기 조절 (0이면 그 소리를 끈다)
+  function syncMix() { document.querySelectorAll('[data-m]').forEach(function (el) { el.value = el.dataset.m === 'vol' ? S.vol : S.mix[el.dataset.m]; }); }
+  document.querySelector('.mix').addEventListener('input', function (e) {
+    var k = e.target.dataset.m; if (!k) return;
+    if (k === 'vol') { S.vol = +e.target.value; setVolume(); } else { S.mix[k] = +e.target.value; applySound(phase(), true); }
+    save();
+  });
 
   // 길게 누르면 메뉴, 두 번 누르면(선택 시간) 하나 둘 셋
   var pressT, lastTap = 0;
@@ -352,13 +364,14 @@
     S.started = true;
     if (fresh) enter(0);
     else { applySound(phase(), true); save(); renderList(); if (S.done) notice('', '향이 다 탔습니다', '경찰이 도착합니다.', 0); }
-    $('vol').value = S.vol;
+    syncMix();
   }
   load();
   if (S.started && !S.done) $('resume').hidden = false;
   S.started = false;
   $('go').addEventListener('click', function () { if (!$('resume').hidden && !confirm('처음부터 다시 시작할까요? (이어서 하려면 ‘이어서 진행’)')) return; begin(true); });
   // 새로고침·탭 닫힘 뒤에도 실제 시각 기준으로 이어서 간다
+  $('go-quiet').addEventListener('click', function () { if (!$('resume').hidden && !confirm('처음부터 다시 시작할까요?')) return; S.mix = { rain: 0, thunder: 0, drone: 0, bell: 1 }; begin(true); });
   $('resume').addEventListener('click', function () { begin(false); });
 
   resize(); sprite = makeSprite();

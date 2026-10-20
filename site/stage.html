@@ -27,6 +27,7 @@
   <h1>꺼지지 않는 이름</h1>
   <p class="sub">잊어도 괜찮습니다</p>
   <button id="go">시작</button>
+  <button id="go-quiet">알림 소리만 켜고 시작</button>
   <p class="hint">화면을 길게 누르면 조작 메뉴가 열립니다.<br>소리를 켜고, 화면 자동 꺼짐을 꺼 두세요.</p>
   <button id="resume" hidden>이어서 진행</button>
 </section>
@@ -36,7 +37,14 @@
   <div class="row"><button data-c="-60">−1분</button><button data-c="+60">+1분</button></div>
   <div class="row"><button data-c="prev">‹ 이전 구간</button><button data-c="next">다음 구간 ›</button></div>
   <div class="row"><button data-c="cards">하나, 둘, 셋</button><button data-c="mute">소리 끄기</button></div>
-  <label class="vol">볼륨 <input id="vol" type="range" min="0" max="1" step="0.05" value="0.7"></label>
+  <div class="mix">
+    <label><span>전체</span><input data-m="vol" type="range" min="0" max="1" step="0.05"></label>
+    <label><span>빗소리</span><input data-m="rain" type="range" min="0" max="1.5" step="0.05"></label>
+    <label><span>천둥</span><input data-m="thunder" type="range" min="0" max="1.5" step="0.05"><button data-c="try-thunder" aria-label="천둥 들어보기">▶</button></label>
+    <label><span>울림</span><input data-m="drone" type="range" min="0" max="1.5" step="0.05"></label>
+    <label><span>알림 방울</span><input data-m="bell" type="range" min="0" max="1.5" step="0.05"><button data-c="try-bell" aria-label="방울 들어보기">▶</button></label>
+  </div>
+  <div class="row"><button data-c="only-bell">알림만 (배경음 없음)</button><button data-c="all-on">전부 켜기</button></div>
   <ol id="plist"></ol>
   <div class="row"><button data-c="reset" class="warn">처음부터</button><button data-c="close">닫기</button></div>
 </section>

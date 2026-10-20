@@ -35,6 +35,7 @@ button { font: inherit; }
 #start h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(30px, 6vw, 64px); letter-spacing: .15em; margin: 0; }
 #start .sub { color: var(--dim); letter-spacing: .3em; margin: 10px 0 40px; }
 #start button { border: 1px solid #5b554b; background: transparent; color: var(--ink); padding: 14px 54px; border-radius: 99px; font-size: 18px; letter-spacing: .3em; cursor: pointer; }
+#start #go-quiet { margin-top: 14px; padding: 9px 24px; font-size: 13px; letter-spacing: .05em; color: var(--dim); border-color: #33302a; }
 #start #resume { margin-top: 14px; padding: 10px 30px; font-size: 14px; letter-spacing: .1em; color: var(--dim); }
 #start .hint { margin-top: 30px; font-size: 13px; color: #5d584f; line-height: 1.7; }
 
@@ -42,8 +43,11 @@ button { font: inherit; }
 #panel .row { display: flex; gap: 8px; margin-bottom: 8px; }
 #panel button { flex: 1; padding: 11px 6px; border: 1px solid #33363f; background: #191b21; color: var(--ink); border-radius: 8px; font-size: 14px; cursor: pointer; }
 #panel button.warn { color: #e48a7a; }
-#panel .vol { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--dim); margin: 10px 0; }
-#panel .vol input { flex: 1; }
+#panel .mix { margin: 12px 0 6px; padding: 10px 12px; border: 1px solid #23252c; border-radius: 10px; }
+#panel .mix label { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--dim); padding: 4px 0; }
+#panel .mix span { width: 64px; flex: none; }
+#panel .mix input { flex: 1; min-width: 0; }
+#panel .mix button { flex: none; width: 34px; padding: 6px 0; }
 #plist { list-style: none; padding: 0; margin: 12px 0; font-size: 13px; }
 #plist li { padding: 7px 8px; border-radius: 6px; color: var(--dim); display: flex; justify-content: space-between; cursor: pointer; }
 #plist li.on { background: #23252c; color: var(--ink); }
