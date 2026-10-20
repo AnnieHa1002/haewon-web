@@ -15,6 +15,8 @@
   D.posts.forEach(function (p) { POST[p.id] = p; });
   D.sites.forEach(function (s) { SITE[s.id] = s; });
   var NOW = D.now;
+  // 글ID → 사진 파일 (assets/photos.js). 없으면 사진 설명 글로 대신한다
+  var PHOTO = window.HW_PHOTOS || {};
 
   // ── 상태 (로그인·잠금 해제). 저장소가 막혀도 메모리로 돈다 ────
   var KEY = 'hw4-state';
@@ -64,13 +66,19 @@
   }
 
   // 본문: 빈 줄로 문단, [사진: …]·[캡처: …] 줄은 사진 자리로, ----- 줄은 구분선으로
-  function rich(x) {
+  function rich(x, id) {
+    var used = false;
     var out = [], para = [];
     function flush() { if (para.length) { out.push('<p>' + para.join('<br>') + '</p>'); para = []; } }
     x.split('\n').forEach(function (line) {
       var t = line.trim(), m = t.match(/^\[(사진|캡처)\s*[:：]?\s*([\s\S]*?)\]$/);
       if (!t) { flush(); return; }
-      if (m) { flush(); out.push('<figure class="ph"><span class="ph-k">' + m[1] + '</span>' + esc(m[2]) + '</figure>'); return; }
+      if (m) {
+        flush();
+        if (id && PHOTO[id] && !used) { used = true; out.push('<figure class="ph-img"><img src="' + esc(PHOTO[id]) + '" alt="' + esc(m[2]) + '" loading="lazy"></figure>'); }
+        else out.push('<figure class="ph"><span class="ph-k">' + m[1] + '</span>' + esc(m[2]) + '</figure>');
+        return;
+      }
       if (/^[-―─]{3,}.*[-―─]{3,}$/.test(t)) { flush(); out.push('<div class="rule">' + esc(t.replace(/[-―─]/g, '').trim()) + '</div>'); return; }
       para.push(esc(line));
     });
@@ -335,7 +343,7 @@
     if (s.k === 'secret') body = lockBox('S1', '비밀글입니다. 작성자만 볼 수 있습니다.');
     else if (s.k === 'blind') body = '<div class="blind">' + BLIND_MSG + '<small>운영 원칙에 따라 게시물이 가려졌습니다.</small></div>';
     else if (s.k === 'del') body = '<div class="blind">삭제된 게시물입니다.</div>';
-    else body = '<article class="post-x' + (s.dim ? ' dim' : '') + '">' + rich(s.body) + '</article>' + (s.k === 'show' && p.l ? '<div class="likes">추천 ' + num(p.l) + '</div>' : '');
+    else body = '<article class="post-x' + (s.dim ? ' dim' : '') + '">' + rich(s.body, p.id) + '</article>' + (s.k === 'show' && p.l ? '<div class="likes">추천 ' + num(p.l) + '</div>' : '');
     var mid = adsFor('S1', 'mid', p.d, p.id)[0];
     return s1Shell(p.b, head + body + (mid ? adHTML(mid.ad, 'ad-mid' + (mid.cached ? ' ad-cached' : ''), mid.halted) : '') +
       (s.k === 'secret' ? '' : commentsHTML(p, { op: '글쓴이' })), p.t);
@@ -385,7 +393,7 @@
     var s = postState(p);
     var body;
     if (s.k === 'blind' || s.k === 'del') body = '<div class="blind">' + BLIND_MSG + '<small>독자 기고 게시 원칙에 따라 노출이 중단되었습니다.</small></div>';
-    else body = '<article class="post-x s5-x">' + rich(s.body) + '</article>';
+    else body = '<article class="post-x s5-x">' + rich(s.body, p.id) + '</article>';
     var mid = adsFor('S5', 'mid', p.d, p.id);
     var h = '<div class="s5-ah"><div class="crumb">' + esc(p.b) + '</div><h1>' + esc(titleOf(p, s)) + '</h1><div class="s5-by">' + esc(nick(p.a)) + ' · 입력 ' + when(p.d) + '</div></div>' + body +
       (mid.length ? adHTML(mid[+hash(p.id) % mid.length].ad, 'ad-mid') : '') +
@@ -440,7 +448,7 @@
   }
   function s9Post(p) {
     var s = postState(p), co = nick(p.a).split(' · ');
-    var body = s.k === 'show' ? '<article class="post-x">' + rich(s.body) + '</article>' :
+    var body = s.k === 'show' ? '<article class="post-x">' + rich(s.body, p.id) + '</article>' :
       '<div class="blind">' + (s.k === 'del' ? '신고 누적으로 가려진 게시물입니다.' : BLIND_MSG) + '<small>커뮤니티 가이드라인에 따라 가려졌습니다.</small></div>';
     var h = '<div class="s9-ph"><div class="crumb"><a href="' + href('S9', 'b', p.b) + '">' + esc(p.b) + '</a></div><h1>' + esc(titleOf(p, s)) + '</h1><div class="s9-co">' + esc(co[0]) + ' · ' + esc(co[1] || '') + ' · ' + when(p.d) + '</div></div>' + body +
       (s.k === 'show' ? '<div class="s9-m big"><span>👁 ' + num(p.v) + '</span><span>♡ ' + num(p.l) + '</span></div>' : '') +
@@ -475,7 +483,7 @@
     if (s.k === 'secret') body = lockBox('S10', '비밀글입니다. 작성자만 볼 수 있습니다.');
     else if (s.k === 'del') body = '<div class="blind">운영 원칙에 따라 삭제된 게시물입니다.<small>운영자가 작성자에게 쪽지를 보냈습니다.</small></div>';
     else if (s.k === 'blind') body = '<div class="blind">' + BLIND_MSG + '</div>';
-    else body = '<article class="post-x">' + rich(s.body) + '</article>';
+    else body = '<article class="post-x">' + rich(s.body, p.id) + '</article>';
     var h = '<div class="s10-ph"><h1>' + esc(titleOf(p, s)) + '</h1><div class="s10-m">' + esc(nick(p.a)) + ' · ' + when(p.d) + '</div></div>' + body + (s.k === 'secret' ? '' : commentsHTML(p, { label: '답장' }));
     return s10Shell(p.b, h, p.t);
   }
@@ -511,7 +519,7 @@
     if (s.k === 'secret') body = lockBox('S6', '비밀글입니다. 작성자와 선생님만 볼 수 있습니다.');
     else if (s.k === 'del') body = '<div class="blind">관리자에 의해 삭제된 글입니다.</div>';
     else if (s.k === 'blind') body = '<div class="blind">' + BLIND_MSG + '</div>';
-    else body = '<article class="post-x s6-x">' + rich(s.body) + '</article>';
+    else body = '<article class="post-x s6-x">' + rich(s.body, p.id) + '</article>';
     var h = '<div class="s6-ph"><h1>' + esc(titleOf(p, s)) + '</h1><div>글쓴이 ' + esc(nick(p.a)) + ' | ' + when(p.d) + (s.k === 'show' ? ' | 조회 ' + num(p.v) : '') + '</div></div>' + body + (s.k === 'secret' ? '' : commentsHTML(p, { label: '댓글' }));
     return s6Shell(p.b, h, p.t);
   }
@@ -552,7 +560,7 @@
   }
   function s8Post(p) {
     var s = postState(p);
-    var body = s.k === 'show' ? '<article class="post-x s8-x">' + rich(s.body) + '</article>' : '<div class="blind">' + BLIND_MSG + '<small>게시판 운영 정책에 따라 노출이 제한되었습니다.</small></div>';
+    var body = s.k === 'show' ? '<article class="post-x s8-x">' + rich(s.body, p.id) + '</article>' : '<div class="blind">' + BLIND_MSG + '<small>게시판 운영 정책에 따라 노출이 제한되었습니다.</small></div>';
     var h = '<div class="s8-ph"><div class="crumb"><a href="' + href('S8', 'b', p.b) + '">' + esc(p.b) + '</a></div><h1>' + esc(titleOf(p, s)) + '</h1><div>' + (p.b === '고객의 소리' ? esc(nick(p.a)) + ' · ' : '') + ymd(p.d) + '</div></div>' + body +
       commentsHTML(p, { label: p.b === '고객의 소리' ? '답변' : '댓글', anon: true });
     return s8Shell(p.b, h, p.t);
@@ -586,7 +594,7 @@
   }
   function s7Post(p) {
     var s = postState(p);
-    var body = s.k === 'show' ? '<article class="post-x s7-x">' + rich(s.body) + '</article>' : '<div class="blind">' + BLIND_MSG + '<small>게시판 관리자가 게시물을 비공개 처리했습니다.</small></div>';
+    var body = s.k === 'show' ? '<article class="post-x s7-x">' + rich(s.body, p.id) + '</article>' : '<div class="blind">' + BLIND_MSG + '<small>게시판 관리자가 게시물을 비공개 처리했습니다.</small></div>';
     return s7Shell(p.b, '<div class="s7-ph"><div class="crumb">' + esc(p.b) + '</div><h1>' + esc(titleOf(p, s)) + '</h1><table class="s7-meta"><tr><th>작성자</th><td>' + esc(nick(p.a)) + '</td><th>등록일</th><td>' + when(p.d) + '</td></tr></table></div>' + body + commentsHTML(p, { label: '댓글' }), p.t);
   }
   function s7Search(q) {
@@ -607,7 +615,7 @@
   function photoOf(x) { var m = x.match(/\[(?:사진|캡처)\s*[:：]?\s*([^\]]*)\]/); return m ? m[1] : ''; }
   function s4Tile(o, i) {
     var p = o.p, s = o.s;
-    var bg = 'background:linear-gradient(160deg,' + tint(p.id, 35, 80) + ',' + tint(p.id + 'x', 30, 62) + ')';
+    var bg = PHOTO[p.id] ? "background:#ddd url('" + esc(PHOTO[p.id]) + "') center/cover" : 'background:linear-gradient(160deg,' + tint(p.id, 35, 80) + ',' + tint(p.id + 'x', 30, 62) + ')';
     if (s.k !== 'show') return '<a class="s4-tile blind-t" href="' + href('S4', 'p', p.id) + '"><span>!</span></a>';
     return '<a class="s4-tile" style="' + bg + '" href="' + href('S4', 'p', p.id) + '"><span>' + esc(excerpt(photoOf(s.body) || p.t, 26)) + '</span></a>';
   }
@@ -626,7 +634,7 @@
     var s = postState(p);
     var lines = (s.body || '').split('\n'), ph = '', cap = [];
     lines.forEach(function (l) { var m = l.trim().match(/^\[(사진|캡처)\s*[:：]?\s*([\s\S]*?)\]$/); if (m && !ph) ph = m[2]; else cap.push(l); });
-    var photo = s.k === 'show' ? '<div class="s4-photo" style="background:linear-gradient(160deg,' + tint(p.id, 35, 82) + ',' + tint(p.id + 'x', 30, 64) + ')"><span>' + esc(ph || '') + '</span></div>' :
+    var photo = s.k === 'show' ? (PHOTO[p.id] ? '<div class="s4-photo img"><img src="' + esc(PHOTO[p.id]) + '" alt="' + esc(ph || '') + '"></div>' : '<div class="s4-photo" style="background:linear-gradient(160deg,' + tint(p.id, 35, 82) + ',' + tint(p.id + 'x', 30, 64) + ')"><span>' + esc(ph || '') + '</span></div>') :
       '<div class="s4-photo blind-p"><span>' + BLIND_MSG + '<br><small>커뮤니티 가이드라인에 따라 가려진 게시물입니다</small></span></div>';
     var h = '<div class="s4-ph"><div class="s4-av sm">나래</div><b>nare_nowhere</b>' + (s.label ? ' <span class="lbl">' + s.label + '</span>' : '') + '</div>' + photo +
       (s.k === 'show' ? '<div class="s4-act">♡ ' + num(p.l) + '</div><div class="s4-cap"><b>nare_nowhere</b> ' + rich(cap.join('\n').trim()) + '</div>' : '') +
@@ -748,11 +756,12 @@
   function gallery(dev, board, app) {
     var list = D.posts.filter(function (p) { return p.s === dev && p.b === board; }).sort(function (a, b) { return a.d < b.d ? 1 : -1; });
     return '<div class="d-gal">' + list.map(function (p) {
-      return '<a href="' + href(dev, app, p.id) + '" style="background:linear-gradient(150deg,' + tint(p.id, 18, 72) + ',' + tint(p.id + 'g', 22, 52) + ')"><span>' + esc(p.t) + '</span></a>';
+      var bg = PHOTO[p.id] ? '#333 url(&quot;' + esc(PHOTO[p.id]) + '&quot;) center/cover' : 'linear-gradient(150deg,' + tint(p.id, 18, 72) + ',' + tint(p.id + 'g', 22, 52) + ')';
+      return '<a href="' + href(dev, app, p.id) + '" style="background:' + bg + '"><span>' + esc(p.t) + '</span></a>';
     }).join('') + '</div>';
   }
-  function photoView(p) { return '<div class="d-photo">' + rich(p.x) + '<div class="d-meta">' + esc(p.t) + ' · ' + when(p.d) + '</div></div>'; }
-  function noteView(p) { return '<div class="d-note"><h2>' + esc(p.t) + '</h2><div class="d-meta">' + when(p.d) + '</div>' + rich(p.x) + '</div>'; }
+  function photoView(p) { return '<div class="d-photo">' + rich(p.x, p.id) + '<div class="d-meta">' + esc(p.t) + ' · ' + when(p.d) + '</div></div>'; }
+  function noteView(p) { return '<div class="d-note"><h2>' + esc(p.t) + '</h2><div class="d-meta">' + when(p.d) + '</div>' + rich(p.x, p.id) + '</div>'; }
 
   // 패턴 잠금 (3×3, 왼쪽 위부터 1~9)
   function patternLock(dev) {

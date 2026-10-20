@@ -506,3 +506,10 @@ body.b-dev { background: #2a2c31; }
 .s9-more.loading { color: #9aa0aa; }
 .spin { display: inline-block; width: 14px; height: 14px; margin-right: 8px; vertical-align: -2px; border: 2px solid #d5d8de; border-top-color: #e8344e; border-radius: 50%; animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* 실제 사진 (assets/photos.js 에 등록된 글) */
+.ph-img { margin: 10px 0 14px; }
+.ph-img img { display: block; width: 100%; height: auto; border-radius: 6px; background: #eee; }
+.s4-photo.img { padding: 0; background: #eee; }
+.s4-photo.img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.s4-tile[style*="url("] span, .d-gal a[style*="url("] span { visibility: hidden; }
