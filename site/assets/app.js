@@ -465,7 +465,7 @@
       '<header class="s10-h"><a class="s10-logo" href="#/S10">새벽의 방</a><a class="s10-acct" href="' + href('S10', me ? 'me' : 'login') + '">' + (me ? esc(nick(me)) : '로그인') + '</a></header><nav class="tabs s10-tabs">';
     D.boards.S10.forEach(function (b) { h += '<a href="' + href('S10', 'b', b.name) + '"' + (active === b.name ? ' class="on"' : '') + '>' + esc(b.name) + '</a>'; });
     h += '<a href="' + href('S10', 'msg') + '"' + (active === 'msg' ? ' class="on"' : '') + '>쪽지</a></nav>';
-    return { html: h + '<main class="s10-main">' + body + '</main>' + adSlot('S10', 'bottom', NOW, '', 's10-ad') + '<footer class="s10-f">새벽의 방은 해원시 정신건강복지센터와 함께합니다.<br>방법·수단·장소를 묻거나 알리는 글, 함께하자는 글은 즉시 삭제합니다.</footer>', title: title || '새벽의 방' };
+    return { html: h + '<main class="s10-main">' + body + '</main>' + adSlot('S10', 'bottom', NOW, '', 's10-ad') + '<footer class="s10-f">새벽의 방은 회원 후원으로 돌아가는 개인 운영 게시판입니다.<br>방법·수단·장소를 묻거나 알리는 글, 함께하자는 글은 즉시 삭제합니다.</footer>', title: title || '새벽의 방' };
   }
   function s10Row(o) {
     var p = o.p, s = o.s, cc = commentCount(p, s);
