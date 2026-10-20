@@ -121,18 +121,22 @@ def build():
     } for r in rows("ads")]
 
     # 로그인: 사용자 탭 비밀번호 칸 + 로그인 탭 '아이디 / 비번' 표기를 합쳐 해시만 남긴다.
+    def hashes(i, pw):  # "a|b|c" = 여러 표기를 모두 받는다
+        hs = [secret(i, x.strip()) for x in pw.split("|") if x.strip()]
+        return hs[0] if len(hs) == 1 else hs
+
     accounts = {}
     for r in rows("users"):
         pw = r["비밀번호"]
         if pw and not pw.startswith(("(", "S2", "패턴", "PIN")):
             for s in r["사이트"].split(","):
-                accounts[r["아이디"]] = {"s": s.strip(), "h": secret(r["아이디"], pw)}
+                accounts[r["아이디"]] = {"s": s.strip(), "h": hashes(r["아이디"], pw)}
     devices = {}
     for r in rows("logins"):
         acct, site = r["계정"], r["사이트"]
         m = re.match(r"^([\w-]+)\s*/\s*(\S+)$", acct)
         if m:
-            accounts[m.group(1)] = {"s": site, "h": secret(m.group(1), m.group(2))}
+            accounts[m.group(1)] = {"s": site, "h": hashes(m.group(1), m.group(2))}
             continue
         m = re.match(r"^S2 잠금 패턴 ([\d-]+)", acct)
         if m:
