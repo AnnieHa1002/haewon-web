@@ -61,3 +61,5 @@ button { font: inherit; }
 #bar button.on { color: var(--ember); }
 #total.tip { color: #e2c79a; font-size: 15px; }
 #total { bottom: calc(5vh + 70px); }
+#bar button { white-space: nowrap; }
+@media (max-width: 420px) { #bar { gap: 2px; } #bar button { padding: 8px 7px; min-width: 34px; font-size: 13px; } }

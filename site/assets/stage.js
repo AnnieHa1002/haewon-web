@@ -2,45 +2,56 @@
 (function () {
   'use strict';
 
-  // ── 진행표 (제작노트 2시간 30분) ───────────────────────
+  // ── 진행표 (규칙서 2026-10-20 · 약 2시간 15분) ──────────
   // smoke: 연기 진하기 0~1. snd: rain 빗소리, thunder 천둥 잦기, drone 울림 크기, root 울림 음높이(Hz)
+  // hold: 안내를 누를 때까지 띄워 둔다. arm: 화면을 두 번 누르면 하나, 둘, 셋. pulse: 심장 박동
   var PHASES = [
-    { act: '프롤로그 · 1막', what: '공통 대본을 함께 읽습니다', min: 20, smoke: 1,
+    { act: '프롤로그', what: '공통 대본을 함께 읽습니다', min: 5, smoke: 1,
       snd: { rain: .5, thunder: .3, drone: .1, root: 55 },
-      notice: ['시작', '프롤로그', '공통 대본을 펴고, 첫 줄에 적힌 사람부터 소리 내어 읽습니다.\n대본이 끝나면 그대로 기다려 주세요.'] },
-    { act: '2막', what: '설정지 2막을 혼자 읽습니다', min: 10, smoke: .9,
+      notice: ['시작', '프롤로그', '공통 대본을 펴고 첫 장부터 함께 소리 내어 읽습니다.\n지문은 가우디가 읽습니다.'] },
+    { act: '1막', what: '대본을 이어 읽습니다', min: 15, smoke: 1,
+      snd: { rain: .45, thunder: .25, drone: .12, root: 55 },
+      notice: ['1막', '대본을 이어 읽습니다', '지문은 외골수가 읽습니다.\n대본이 끝나면 STOP 1까지 그대로 기다려 주세요.'] },
+    { act: '2막', what: '설정지를 혼자 읽습니다', min: 10, smoke: .9,
       snd: { rain: .3, thunder: .1, drone: .12, root: 55 },
-      notice: ['STOP 1', '설정지를 넘기세요', '2막 설정지를 10분 동안 혼자 읽습니다.\n아직 말하지 마세요.'] },
-    { act: '2막', what: '대화', sub: '이 불은 무엇인가. 저 여자는 누구인가.', min: 20, smoke: .85,
+      notice: ['STOP 1', '다음 장을 넘기세요', '설정지 2막을 10분 동안 혼자 읽습니다.\n아직 말하지 마세요.'] },
+    { act: '2막', what: '토론', sub: '이 불은 무엇인가. 저 여자는 누구인가.', min: 20, smoke: .85,
       snd: { rain: .55, thunder: .35, drone: .26, root: 55 },
-      notice: ['2막', '대화를 시작합니다', '20분'] },
-    { act: '3막', what: '설정지 3막을 혼자 읽습니다', min: 15, smoke: .55,
+      notice: ['2막', '토론을 시작합니다', '20분'] },
+    { act: '3막', what: '설정지를 혼자 읽습니다', min: 10, smoke: .55,
       snd: { rain: .35, thunder: .15, drone: .14, root: 49 },
-      notice: ['STOP 2', '설정지를 넘기세요', '3막 설정지를 15분 동안 혼자 읽습니다.'] },
-    { act: '3막', what: '대화', sub: '누가 언제부터 오기로 했나. 불은 왜 꺼지지 않았나.', min: 25, smoke: .5,
+      notice: ['STOP 2', '다음 장을 넘기세요', '설정지 3막(그 후의 기억, 더 깊은 기억)을\n10분 동안 한 번에 읽습니다.'] },
+    { act: '3막', what: '토론', sub: '누가 언제부터 오기로 했나. 불은 왜 꺼지지 않았나.', min: 20, smoke: .5,
       snd: { rain: .75, thunder: .5, drone: .3, root: 49 },
-      notice: ['3막', '대화를 시작합니다', '25분'] },
-    { act: '4막', what: '기록', min: 50, smoke: .2,
-      snd: { rain: .4, thunder: .15, drone: .24, root: 46.25 },
-      notice: ['STOP 3', '공개 단서 봉투를 엽니다', '설정지 4막을 넘기고, 휴대폰으로 기록을 찾습니다.\n50분'],
-      cues: [
-        [0, '봉투를 열고, 자기 계정으로 로그인합니다'],
-        [10, '방법 — 불은 왜 꺼지지 않았나'],
-        [25, '정체 — 남매와 어머니, 편지는 누구였나'],
-        [35, '각자의 죄를 마주합니다'],
-        [40, '범인 지목', '범인 지목', '5분 안에 범인을 가리킵니다.'],
-        [45, '카드 1 선택과 대사', '선택', '모두 카드 1에 손을 얹으세요.\n준비되면 화면을 두 번 누르세요. 화면이 하나, 둘, 셋을 셉니다.', 'cards']
-      ] },
+      notice: ['3막', '토론을 시작합니다', '20분'] },
+    { act: '4막', what: '조사', sub: '봉투 속 단서와 휴대폰으로 기록을 찾습니다', min: 10, smoke: .3,
+      snd: { rain: .4, thunder: .15, drone: .22, root: 46.25 },
+      notice: ['STOP 3', '공개 단서 봉투를 엽니다', '설정지 4막을 넘기고, 봉투 속 단서를 읽고,\n휴대폰으로 들어갈 수 있는 곳에 들어갑니다.\n10분'] },
+    { act: '4막 · 1대1 면담', what: '별꽃과 하늘바라기', sub: '나머지는 조사를 이어 갑니다', min: 3, smoke: .25,
+      snd: { rain: .35, thunder: .08, drone: .2, root: 46.25 },
+      notice: ['1대1 면담', '하늘바라기', '별꽃: "마지막으로, 한 분씩 잠깐 따로 이야기 나눌게요."\n방 한쪽에서 둘이서만 3분.\n나머지는 조용히 조사를 이어 갑니다.'] },
+    { act: '4막 · 1대1 면담', what: '별꽃과 가우디', sub: '나머지는 조사를 이어 갑니다', min: 3, smoke: .25,
+      snd: { rain: .35, thunder: .08, drone: .2, root: 46.25 },
+      notice: ['1대1 면담', '가우디', '하늘바라기는 자리로 돌아오고,\n가우디가 별꽃과 3분 동안 따로 이야기합니다.'] },
+    { act: '4막 · 1대1 면담', what: '별꽃과 외골수', sub: '나머지는 조사를 이어 갑니다', min: 3, smoke: .25,
+      snd: { rain: .35, thunder: .08, drone: .2, root: 46.25 },
+      notice: ['1대1 면담', '외골수', '가우디는 자리로 돌아오고,\n외골수가 별꽃과 3분 동안 따로 이야기합니다.'] },
+    { act: '4막', what: '토론', sub: '다 함께 이야기합니다', min: 20, smoke: .2,
+      snd: { rain: .5, thunder: .25, drone: .26, root: 46.25 },
+      notice: ['4막', '다 함께 이야기합니다', '20분'] },
+    { act: '4막', what: '최종 추리와 지목', sub: '화면을 두 번 누르면 하나, 둘, 셋', min: 5, smoke: .12, pulse: true, arm: 'point', hold: true,
+      snd: { rain: .3, thunder: .1, drone: .3, root: 46.25 },
+      notice: ['4막', '최종 추리와 지목', '별꽃: "이제, 한 사람을 가리켜 주세요."\n준비되면 화면을 두 번 누르세요.\n하나, 둘, 셋에 모두 동시에 손가락으로 가리킵니다.\n자기 자신은 가리킬 수 없습니다.'] },
     { act: '엔딩', what: '엔딩북을 읽습니다', min: 10, smoke: 0,
       snd: { rain: .16, thunder: 0, drone: .18, root: 65.4, major: true },
-      notice: ['엔딩', '엔딩북', '오십분 → 하늘바라기 → 기초부터 → 늦은소식 순서로 읽습니다.\n오십분과 하늘바라기가 둘 다 A라면, 두 사람 대신 재회 엔딩을 읽습니다.'] }
+      notice: ['엔딩', '엔딩북', '적힌 사람이 차례로 소리 내어 읽습니다.\n개인 엔딩은 별꽃 → 하늘바라기 → 가우디 → 외골수.\n별꽃과 하늘바라기가 둘 다 A라면, 두 사람 대신 재회를 함께 읽습니다.'] }
   ];
   var TOTAL = PHASES.reduce(function (n, p) { return n + p.min * 60; }, 0);
   var NOTICE_MS = 14000;
 
   // ── 상태 (새로고침해도 이어진다) ─────────────────────────
-  var KEY = 'hw4-stage';
-  var S = { i: 0, t0: 0, pausedAt: null, started: false, done: false, cue: -1, vol: .7, muted: false, mix: { rain: 1, thunder: 1, drone: 1, bell: 1 } };
+  var KEY = 'hw4-stage-2'; // 진행표가 바뀌면 이름을 바꿔 옛 기록과 섞이지 않게
+  var S = { i: 0, t0: 0, pausedAt: null, started: false, done: false, armed: null, vol: .7, muted: false, mix: { rain: 1, thunder: 1, drone: 1, bell: 1 } };
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { } }
   function load() { try { var x = JSON.parse(localStorage.getItem(KEY) || 'null'); if (x) { var m = Object.assign({}, S.mix, x.mix || {}); S = Object.assign(S, x); S.mix = m; } } catch (e) { } }
   function now() { return Date.now(); }
@@ -161,24 +172,35 @@
   }
   function hideNotice() { $('notice').hidden = true; clearTimeout(noticeT); }
 
-  var cardsArmed = false;
-  function countdown() {
-    hideNotice(); cardsArmed = false;
+  // 하나, 둘, 셋 — point: 범인 지목, cards: 마지막 장의 물건 카드
+  var AFTER = {
+    point: '모두 동시에 한 사람을 가리킵니다.\n\n가장 많은 손가락이 모인 사람을\n기억해 두세요.',
+    cards: '카드를 움직이세요.\nA는 가운데로, B는 자기 쪽으로.\n\n다 움직였으면\n별꽃 → 하늘바라기 → 가우디 → 외골수\n순서로 고른 쪽의 대사를 말합니다.'
+  };
+  function countdown(kind) {
+    hideNotice(); S.armed = null; save();
     var c = $('count'), steps = ['하나', '둘', '셋'], k = 0;
     c.className = ''; c.hidden = false;
     (function step() {
       if (k < steps.length) { c.textContent = steps[k]; bell(k < 2 ? 520 : 780, k < 2 ? .3 : .45); k++; setTimeout(step, 1300); return; }
-      c.className = 'small';
-      c.textContent = '카드를 움직이세요.\nA는 가운데로, B는 자기 쪽으로.\n\n다 움직였으면\n오십분 → 하늘바라기 → 기초부터 → 늦은소식\n순서로 대사를 말합니다.';
-      setTimeout(function () { c.hidden = true; }, 25000);
+      if (!AFTER[kind]) { setTimeout(function () { c.hidden = true; }, 1500); return; }
+      c.className = 'small'; c.textContent = AFTER[kind];
+      setTimeout(function () {
+        c.hidden = true;
+        // 지목이 끝나면 마지막 장: 물건 카드
+        if (kind === 'point' && !S.done) {
+          S.armed = 'cards'; save();
+          notice('마지막 장', '물건 카드', '마지막 장을 넘기고, 모두 카드 1에 손을 얹으세요.\n준비되면 화면을 두 번 누르세요.\n하나, 둘, 셋에 A는 가운데로, B는 자기 쪽으로.', 0);
+        }
+      }, kind === 'point' ? 9000 : 25000);
     })();
   }
 
   function enter(i, quiet) {
-    S.i = i; S.t0 = now(); S.pausedAt = null; S.cue = -1; S.done = false; S.extra = 0; save();
-    var p = phase();
+    var p = PHASES[i];
+    S.i = i; S.t0 = now(); S.pausedAt = null; S.armed = p.arm || null; S.done = false; S.extra = 0; save();
     applySound(p);
-    if (!quiet) { bell(p.notice[0].indexOf('STOP') === 0 ? 587 : 660); notice(p.notice[0], p.notice[1], p.notice[2]); }
+    if (!quiet) { bell(p.notice[0].indexOf('STOP') === 0 ? 587 : 660); notice(p.notice[0], p.notice[1], p.notice[2], p.hold ? 0 : NOTICE_MS); }
     renderList();
   }
   function finish() {
@@ -195,25 +217,9 @@
       if (S.i < PHASES.length - 1) enter(S.i + 1); else finish();
       return;
     }
-    // 4막 안의 구간 안내
-    var sub = p.sub || '';
-    if (p.cues) {
-      var m = elapsed() / 60, ci = -1;
-      p.cues.forEach(function (c, k) { if (m >= c[0]) ci = k; });
-      if (ci >= 0) {
-        var cue = p.cues[ci]; sub = cue[1];
-        if (ci !== S.cue) {
-          var first = S.cue === -1;
-          S.cue = ci; save();
-          if (!first && !S.pausedAt) {
-            bell(cue[2] ? 587 : 700, cue[2] ? .35 : .2);
-            if (cue[2]) notice('4막', cue[2], cue[3], cue[4] ? 0 : NOTICE_MS);
-          }
-          cardsArmed = cue[4] === 'cards';
-        }
-      }
-      if (A) A.pulse = !S.pausedAt && ci === 4;
-    } else if (A) A.pulse = false;
+    // 규칙서: "잠시 쉬어요"라고 하면 모두 잠시 멈춘다
+    var sub = S.pausedAt && !S.done ? '잠시 쉬어요. 모두 잠시 멈춥니다.' : p.sub || '';
+    if (A) A.pulse = !S.pausedAt && !!p.pulse;
     $('act').textContent = p.act;
     $('what').textContent = p.what;
     $('sub').textContent = sub;
@@ -316,7 +322,7 @@
     else if (c === '-60') shift(-60);
     else if (c === 'next') { if (S.i < PHASES.length - 1) enter(S.i + 1); else finish(); closePanel(); }
     else if (c === 'prev') { enter(Math.max(0, S.i - 1)); closePanel(); }
-    else if (c === 'cards') { closePanel(); countdown(); }
+    else if (c === 'cards') { closePanel(); countdown(S.armed); }
     else if (c === 'try-thunder') { audio(); thunder(true); }
     else if (c === 'try-bell') { audio(); bell(660); }
     else if (c === 'only-bell' || c === 'all-on') { var on = c === 'all-on' ? 1 : 0; S.mix = { rain: on, thunder: on, drone: on, bell: 1 }; save(); syncMix(); applySound(phase(), true); }
@@ -351,7 +357,7 @@
   var tipText = '', tipUntil = 0;
   function toast(t) { tipText = t; tipUntil = now() + 1500; tick(); }
 
-  // 길게 누르면 메뉴, 두 번 누르면(선택 시간) 하나 둘 셋
+  // 길게 누르면 메뉴, 두 번 누르면(지목·카드 시간) 하나 둘 셋
   var pressT, lastTap = 0;
   document.addEventListener('pointerdown', function (e) {
     if (!S.started || e.target.closest('#panel') || e.target.closest('#bar')) return;
@@ -362,9 +368,9 @@
     if (!S.started || e.target.closest('#panel') || e.target.closest('#start') || e.target.closest('#bar')) return;
     wakeBar();
     var t = now();
-    if (cardsArmed && t - lastTap < 400) { countdown(); lastTap = 0; return; }
+    if (S.armed && t - lastTap < 400) { countdown(S.armed); lastTap = 0; return; }
     lastTap = t;
-    if (!$('notice').hidden && !S.done && !cardsArmed) hideNotice();
+    if (!$('notice').hidden && !S.done && !S.armed) hideNotice();
   });
   document.addEventListener('keydown', function (e) {
     if (!S.started) return;
@@ -387,7 +393,12 @@
     S.started = true;
     $('bar').hidden = false; syncBar(); wakeBar();
     if (fresh) enter(0);
-    else { applySound(phase(), true); save(); renderList(); if (S.done) notice('', '향이 다 탔습니다', '경찰이 도착합니다.', 0); }
+    else {
+      applySound(phase(), true); save(); renderList();
+      if (S.done) notice('', '향이 다 탔습니다', '경찰이 도착합니다.', 0);
+      else if (S.armed === 'cards') notice('마지막 장', '물건 카드', '모두 카드 1에 손을 얹으세요.\n준비되면 화면을 두 번 누르세요.', 0);
+      else if (S.armed) notice(phase().notice[0], phase().notice[1], phase().notice[2], 0);
+    }
     syncMix();
   }
   load();

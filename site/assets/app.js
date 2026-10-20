@@ -864,7 +864,7 @@
     return phone('p-s3 in', statusBar('19:16') + '<div class="d-app">' + h + '</div>' + crack, '이다음의 휴대폰');
   }
 
-  // ── WIRO 오십분의 휴대폰 ────────────────────────────────
+  // ── WIRO 별꽃의 휴대폰 ────────────────────────────────
   function wiro(parts) {
     if (!isOpen('locker')) return locker();
     if (!isOpen('WIRO')) {
@@ -875,7 +875,7 @@
     var id = parts[2], h;
     if (parts[1] === 'doran' && id) h = appBar('WIRO', cname('WIRO', id), href('WIRO', 'doran')) + chatHTML(devThreads('WIRO').find(function (t) { return t.who === id; }).list, OWNER.WIRO, 'doran');
     else h = appBar('WIRO', '도란', '#/locker') + threadList('WIRO', 'doran') + '<p class="d-empty">다른 대화방은 모두 나간 상태입니다.</p>';
-    return phone('p-wiro in', statusBar('19:16') + '<div class="d-app">' + h + '</div>', '오십분의 휴대폰');
+    return phone('p-wiro in', statusBar('19:16') + '<div class="d-app">' + h + '</div>', '별꽃의 휴대폰');
   }
 
   // ── 라우터 ─────────────────────────────────────────────
