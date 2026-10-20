@@ -62,5 +62,9 @@ window.HW_PHOTOS = {
   "S9-CM-037": "img/S9-CM-037.jpg",
   "S9-SS-005": "img/S9-SS-005.jpg",
   "S1-FREE-011": "img/S1-FREE-011.jpg",
-  "S9-DW-028": "img/S9-DW-028.jpg"
+  "S9-DW-028": "img/S9-DW-028.jpg",
+  "S2-PHOTO-007": "img/S2-PHOTO-007.jpg",
+  "S2-PHOTO-010": "img/S2-PHOTO-010.jpg",
+  "S2-PHOTO-013": "img/S2-PHOTO-013.jpg",
+  "S5-SOC-006": "img/S5-SOC-006.jpg"
 };
