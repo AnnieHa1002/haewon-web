@@ -6,6 +6,7 @@
 ## QR 코드
 
 휴대폰 카메라로 찍으면 바로 그 사이트가 열린다. 주소는 GitHub Pages 기준이라 **배포가 켜져야 동작한다**.
+보관함 1과 이다음의 휴대폰은 허브에 아이콘이 없다. 이 둘의 QR은 해당 소지품 카드에만 인쇄한다.
 다른 주소로 배포했다면 `python3 tools/qr.py <새 주소>`로 다시 만든다 (`pip install segno` 필요).
 
 <!-- QR:START -->
@@ -13,8 +14,8 @@
 | --- | --- | --- |
 | 허브 (홈 화면) | <img src="qr/hub.svg" width="140" alt="허브 (홈 화면) QR"> | `https://annieha1002.github.io/haewon-web/` |
 | S1 남은자리 | <img src="qr/s1.svg" width="140" alt="S1 남은자리 QR"> | `https://annieha1002.github.io/haewon-web/#/S1` |
-| 보관함 1 (S2 편지 폰 · 오십분 폰) | <img src="qr/s2-locker.svg" width="140" alt="보관함 1 (S2 편지 폰 · 오십분 폰) QR"> | `https://annieha1002.github.io/haewon-web/#/locker` |
-| S3 이다음의 휴대폰 | <img src="qr/s3.svg" width="140" alt="S3 이다음의 휴대폰 QR"> | `https://annieha1002.github.io/haewon-web/#/S3` |
+| 보관함 1 (S2 편지 폰 · 오십분 폰) — **오십분 카드 2(열쇠)에 인쇄** | <img src="qr/s2-locker.svg" width="140" alt="보관함 1 (S2 편지 폰 · 오십분 폰) QR"> | `https://annieha1002.github.io/haewon-web/#/locker` |
+| S3 이다음의 휴대폰 — **늦은소식 카드 1에 인쇄** | <img src="qr/s3.svg" width="140" alt="S3 이다음의 휴대폰 QR"> | `https://annieha1002.github.io/haewon-web/#/S3` |
 | S4 한컷 nare_nowhere | <img src="qr/s4.svg" width="140" alt="S4 한컷 nare_nowhere QR"> | `https://annieha1002.github.io/haewon-web/#/S4` |
 | S5 해원일보 | <img src="qr/s5.svg" width="140" alt="S5 해원일보 QR"> | `https://annieha1002.github.io/haewon-web/#/S5` |
 | S6 금방울당 | <img src="qr/s6.svg" width="140" alt="S6 금방울당 QR"> | `https://annieha1002.github.io/haewon-web/#/S6` |
@@ -54,7 +55,9 @@ site/          배포 산출물. index.html + assets/{app.js, style.css, data.js
   - 블라인드 글은 제목·본문 모두 "신고 누적으로 블라인드 처리된 게시물입니다." 작성자·날짜·댓글은 남아서
     스크랩(원래 작성자·작성 시각)과 맞춰 볼 수 있다.
 - **쪽지·DM**은 로그인한 계정이 보내거나 받은 것만 보인다.
-- **잠금** 보관함 1(열쇠 확인 버튼) → 편지 폰(패턴) / 오십분 폰(PIN). 이다음 폰(PIN)은 허브에 따로.
+- **휴대폰** 보관함 1(`#/locker`)과 이다음 폰(`#/S3`)은 허브에 없고 카드의 QR로만 들어간다.
+  휴대폰 화면에는 허브로 가는 홈 버튼이 없다 (보관함 ↔ 두 폰 사이만 오간다).
+- **잠금** 보관함 1(열쇠 확인 버튼) → 편지 폰(패턴) / 오십분 폰(PIN). 이다음 폰(PIN).
   이다음 폰을 열면 홈 화면의 '남은자리'·'새벽의 방' 아이콘으로 room702 / dawn_702에 자동 로그인된다.
   다섯 번 틀리면 30초 막힌다.
 - **광고**는 `위치`대로 놓이고, 화면의 시점(목록은 2025-07-17, 글은 그 글의 날짜)이 `노출 기간` 안일 때만 뜬다.

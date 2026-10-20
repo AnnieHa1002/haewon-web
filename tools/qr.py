@@ -14,8 +14,8 @@ BASE = (sys.argv[1] if len(sys.argv) > 1 else "https://annieha1002.github.io/hae
 TARGETS = [
     ("hub", "", "허브 (홈 화면)"),
     ("s1", "S1", "S1 남은자리"),
-    ("s2-locker", "locker", "보관함 1 (S2 편지 폰 · 오십분 폰)"),
-    ("s3", "S3", "S3 이다음의 휴대폰"),
+    ("s2-locker", "locker", "보관함 1 (S2 편지 폰 · 오십분 폰) — **오십분 카드 2(열쇠)에 인쇄**"),
+    ("s3", "S3", "S3 이다음의 휴대폰 — **늦은소식 카드 1에 인쇄**"),
     ("s4", "S4", "S4 한컷 nare_nowhere"),
     ("s5", "S5", "S5 해원일보"),
     ("s6", "S6", "S6 금방울당"),
@@ -34,7 +34,7 @@ for name, route, label in TARGETS:
     rows.append((label, url, f"qr/{name}.svg"))
 
 table = ["| 사이트 | QR | 주소 |", "| --- | --- | --- |"]
-table += [f"| {label} | <img src=\"{img}\" width=\"140\" alt=\"{label} QR\"> | `{url}` |" for label, url, img in rows]
+table += [f"| {label} | <img src=\"{img}\" width=\"140\" alt=\"{label.split(' — ')[0]} QR\"> | `{url}` |" for label, url, img in rows]
 block = "<!-- QR:START -->\n" + "\n".join(table) + "\n<!-- QR:END -->"
 
 readme = os.path.join(ROOT, "README.md")

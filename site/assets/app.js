@@ -277,10 +277,9 @@
     { r: 'S4', label: '한컷', ic: '◎', bg: 'linear-gradient(135deg,#f7b267,#e05780 60%,#7b5ce0)' },
     { r: 'S6', label: '금방울당', ic: '🔔', bg: '#a50f0f' },
     { r: 'S10', label: '새벽의 방', ic: '☾', bg: '#1d2230' },
-    { r: 'S7', label: '도원 사내망', ic: 'DW', bg: '#2b4c7e', lock: function () { return !sess('S7'); } },
-    { r: 'locker', label: '보관함 1', ic: '🗄', bg: '#5b6170', lock: function () { return !isOpen('locker'); } },
-    { r: 'S3', label: '이다음의 휴대폰', ic: '📱', bg: '#33465c', lock: function () { return !isOpen('S3'); } }
+    { r: 'S7', label: '도원 사내망', ic: 'DW', bg: '#2b4c7e', lock: function () { return !sess('S7'); } }
   ];
+  // 보관함 1(#/locker)과 이다음의 휴대폰(#/S3)은 허브에 두지 않는다. 소지품 카드의 QR로만 들어간다.
   function hub() {
     document.title = '홈';
     var h = '<div class="hub"><div class="hub-clock"><b>' + hm(NOW) + '</b><span>' + kdate(NOW) + '</span></div><div class="hub-grid">';
@@ -692,7 +691,8 @@
     return h + '</div>';
   }
   function statusBar(time) { return '<div class="sbar"><span>' + (time || '19:14') + '</span><span>▂▄▆ 〒 ▮▮▮▯</span></div>'; }
-  function phone(cls, inner, title) { return { html: '<div class="phone ' + cls + '">' + inner + '</div>', title: title, skin: 'dev' }; }
+  // 휴대폰 화면에는 허브로 가는 홈 버튼을 두지 않는다
+  function phone(cls, inner, title) { return { html: '<div class="phone ' + cls + '">' + inner + '</div>', title: title, skin: 'dev', nopill: true }; }
 
   // 기기별 연락처 표시 이름 (저장 이름)
   var CONTACT = {
@@ -765,13 +765,13 @@
   function locker() {
     if (!isOpen('locker')) {
       return { html: '<div class="locker"><div class="lk-door"><div class="lk-plate">다독임 · 보관함 1</div><div class="lk-hole"></div></div>' +
-        '<p>모임 중 맡긴 휴대폰이 들어 있는 보관함입니다.<br>열쇠는 진행자가 가지고 있습니다.</p><button class="btn" data-act="locker">열쇠로 연다</button></div>', title: '보관함 1', skin: 'dev' };
+        '<p>모임 중 맡긴 휴대폰이 들어 있는 보관함입니다.<br>열쇠는 진행자가 가지고 있습니다.</p><button class="btn" data-act="locker">열쇠로 연다</button></div>', title: '보관함 1', skin: 'dev', nopill: true };
     }
     var hint = SHOW_CASE_HINT ? '<details class="case"><summary>케이스 안쪽에 접힌 사진이 끼워져 있다</summary><div class="case-ph"><div class="case-front">[바다 사진 출력물]</div><div class="case-back">702.<br>첫 글자만 그리면 돼요.</div></div></details>' : '';
     return { html: '<div class="locker open"><h2>보관함 1</h2><div class="lk-phones">' +
       '<a class="lk-ph white" href="#/S2"><span class="lk-scr">' + (isOpen('S2') ? '🔓' : '🔒') + '</span><b>흰 케이스 휴대폰</b><small>그을린 이름표 ‘편지’ 옆에 있던 것</small></a>' +
       '<a class="lk-ph dark" href="#/WIRO"><span class="lk-scr">' + (isOpen('WIRO') ? '🔓' : '🔒') + '</span><b>검은 휴대폰</b><small>진행자의 것</small></a></div>' + hint +
-      '<p class="lk-note">다른 휴대폰 두 대는 이미 주인에게 돌아갔다.</p></div>', title: '보관함 1', skin: 'dev' };
+      '<p class="lk-note">다른 휴대폰 두 대는 이미 주인에게 돌아갔다.</p></div>', title: '보관함 1', skin: 'dev', nopill: true };
   }
 
   // ── S2 편지의 휴대폰 ────────────────────────────────────
@@ -803,14 +803,14 @@
     if (!isOpen('S3')) {
       var wait = lockedFor('S3');
       return phone('p-s3 lock', statusBar('19:16') + '<div class="ls-wall sea"><div class="ls-clock">19:16</div><div class="ls-date">배터리 4%</div><p class="ls-msg">' +
-        (wait ? wait + '초 후에 다시 시도하세요' : '암호 입력') + '</p>' + pinLock('S3', D.auth.devices.S3.n) + '<a class="ls-back" href="#/">‹ 홈</a></div>' + crack, '잠김');
+        (wait ? wait + '초 후에 다시 시도하세요' : '암호 입력') + '</p>' + pinLock('S3', D.auth.devices.S3.n) + '</div>' + crack, '잠김');
     }
     var app = parts[1], id = parts[2], h;
     if (!app) {
       h = '<div class="home sea"><div class="home-grid">' +
         '<a href="' + href('S3', 'doran') + '"><i class="ic doran">도</i>도란</a><a href="' + href('S3', 'memo') + '"><i class="ic memo">✎</i>메모</a>' +
         '<a href="' + href('S3', 'rec') + '"><i class="ic rec">●</i>녹음</a><a href="' + href('S3', 'note') + '"><i class="ic photo">▤</i>수첩 사진</a>' +
-        '<a href="#" data-act="auto" data-site="S1"><i class="ic web s1">남</i>남은자리</a><a href="#" data-act="auto" data-site="S10"><i class="ic web s10">☾</i>새벽의 방</a></div><a class="ls-back" href="#/">‹ 홈</a></div>';
+        '<a href="#" data-act="auto" data-site="S1"><i class="ic web s1">남</i>남은자리</a><a href="#" data-act="auto" data-site="S10"><i class="ic web s10">☾</i>새벽의 방</a></div></div>';
       return phone('p-s3', statusBar('19:16') + h + crack, '이다음의 휴대폰');
     }
     if (app === 'doran') h = id ? appBar('S3', cname('S3', id), href('S3', 'doran')) + chatHTML(devThreads('S3').find(function (t) { return t.who === id; }).list, OWNER.S3, 'doran s3c') : appBar('S3', '도란') + threadList('S3', 'doran');
