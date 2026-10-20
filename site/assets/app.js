@@ -844,6 +844,7 @@
     if (qi >= 0) { raw.slice(qi + 1).split('&').forEach(function (kv) { var a = kv.split('='); if (a[0]) q[a[0]] = decodeURIComponent((a[1] || '').replace(/\+/g, ' ')); }); raw = raw.slice(0, qi); }
     return { parts: raw.split('/').filter(Boolean).map(decodeURIComponent), q: q };
   }
+  var viaPhone = false;
   function route() {
     var r = parse(), parts = r.parts, q = r.q, site = parts[0], out;
     if (!site) out = hub();
@@ -864,11 +865,14 @@
       else if (what === 'u') out = userPage(site, parts[2]);
     }
     if (!out) out = hub();
+    // 이다음 폰에서 연 남은자리·새벽의 방은 홈 대신 휴대폰으로 돌아간다.
+    if (site === 'S3') viaPhone = true;
+    else if (site !== 'S1' && site !== 'S10') viaPhone = false;
     var app = document.getElementById('app');
     app.className = 'skin-' + (out.skin || site || 'hub');
     document.body.className = 'b-' + (out.skin === 'dev' ? 'dev' : (site || 'hub'));
-    // 사이트에는 허브로 가는 버튼을 두지 않는다. 허브로는 브라우저 뒤로 가기로 돌아간다.
-    app.innerHTML = out.html;
+    // 허브로 가는 버튼은 두지 않는다(허브로는 브라우저 뒤로 가기). 이다음 폰에서 연 사이트만 휴대폰으로 돌아가는 버튼을 단다.
+    app.innerHTML = out.html + (viaPhone && site !== 'S3' ? '<a class="pill" href="#/S3" aria-label="휴대폰으로">‹ 휴대폰</a>' : '');
     document.title = out.title ? out.title : (SITE[site] ? SITE[site].name : '홈');
     window.scrollTo(0, 0);
     bindLocks();
