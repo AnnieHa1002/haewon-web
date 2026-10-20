@@ -46,7 +46,9 @@
   function now() { return Date.now(); }
   function elapsed() { return ((S.pausedAt || now()) - S.t0) / 1000; }
   function phase() { return PHASES[S.i]; }
-  function remaining() { return Math.max(0, phase().min * 60 - elapsed()); }
+  // 구간 길이 = 진행표 시간 + 더하거나 뺀 시간
+  function dur() { return phase().min * 60 + (S.extra || 0); }
+  function remaining() { return Math.max(0, dur() - elapsed()); }
   function before(i) { var n = 0; for (var k = 0; k < i; k++) n += PHASES[k].min * 60; return n; }
 
   var $ = function (id) { return document.getElementById(id); };
@@ -173,7 +175,7 @@
   }
 
   function enter(i, quiet) {
-    S.i = i; S.t0 = now(); S.pausedAt = null; S.cue = -1; S.done = false; save();
+    S.i = i; S.t0 = now(); S.pausedAt = null; S.cue = -1; S.done = false; S.extra = 0; save();
     var p = phase();
     applySound(p);
     if (!quiet) { bell(p.notice[0].indexOf('STOP') === 0 ? 587 : 660); notice(p.notice[0], p.notice[1], p.notice[2]); }
@@ -219,9 +221,10 @@
     c.textContent = S.done ? '00:00' : mmss(rem);
     c.classList.toggle('low', rem < 60 && !S.done);
     c.classList.toggle('paused', !!S.pausedAt && !S.done);
-    $('total').textContent = (S.pausedAt && !S.done ? '일시정지 · ' : '') + '전체 ' + hm(before(S.i) + Math.min(elapsed(), p.min * 60)) + ' / ' + hm(TOTAL);
+    $('total').classList.toggle('tip', now() < tipUntil);
+    $('total').textContent = now() < tipUntil ? tipText : (S.pausedAt && !S.done ? '일시정지 · ' : '') + '전체 ' + hm(before(S.i) + Math.min(elapsed(), dur())) + ' / ' + hm(TOTAL);
     smokeLevel = S.done ? 0 : p.smoke * (S.pausedAt ? .4 : 1);
-    stickFrac = S.done ? 0 : rem / (p.min * 60);
+    stickFrac = S.done ? 0 : rem / dur();
   }
 
   // ── 망향 연기 (캔버스) ───────────────────────────────────
@@ -289,9 +292,10 @@
     if (S.pausedAt) { S.t0 += now() - S.pausedAt; S.pausedAt = null; } else S.pausedAt = now();
     save(); applySound(phase(), true);
     document.querySelector('[data-c=pause]').textContent = S.pausedAt ? '다시 시작' : '일시정지';
+    syncBar();
   }
   // +는 남은 시간을 늘린다
-  function shift(sec) { if (S.done) return; S.t0 = Math.min(S.t0 + sec * 1000, S.pausedAt || now()); save(); tick(); }
+  function shift(sec) { if (S.done) return; S.extra = Math.max((S.extra || 0) + sec, elapsed() - phase().min * 60); save(); tick(); }
   function renderList() {
     var ol = $('plist'); if (!ol) return;
     ol.innerHTML = PHASES.map(function (p, k) {
@@ -329,15 +333,34 @@
     save();
   });
 
+  // 늘 보이는 조작 줄
+  var idleT;
+  function wakeBar() { var b = $('bar'); b.classList.remove('idle'); clearTimeout(idleT); idleT = setTimeout(function () { b.classList.add('idle'); }, 4000); }
+  function syncBar() { var b = document.querySelector('[data-b=pause]'); b.textContent = S.pausedAt ? '▶' : '⏸'; b.classList.toggle('on', !!S.pausedAt); }
+  $('bar').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    e.stopPropagation(); wakeBar();
+    var c = b.dataset.b;
+    if (c === 'pause') togglePause();
+    else if (c === 'menu') openPanel();
+    else if (c === 'next') { var nx = PHASES[S.i + 1]; if (confirm(nx ? '“' + nx.act + ' · ' + nx.what + '”(으)로 넘어갈까요?' : '끝낼까요?')) { if (nx) enter(S.i + 1); else finish(); } }
+    else { shift(+c); toast((+c > 0 ? '+' : '−') + Math.abs(+c / 60) + '분'); }
+    syncBar();
+  });
+  document.addEventListener('pointermove', function () { if (S.started) wakeBar(); });
+  var tipText = '', tipUntil = 0;
+  function toast(t) { tipText = t; tipUntil = now() + 1500; tick(); }
+
   // 길게 누르면 메뉴, 두 번 누르면(선택 시간) 하나 둘 셋
   var pressT, lastTap = 0;
   document.addEventListener('pointerdown', function (e) {
-    if (!S.started || e.target.closest('#panel')) return;
+    if (!S.started || e.target.closest('#panel') || e.target.closest('#bar')) return;
     pressT = setTimeout(openPanel, 650);
   });
   ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) { document.addEventListener(ev, function () { clearTimeout(pressT); }); });
   document.addEventListener('click', function (e) {
-    if (!S.started || e.target.closest('#panel') || e.target.closest('#start')) return;
+    if (!S.started || e.target.closest('#panel') || e.target.closest('#start') || e.target.closest('#bar')) return;
+    wakeBar();
     var t = now();
     if (cardsArmed && t - lastTap < 400) { countdown(); lastTap = 0; return; }
     lastTap = t;
@@ -362,6 +385,7 @@
     audio(); if (A && A.ctx.state === 'suspended') A.ctx.resume();
     setVolume(); wake();
     S.started = true;
+    $('bar').hidden = false; syncBar(); wakeBar();
     if (fresh) enter(0);
     else { applySound(phase(), true); save(); renderList(); if (S.done) notice('', '향이 다 탔습니다', '경찰이 도착합니다.', 0); }
     syncMix();

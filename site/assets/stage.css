@@ -52,3 +52,12 @@ button { font: inherit; }
 #plist li { padding: 7px 8px; border-radius: 6px; color: var(--dim); display: flex; justify-content: space-between; cursor: pointer; }
 #plist li.on { background: #23252c; color: var(--ink); }
 #plist li.done { opacity: .45; }
+
+/* 늘 보이는 조작 줄: 가만히 두면 흐려지고, 화면을 건드리면 또렷해진다 */
+#bar { position: fixed; left: 50%; bottom: calc(5vh + 16px); transform: translateX(-50%); display: flex; gap: 6px; padding: 6px; border-radius: 99px; background: rgba(20, 21, 26, .7); border: 1px solid #23252c; opacity: .9; transition: opacity 1.2s; z-index: 5; }
+#bar.idle { opacity: .12; }
+#bar button { border: 0; background: transparent; color: var(--ink); font-size: 14px; padding: 8px 12px; border-radius: 99px; cursor: pointer; min-width: 44px; }
+#bar button:active { background: #2a2c33; }
+#bar button.on { color: var(--ember); }
+#total.tip { color: #e2c79a; font-size: 15px; }
+#total { bottom: calc(5vh + 70px); }
