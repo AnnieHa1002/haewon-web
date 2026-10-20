@@ -12,6 +12,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE = (sys.argv[1] if len(sys.argv) > 1 else "https://annieha1002.github.io/haewon-web/").rstrip("/") + "/"
 
 TARGETS = [
+    ("stage", "stage.html", "진행 화면 (타이머·향·소리) — **테이블 가운데 노트북·태블릿용**"),
     ("hub", "", "허브 (홈 화면)"),
     ("s1", "S1", "S1 남은자리"),
     ("s2-locker", "locker", "보관함 1 (S2 편지 폰 · 오십분 폰) — **오십분 카드 2(열쇠)에 인쇄**"),
@@ -29,7 +30,7 @@ out = os.path.join(ROOT, "qr")
 os.makedirs(out, exist_ok=True)
 rows = []
 for name, route, label in TARGETS:
-    url = BASE + ("#/" + route if route else "")
+    url = BASE + (route if route.endswith(".html") else "#/" + route if route else "")
     segno.make(url, error="m").save(os.path.join(out, name + ".svg"), scale=6, border=2)
     rows.append((label, url, f"qr/{name}.svg"))
 

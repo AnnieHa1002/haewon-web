@@ -1,0 +1,50 @@
+/* 진행 화면: 테이블 가운데 노트북·태블릿에 띄운다 */
+:root {
+  --sans: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  --serif: "AppleMyungjo", "Nanum Myeongjo", "Noto Serif KR", "Batang", serif;
+  --ink: #d8d4cb;
+  --dim: #7f7a70;
+  --ember: #ff8a3d;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; height: 100%; background: #07080b; color: var(--ink); font-family: var(--sans); overflow: hidden; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+button { font: inherit; }
+#smoke { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+#flash { position: fixed; inset: 0; background: #cfd8ff; opacity: 0; pointer-events: none; mix-blend-mode: screen; }
+
+#hud { text-shadow: 0 0 18px rgba(7, 8, 11, .9), 0 0 4px rgba(7, 8, 11, .8); position: fixed; left: 0; right: 0; top: 7vh; text-align: center; pointer-events: none; padding: 0 20px; }
+#act { font-family: var(--serif); font-size: clamp(16px, 2.6vw, 26px); letter-spacing: .35em; color: var(--dim); }
+#clock { font-size: clamp(64px, 14vw, 170px); font-weight: 200; letter-spacing: .02em; line-height: 1.05; font-variant-numeric: tabular-nums; margin: 1vh 0 .5vh; }
+#clock.low { color: #e7a07a; }
+#clock.paused { opacity: .35; }
+#what { font-family: var(--serif); font-size: clamp(18px, 3vw, 32px); }
+#sub { margin-top: 1.2vh; font-size: clamp(13px, 1.8vw, 19px); color: var(--dim); min-height: 1.5em; }
+#total { position: fixed; left: 0; right: 0; bottom: 3vh; text-align: center; font-size: 12px; color: #4d4a44; letter-spacing: .1em; font-variant-numeric: tabular-nums; }
+
+#notice { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: rgba(5, 6, 9, .82); animation: fade .8s; padding: 30px; }
+#notice .n-k { font-size: clamp(14px, 2vw, 20px); letter-spacing: .4em; color: var(--ember); }
+#notice .n-t { font-family: var(--serif); font-size: clamp(30px, 6vw, 70px); margin: 2vh 0; }
+#notice .n-s { font-size: clamp(15px, 2.2vw, 24px); color: #a9a397; line-height: 1.7; white-space: pre-line; }
+@keyframes fade { from { opacity: 0; } }
+
+#count { position: fixed; inset: 0; display: grid; place-items: center; font-family: var(--serif); font-size: clamp(80px, 22vw, 260px); background: rgba(5, 6, 9, .9); color: #f1ebe0; }
+#count.small { font-size: clamp(22px, 4vw, 44px); line-height: 1.8; text-align: center; white-space: pre-line; padding: 20px; }
+
+#start { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(60% 60% at 50% 60%, rgba(30, 24, 18, .6), #07080b); text-align: center; }
+#start h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(30px, 6vw, 64px); letter-spacing: .15em; margin: 0; }
+#start .sub { color: var(--dim); letter-spacing: .3em; margin: 10px 0 40px; }
+#start button { border: 1px solid #5b554b; background: transparent; color: var(--ink); padding: 14px 54px; border-radius: 99px; font-size: 18px; letter-spacing: .3em; cursor: pointer; }
+#start #resume { margin-top: 14px; padding: 10px 30px; font-size: 14px; letter-spacing: .1em; color: var(--dim); }
+#start .hint { margin-top: 30px; font-size: 13px; color: #5d584f; line-height: 1.7; }
+
+#panel { position: fixed; right: 0; top: 0; bottom: 0; width: min(380px, 100%); background: rgba(14, 15, 19, .96); border-left: 1px solid #23252c; padding: 18px; overflow-y: auto; }
+#panel .row { display: flex; gap: 8px; margin-bottom: 8px; }
+#panel button { flex: 1; padding: 11px 6px; border: 1px solid #33363f; background: #191b21; color: var(--ink); border-radius: 8px; font-size: 14px; cursor: pointer; }
+#panel button.warn { color: #e48a7a; }
+#panel .vol { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--dim); margin: 10px 0; }
+#panel .vol input { flex: 1; }
+#plist { list-style: none; padding: 0; margin: 12px 0; font-size: 13px; }
+#plist li { padding: 7px 8px; border-radius: 6px; color: var(--dim); display: flex; justify-content: space-between; cursor: pointer; }
+#plist li.on { background: #23252c; color: var(--ink); }
+#plist li.done { opacity: .45; }

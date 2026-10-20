@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="theme-color" content="#07080b">
+<title>다정한 이별</title>
+<link rel="stylesheet" href="assets/stage.css">
+</head>
+<body>
+<canvas id="smoke"></canvas>
+<div id="flash"></div>
+
+<main id="hud">
+  <div id="act"></div>
+  <div id="clock">--:--</div>
+  <div id="what"></div>
+  <div id="sub"></div>
+  <div id="total"></div>
+</main>
+
+<div id="notice" hidden><div class="n-k"></div><div class="n-t"></div><div class="n-s"></div></div>
+<div id="count" hidden></div>
+
+<section id="start">
+  <h1>꺼지지 않는 이름</h1>
+  <p class="sub">잊어도 괜찮습니다</p>
+  <button id="go">시작</button>
+  <p class="hint">화면을 길게 누르면 조작 메뉴가 열립니다.<br>소리를 켜고, 화면 자동 꺼짐을 꺼 두세요.</p>
+  <button id="resume" hidden>이어서 진행</button>
+</section>
+
+<section id="panel" hidden>
+  <div class="row"><button data-c="pause">일시정지</button><button data-c="full">전체 화면</button></div>
+  <div class="row"><button data-c="-60">−1분</button><button data-c="+60">+1분</button></div>
+  <div class="row"><button data-c="prev">‹ 이전 구간</button><button data-c="next">다음 구간 ›</button></div>
+  <div class="row"><button data-c="cards">하나, 둘, 셋</button><button data-c="mute">소리 끄기</button></div>
+  <label class="vol">볼륨 <input id="vol" type="range" min="0" max="1" step="0.05" value="0.7"></label>
+  <ol id="plist"></ol>
+  <div class="row"><button data-c="reset" class="warn">처음부터</button><button data-c="close">닫기</button></div>
+</section>
+
+<script src="assets/stage.js"></script>
+</body>
+</html>

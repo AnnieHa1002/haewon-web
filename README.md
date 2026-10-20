@@ -12,6 +12,7 @@
 <!-- QR:START -->
 | 사이트 | QR | 주소 |
 | --- | --- | --- |
+| 진행 화면 (타이머·향·소리) — **테이블 가운데 노트북·태블릿용** | <img src="qr/stage.svg" width="140" alt="진행 화면 (타이머·향·소리) QR"> | `https://annieha1002.github.io/haewon-web/stage.html` |
 | 허브 (홈 화면) | <img src="qr/hub.svg" width="140" alt="허브 (홈 화면) QR"> | `https://annieha1002.github.io/haewon-web/` |
 | S1 남은자리 | <img src="qr/s1.svg" width="140" alt="S1 남은자리 QR"> | `https://annieha1002.github.io/haewon-web/#/S1` |
 | 보관함 1 (S2 편지 폰 · 오십분 폰) — **오십분 카드 2(열쇠)에 인쇄** | <img src="qr/s2-locker.svg" width="140" alt="보관함 1 (S2 편지 폰 · 오십분 폰) QR"> | `https://annieha1002.github.io/haewon-web/#/locker` |
@@ -25,6 +26,20 @@
 | S10 새벽의 방 | <img src="qr/s10.svg" width="140" alt="S10 새벽의 방 QR"> | `https://annieha1002.github.io/haewon-web/#/S10` |
 <!-- QR:END -->
 
+## 진행 화면 (`stage.html`)
+
+테이블 가운데 노트북·태블릿에 띄우는 타이머. 허브와 연결되어 있지 않다.
+
+- 망향 향이 타들어 가는 길이가 그 구간의 남은 시간이다. 연기는 막이 넘어갈수록 옅어진다 (2막 진함 → 4막 거의 없음 → 엔딩 꺼짐).
+- 진행표: 대본 20 → 2막 숙지 10 · 대화 20 → 3막 숙지 15 · 대화 25 → 4막 50 → 엔딩북 10 (총 2시간 30분).
+  구간이 바뀌면 방울 소리와 함께 STOP 안내가 뜬다. 4막 안에서는 방법·정체·죄·지목·선택 구간을 안내하고,
+  45분에 화면을 두 번 누르면 "하나, 둘, 셋"을 센다.
+- 소리는 파일 없이 코드로 만든다: 빗소리, 천둥(가까우면 화면이 번쩍), 낮은 울림, 방울, 지목 시간의 심장 박동.
+  막마다 비 세기·천둥 빈도·울림 높이가 바뀐다. 진행표와 소리 설정은 `assets/stage.js` 맨 위 `PHASES`.
+- 처음에 '시작'을 눌러야 소리가 난다 (브라우저 규칙). 화면을 길게 누르거나 Esc를 누르면 메뉴:
+  일시정지, ±1분, 구간 이동, 하나·둘·셋, 볼륨. 키보드: 스페이스 일시정지, ←/→ ±1분, t 천둥.
+- 새로고침해도 실제 시각 기준으로 이어진다 ('이어서 진행').
+
 ## 구조
 
 ```
@@ -33,7 +48,7 @@ tools/build.py CSV → site/assets/data.js (제작용 컬럼 제거, 비밀번�
 tools/smoke.mjs 390px 화면으로 모든 사이트를 열고 로그인·잠금 해제까지 돌려 보는 점검
 tools/qr.py    사이트별 QR(qr/*.svg) 만들고 README 표 갱신
 tools/package.sh 빌드 + site/를 dist/haewon-site.zip으로 묶기 (USB·오프라인 배포)
-site/          배포 산출물. index.html + assets/{app.js, style.css, data.js}, robots.txt
+site/          배포 산출물. stage.html(진행 화면), index.html + assets/{app.js, style.css, data.js}, robots.txt
 ```
 
 ## 데이터 고치기

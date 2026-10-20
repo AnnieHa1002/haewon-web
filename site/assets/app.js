@@ -395,10 +395,30 @@
   SK.S5 = { list: s5List, post: s5Post, shell: s5Shell, search: s5Search };
 
   // ── S9 사원증 ──────────────────────────────────────────
-  function s9Shell(active, body, title) {
-    var h = '<header class="s9-h"><a class="s9-logo" href="#/S9">사원증</a><a class="s9-s" href="' + href('S9', 'search') + '">⌕</a></header><nav class="tabs s9-tabs">';
-    D.boards.S9.forEach(function (b, i) { h += '<a href="' + href('S9', 'b', b.name) + '"' + (active === b.name || (!active && i === 0) ? ' class="on"' : '') + '>' + esc(b.name) + '</a>'; });
-    return { html: h + '</nav>' + adSlot('S9', 'top', NOW) + '<main class="s9-main">' + body + '</main>', title: title || '사원증' };
+  // 회사 목록. 라운지가 있는 회사(게시판 탭)만 들어가지고, 나머지는 불러오기에 실패한다.
+  var S9_FAKE = [
+    ['해원은행', '금융', 2841], ['해원대학병원', '의료', 1932], ['한빛물류', '물류·유통', 1207], ['해원교통공사', '공기업', 1544],
+    ['대성식품', '식품', 688], ['넥스트웨이브', 'IT', 513], ['해원전자', '제조', 3120], ['미래생명', '보험', 977],
+    ['해원도시가스', '에너지', 402], ['그린마트', '유통', 1650], ['해원FC', '스포츠', 88], ['한결건설', '건설', 731]
+  ];
+  var S9_SIZE = { '천명건설': 1388, '도원화학': 1102 };
+  function s9Co(board) { return board.replace(/\s*라운지$/, ''); }
+  function s9Shell(co, body, title) {
+    var h = '<header class="s9-h">' + (co ? '<a class="s9-back" href="#/S9">‹</a>' : '') + '<a class="s9-logo" href="#/S9">사원증</a><a class="s9-s" href="' + href('S9', 'search') + '">⌕</a></header>';
+    if (co) h += '<div class="s9-coh"><span class="s9-lg" style="background:' + tint(co, 45, 42) + '">' + esc(co.slice(0, 1)) + '</span><div><b>' + esc(co) + '</b><small>재직자 인증 라운지</small></div></div>';
+    return { html: h + adSlot('S9', 'top', NOW) + '<main class="s9-main">' + body + '</main>', title: title || (co ? co + ' 라운지 · 사원증' : '사원증') };
+  }
+  function s9Home() {
+    var real = D.boards.S9.map(function (b) { var co = s9Co(b.name); return { co: co, kind: co.indexOf('건설') >= 0 ? '건설' : '화학', n: S9_SIZE[co] || 900, link: href('S9', 'b', b.name), last: (sitePosts('S9', b.name)[0] || {}).p }; });
+    var all = real.concat(S9_FAKE.map(function (f) { return { co: f[0], kind: f[1], n: f[2], link: href('S9', 'c', f[0]) }; }))
+      .sort(function (a, b) { return b.n - a.n; });
+    var h = '<p class="bdesc">회사 메일로 인증한 재직자만 글을 쓸 수 있습니다.</p><ul class="s9-cos">' + all.map(function (c) {
+      return '<li><a href="' + c.link + '"><span class="s9-lg" style="background:' + tint(c.co, 45, 42) + '">' + esc(c.co.slice(0, 1)) + '</span><div><b>' + esc(c.co) + '</b><small>' + esc(c.kind) + ' · 인증 ' + num(c.n) + '명</small></div><em>›</em></a></li>';
+    }).join('') + '</ul>';
+    return s9Shell('', '<h2 class="s9-sec">회사 라운지</h2>' + h);
+  }
+  function s9Offline(co) {
+    return s9Shell(co || '', '<div class="s9-err"><div class="s9-err-i">⚠</div><b>인터넷에 연결되어 있지 않습니다</b><p>네트워크 연결을 확인한 뒤 다시 시도해 주세요.</p><button class="btn" data-act="retry">다시 시도</button></div>', '연결 오류');
   }
   function s9Card(o) {
     var p = o.p, s = o.s, t = titleOf(p, s), co = nick(p.a).split(' · ');
@@ -407,10 +427,10 @@
       '<div class="s9-m"><span>' + short(p.d) + '</span><span>👁 ' + num(p.v) + '</span><span>♡ ' + num(p.l) + '</span><span>💬 ' + commentCount(p, s) + '</span></div></a></li>';
   }
   function s9List(board, q) {
-    board = board || D.boards.S9[0].name;
+    if (!board) return s9Home();
     var n = (+q.n || 20), all = sitePosts('S9', board);
     var rows = all.slice(0, n).map(s9Card);
-    return s9Shell(board, '<p class="bdesc">' + esc((D.boards.S9.find(function (b) { return b.name === board; }) || {}).desc || '') + '</p><ul class="s9-list">' + withMidAds('S9', rows, 5, board) + '</ul>' +
+    return s9Shell(s9Co(board), '<ul class="s9-list">' + withMidAds('S9', rows, 5, board) + '</ul>' +
       (all.length > n ? '<a class="more" href="' + href('S9', 'b', board) + qs({ n: n + 20 }) + '">더보기</a>' : ''));
   }
   function s9Search(q) {
@@ -424,9 +444,9 @@
     var h = '<div class="s9-ph"><div class="crumb"><a href="' + href('S9', 'b', p.b) + '">' + esc(p.b) + '</a></div><h1>' + esc(titleOf(p, s)) + '</h1><div class="s9-co">' + esc(co[0]) + ' · ' + esc(co[1] || '') + ' · ' + when(p.d) + '</div></div>' + body +
       (s.k === 'show' ? '<div class="s9-m big"><span>👁 ' + num(p.v) + '</span><span>♡ ' + num(p.l) + '</span></div>' : '') +
       commentsHTML(p, { anon: true, op: '작성자' });
-    return s9Shell(p.b, h, p.t);
+    return s9Shell(s9Co(p.b), h, p.t);
   }
-  SK.S9 = { list: s9List, post: s9Post, shell: s9Shell, search: s9Search };
+  SK.S9 = { list: s9List, post: s9Post, shell: s9Shell, search: s9Search, company: s9Offline };
 
   // ── S10 새벽의 방 ──────────────────────────────────────
   function s10Shell(active, body, title) {
@@ -863,6 +883,7 @@
       else if (what === 'me') out = mePage(site);
       else if (what === 'msg') out = msgPage(site, parts[2]);
       else if (what === 'u') out = userPage(site, parts[2]);
+      else if (what === 'c' && sk.company) out = sk.company(parts[2]);
     }
     if (!out) out = hub();
     // 이다음 폰에서 연 남은자리·새벽의 방은 홈 대신 휴대폰으로 돌아간다.
@@ -918,6 +939,7 @@
       e.preventDefault();
       var pair = (D.auth.auto.S3 || []).find(function (x) { return x[0] === a.dataset.site; });
       if (pair) { st.sess[pair[0]] = pair[1]; save(); location.hash = href(pair[0], 'me'); }
+    } else if (act === 'retry') { e.preventDefault(); a.disabled = true; a.textContent = '연결 중…'; setTimeout(function () { a.disabled = false; a.textContent = '다시 시도'; toast('연결할 수 없습니다.'); }, 1400);
     } else if (act === 'play') { e.preventDefault(); toast('파일을 재생할 수 없습니다. (손상된 파일)'); }
   });
 
