@@ -45,3 +45,4 @@ Unsplash 라이선스(https://unsplash.com/license)로 받은 사진. 상업적 
 | img/S4-FEED-014.jpg | S4-FEED-014 | 제작 이미지 (생성, 인물 초상과 맞춤) | 자체 제작 |
 | img/S2-PHOTO-001.jpg | S2-PHOTO-001 | 제작 이미지 (생성, 인물 초상과 맞춤) | 자체 제작 |
 | img/S2-PHOTO-002.jpg | S2-PHOTO-002 | 제작 이미지 (생성, 인물 초상과 맞춤) | 자체 제작 |
+| img/S4-FEED-023.jpg | S4-FEED-023 | 붕어빵 | 제작자가 채팅으로 준 사진 |

@@ -56,5 +56,6 @@ window.HW_PHOTOS = {
   "S3-NOTE-010": "img/S3-NOTE-010.jpg",
   "S3-NOTE-011": "img/S3-NOTE-011.jpg",
   "S4-FEED-011": "img/S4-FEED-011.jpg",
-  "S4-FEED-016": "img/S4-FEED-016.jpg"
+  "S4-FEED-016": "img/S4-FEED-016.jpg",
+  "S4-FEED-023": "img/S4-FEED-023.jpg"
 };
