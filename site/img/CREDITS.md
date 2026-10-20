@@ -46,12 +46,12 @@ Unsplash 라이선스(https://unsplash.com/license)로 받은 사진. 상업적 
 | img/S2-PHOTO-001.jpg | S2-PHOTO-001 | 제작 이미지 (생성, 인물 초상과 맞춤) | 자체 제작 |
 | img/S2-PHOTO-002.jpg | S2-PHOTO-002 | 제작 이미지 (생성, 인물 초상과 맞춤) | 자체 제작 |
 | img/S4-FEED-023.jpg | S4-FEED-023 | 붕어빵 | 제작자가 채팅으로 준 사진 |
+| img/S1-SANJAE-019.jpg | S1-SANJAE-019 | 순대국밥 | 제작자가 채팅으로 준 사진 |
 
 ## Wikimedia Commons (작가 표기 필요)
 
 | 파일 | 쓰인 글 | 원본 | 작가 | 라이선스 |
 | --- | --- | --- | --- | --- |
-| img/S1-SANJAE-019.jpg | S1-SANJAE-019 | [File:Dwaeji-gukbap 1.jpg](https://commons.wikimedia.org/wiki/File:Dwaeji-gukbap_1.jpg) | chomjong | CC BY 2.0 |
 | img/S9-CM-037.jpg | S9-CM-037 | [File:Dwaeji-gukbap 2.jpg](https://commons.wikimedia.org/wiki/File:Dwaeji-gukbap_2.jpg) | chomjong | CC BY 2.0 |
 | img/S9-SS-005.jpg | S9-SS-005 | [File:Malatang2025.jpg](https://commons.wikimedia.org/wiki/File:Malatang2025.jpg) | Lukas010109 | CC0 |
 | img/S1-FREE-011.jpg | S1-FREE-011 | [File:Gajami-miyeok-guk 1.jpg](https://commons.wikimedia.org/wiki/File:Gajami-miyeok-guk_1.jpg) | 대경라이프 | CC BY-SA 4.0 |
