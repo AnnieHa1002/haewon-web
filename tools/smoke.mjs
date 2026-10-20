@@ -19,7 +19,7 @@ const routes = [
   ['#/', 'hub'], ['#/S1', 's1'], ['#/S1/b/천명타워 유족방', 's1-tower'], ['#/S1/p/S1-TOWER-001', 's1-post'],
   ['#/S1/b/산재·사고 유족방', 's1-sanjae'], ['#/S1/p/S1-SANJAE-015', 's1-blind'], ['#/S1/p/S1-FREE-008', 's1-del'], ['#/S1/msg', 's1-msg'],
   ['#/S5', 's5'], ['#/S5/p/S5-SOC-001', 's5-1999'], ['#/S5/search?q=천명타워', 's5-search'],
-  ['#/S9', 's9'], ['#/S9/b/천명건설 라운지', 's9-lounge'], ['#/S9/c/해원은행', 's9-offline'], ['#/S9/p/S9-CM-001', 's9-post'], ['#/S10', 's10'], ['#/S10/p/S10-TALK-001', 's10-post'],
+  ['#/S9', 's9'], ['#/S9/b/천명건설 라운지', 's9-lounge'], ['#/S9/b/샘선전자 라운지', 's9-ss'], ['#/S9/p/S9-CM-001', 's9-post'], ['#/S10', 's10'], ['#/S10/p/S10-TALK-001', 's10-post'],
   ['#/S6', 's6'], ['#/S6/b/상품', 's6-shop'], ['#/S6/p/S6-SHOP-001', 's6-post'], ['#/S8', 's8'], ['#/S8/b/고객의 소리', 's8-voc'], ['#/S8/p/S8-VOC-001', 's8-post'],
   ['#/S7', 's7-gate'], ['#/S4', 's4'], ['#/S4/p/S4-FEED-001', 's4-post'], ['#/S4/msg', 's4-dm'], ['#/locker', 'locker'], ['#/S3', 's3-lock'],
 ];

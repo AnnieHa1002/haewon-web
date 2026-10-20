@@ -395,13 +395,10 @@
   SK.S5 = { list: s5List, post: s5Post, shell: s5Shell, search: s5Search };
 
   // ── S9 사원증 ──────────────────────────────────────────
-  // 회사 목록. 라운지가 있는 회사(게시판 탭)만 들어가지고, 나머지는 불러오기에 실패한다.
-  var S9_FAKE = [
-    ['해원은행', '금융', 2841], ['해원대학병원', '의료', 1932], ['한빛물류', '물류·유통', 1207], ['해원교통공사', '공기업', 1544],
-    ['대성식품', '식품', 688], ['넥스트웨이브', 'IT', 513], ['해원전자', '제조', 3120], ['미래생명', '보험', 977],
-    ['해원도시가스', '에너지', 402], ['그린마트', '유통', 1650], ['해원FC', '스포츠', 88], ['한결건설', '건설', 731]
-  ];
-  var S9_SIZE = { '천명건설': 1388, '도원화학': 1102 };
+  // 회사 목록. 게시판이 곧 회사 라운지다. '더보기'는 끝없이 불러오기만 한다.
+  // 즐겨찾기 = 사건과 관련된 두 회사. 나머지 라운지는 data/extra 의 배경용 회사
+  var S9_FAV = ['천명건설', '도원화학'];
+  var S9_SIZE = { '천명건설': [1388, '건설'], '도원화학': [1102, '화학'], '샘선전자': [41203, '전자'], '케이에스하이닉스': [18362, '반도체'], '알쥐': [15917, '전자·화학'] };
   function s9Co(board) { return board.replace(/\s*라운지$/, ''); }
   function s9Shell(co, body, title) {
     var h = '<header class="s9-h">' + (co ? '<a class="s9-back" href="#/S9">‹</a>' : '') + '<a class="s9-logo" href="#/S9">사원증</a><a class="s9-s" href="' + href('S9', 'search') + '">⌕</a></header>';
@@ -413,8 +410,9 @@
       return '<li><a href="' + c.link + '"><span class="s9-lg" style="background:' + tint(c.co, 45, 42) + '">' + esc(c.co.slice(0, 1)) + '</span><div><b>' + esc(c.co) + '</b><small>' + esc(c.kind) + ' · 인증 ' + num(c.n) + '명</small></div><em>' + (c.fav ? '★' : '›') + '</em></a></li>';
     }
     // 글이 있는 두 회사는 즐겨찾기로 맨 위, 나머지는 세 개만 보이고 '더보기'는 끝없이 불러오기만 한다
-    var favs = D.boards.S9.map(function (b) { var co = s9Co(b.name); return { co: co, kind: co.indexOf('건설') >= 0 ? '건설' : '화학', n: S9_SIZE[co] || 900, link: href('S9', 'b', b.name), fav: true }; });
-    var others = S9_FAKE.slice().sort(function (a, b) { return b[2] - a[2]; }).slice(0, 3).map(function (f) { return { co: f[0], kind: f[1], n: f[2], link: href('S9', 'c', f[0]) }; });
+    function co(b) { var c = s9Co(b.name), m = S9_SIZE[c] || [900, '']; return { co: c, kind: m[1], n: m[0], link: href('S9', 'b', b.name), fav: S9_FAV.indexOf(c) >= 0 }; }
+    var favs = D.boards.S9.map(co).filter(function (c) { return c.fav; });
+    var others = D.boards.S9.map(co).filter(function (c) { return !c.fav; }).sort(function (a, b) { return b.n - a.n; });
     return s9Shell('', '<p class="bdesc">회사 메일로 인증한 재직자만 글을 쓸 수 있습니다.</p>' +
       '<h2 class="s9-sec">즐겨찾기</h2><ul class="s9-cos">' + favs.map(row).join('') + '</ul>' +
       '<h2 class="s9-sec">인기 회사 라운지</h2><ul class="s9-cos">' + others.map(row).join('') + '</ul>' +

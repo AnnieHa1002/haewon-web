@@ -16,8 +16,13 @@ NOW = "2025-07-17 19:10"  # 4막에서 사이트를 보는 '지금'
 
 
 def rows(name):
-    with open(os.path.join(DATA, name + ".csv"), encoding="utf-8") as f:
-        return [{k.strip(): (v or "").strip() for k, v in r.items()} for r in csv.DictReader(f)]
+    """시트 탭 CSV + data/extra/ 의 같은 이름 CSV (시트에 없는 배경용 추가분)"""
+    out = []
+    for path in (os.path.join(DATA, name + ".csv"), os.path.join(DATA, "extra", name + ".csv")):
+        if os.path.exists(path):
+            with open(path, encoding="utf-8") as f:
+                out += [{k.strip(): (v or "").strip() for k, v in r.items()} for r in csv.DictReader(f)]
+    return out
 
 
 def cyrb53(s, seed=0):
