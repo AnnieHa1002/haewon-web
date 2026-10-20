@@ -1,5 +1,5 @@
 /* 글ID → 사진 파일 (site/ 기준 상대경로). 여기에 없는 글은 사진 설명 글로 보인다.
-   사진의 출처·라이선스는 site/img/CREDITS.md 에 적는다. */
+   [사진] 줄이 없는 글이면 본문 맨 위에 붙는다. 출처·라이선스는 site/img/CREDITS.md. */
 window.HW_PHOTOS = {
   "S4-FEED-001": "img/S4-FEED-001.jpg",
   "S4-FEED-002": "img/S4-FEED-002.jpg",
@@ -10,5 +10,21 @@ window.HW_PHOTOS = {
   "S4-FEED-021": "img/S4-FEED-021.jpg",
   "S4-FEED-022": "img/S4-FEED-022.jpg",
   "S4-FEED-024": "img/S4-FEED-024.jpg",
-  "S1-FREE-017": "img/S1-FREE-017.jpg"
+  "S1-FREE-017": "img/S1-FREE-017.jpg",
+  "S1-DEBATE-013": "img/S1-DEBATE-013.jpg",
+  "S1-FREE-019": "img/S1-FREE-019.jpg",
+  "S1-FREE-023": "img/S1-FREE-023.jpg",
+  "S1-TOWER-020": "img/S1-TOWER-020.jpg",
+  "S5-SOC-014": "img/S5-SOC-014.jpg",
+  "S5-SOC-020": "img/S5-SOC-020.jpg",
+  "S5-SOC-024": "img/S5-SOC-024.jpg",
+  "S5-OPN-013": "img/S5-OPN-013.jpg",
+  "S5-OPN-020": "img/S5-OPN-020.jpg",
+  "S6-SHOP-008": "img/S6-SHOP-008.jpg",
+  "S7-NOTI-016": "img/S7-NOTI-016.jpg",
+  "S8-PRESS-017": "img/S8-PRESS-017.jpg",
+  "S8-PRESS-018": "img/S8-PRESS-018.jpg",
+  "S8-PRESS-019": "img/S8-PRESS-019.jpg",
+  "S9-LG-005": "img/S9-LG-005.jpg",
+  "S10-TALK-030": "img/S10-TALK-030.jpg"
 };

@@ -83,6 +83,8 @@
       para.push(esc(line));
     });
     flush();
+    // [사진] 줄이 없는 글에 붙인 사진은 본문 맨 위에 둔다
+    if (id && PHOTO[id] && !used) out.unshift('<figure class="ph-img"><img src="' + esc(PHOTO[id]) + '" alt="" loading="lazy"></figure>');
     return out.join('');
   }
 
