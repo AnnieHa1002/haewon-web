@@ -30,3 +30,12 @@ Unsplash 라이선스(https://unsplash.com/license)로 받은 사진. 상업적 
 | img/S8-PRESS-019.jpg | S8-PRESS-019 | 아파트 | https://images.unsplash.com/photo-1545324418-cc1a3fa10c00 |
 | img/S9-LG-005.jpg | S9-LG-005 | 야구 | https://images.unsplash.com/photo-1508344928928-7165b67de128 |
 | img/S10-TALK-030.jpg | S10-TALK-030 | 비 오는 거리의 우산 | https://images.unsplash.com/photo-1519692933481-e162a57d6721 |
+| img/S4-FEED-003.jpg | S4-FEED-003 | 제작 이미지 (생성, 인물 초상과 맞춤) | 자체 제작 |
+| img/S4-FEED-005.jpg | S4-FEED-005 | 제작 이미지 (생성, 인물 초상과 맞춤) | 자체 제작 |
+| img/S4-FEED-006.jpg | S4-FEED-006 | 제작 이미지 (생성, 인물 초상과 맞춤) | 자체 제작 |
+| img/S4-FEED-008.jpg | S4-FEED-008 | 제작 이미지 (생성, 인물 초상과 맞춤) | 자체 제작 |
+| img/S4-FEED-009.jpg | S4-FEED-009 | 제작 이미지 (생성, 인물 초상과 맞춤) | 자체 제작 |
+| img/S4-FEED-013.jpg | S4-FEED-013 | 제작 이미지 (생성, 인물 초상과 맞춤) | 자체 제작 |
+| img/S4-FEED-014.jpg | S4-FEED-014 | 제작 이미지 (생성, 인물 초상과 맞춤) | 자체 제작 |
+| img/S2-PHOTO-001.jpg | S2-PHOTO-001 | 제작 이미지 (생성, 인물 초상과 맞춤) | 자체 제작 |
+| img/S2-PHOTO-002.jpg | S2-PHOTO-002 | 제작 이미지 (생성, 인물 초상과 맞춤) | 자체 제작 |
