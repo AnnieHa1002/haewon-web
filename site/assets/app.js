@@ -288,7 +288,7 @@
         (a.lock && a.lock() ? '<i class="app-lock">🔒</i>' : '') + '</span><span class="app-l">' + a.label + '</span></a>';
     });
     h += '</div><button class="hub-reset" data-act="reset">기록 지우기</button></div>';
-    return { html: h, skin: 'hub', nopill: true };
+    return { html: h, skin: 'hub' };
   }
 
   // ── S1 남은자리 ─────────────────────────────────────────
@@ -691,8 +691,7 @@
     return h + '</div>';
   }
   function statusBar(time) { return '<div class="sbar"><span>' + (time || '19:14') + '</span><span>▂▄▆ 〒 ▮▮▮▯</span></div>'; }
-  // 휴대폰 화면에는 허브로 가는 홈 버튼을 두지 않는다
-  function phone(cls, inner, title) { return { html: '<div class="phone ' + cls + '">' + inner + '</div>', title: title, skin: 'dev', nopill: true }; }
+  function phone(cls, inner, title) { return { html: '<div class="phone ' + cls + '">' + inner + '</div>', title: title, skin: 'dev' }; }
 
   // 기기별 연락처 표시 이름 (저장 이름)
   var CONTACT = {
@@ -765,13 +764,13 @@
   function locker() {
     if (!isOpen('locker')) {
       return { html: '<div class="locker"><div class="lk-door"><div class="lk-plate">다독임 · 보관함 1</div><div class="lk-hole"></div></div>' +
-        '<p>모임 중 맡긴 휴대폰이 들어 있는 보관함입니다.<br>열쇠는 진행자가 가지고 있습니다.</p><button class="btn" data-act="locker">열쇠로 연다</button></div>', title: '보관함 1', skin: 'dev', nopill: true };
+        '<p>모임 중 맡긴 휴대폰이 들어 있는 보관함입니다.<br>열쇠는 진행자가 가지고 있습니다.</p><button class="btn" data-act="locker">열쇠로 연다</button></div>', title: '보관함 1', skin: 'dev' };
     }
     var hint = SHOW_CASE_HINT ? '<details class="case"><summary>케이스 안쪽에 접힌 사진이 끼워져 있다</summary><div class="case-ph"><div class="case-front">[바다 사진 출력물]</div><div class="case-back">702.<br>첫 글자만 그리면 돼요.</div></div></details>' : '';
     return { html: '<div class="locker open"><h2>보관함 1</h2><div class="lk-phones">' +
       '<a class="lk-ph white" href="#/S2"><span class="lk-scr">' + (isOpen('S2') ? '🔓' : '🔒') + '</span><b>흰 케이스 휴대폰</b><small>그을린 이름표 ‘편지’ 옆에 있던 것</small></a>' +
       '<a class="lk-ph dark" href="#/WIRO"><span class="lk-scr">' + (isOpen('WIRO') ? '🔓' : '🔒') + '</span><b>검은 휴대폰</b><small>진행자의 것</small></a></div>' + hint +
-      '<p class="lk-note">다른 휴대폰 두 대는 이미 주인에게 돌아갔다.</p></div>', title: '보관함 1', skin: 'dev', nopill: true };
+      '<p class="lk-note">다른 휴대폰 두 대는 이미 주인에게 돌아갔다.</p></div>', title: '보관함 1', skin: 'dev' };
   }
 
   // ── S2 편지의 휴대폰 ────────────────────────────────────
@@ -868,7 +867,8 @@
     var app = document.getElementById('app');
     app.className = 'skin-' + (out.skin || site || 'hub');
     document.body.className = 'b-' + (out.skin === 'dev' ? 'dev' : (site || 'hub'));
-    app.innerHTML = out.html + (out.nopill ? '' : '<a class="pill" href="#/" aria-label="홈">홈</a>');
+    // 사이트에는 허브로 가는 버튼을 두지 않는다. 허브로는 브라우저 뒤로 가기로 돌아간다.
+    app.innerHTML = out.html;
     document.title = out.title ? out.title : (SITE[site] ? SITE[site].name : '홈');
     window.scrollTo(0, 0);
     bindLocks();
