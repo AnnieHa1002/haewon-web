@@ -62,9 +62,6 @@ site/          배포 산출물. stage.html(진행 화면), index.html + assets/
    `sites, boards, users, posts, comments, messages, logins, ads .csv`로 덮어쓴다.
 3. `python3 tools/build.py` → `site/assets/data.js`가 다시 만들어진다.
 
-`data/extra/`에는 시트에 없는 배경용 추가분이 있다 (사원증의 샘선전자·케이에스하이닉스·알쥐 라운지와 글·댓글·계정).
-빌드가 같은 이름의 시트 CSV 뒤에 붙인다. 시트로 옮기면 이 폴더는 지워도 된다.
-
 화면에 나가지 않는 컬럼: 게시글 `연결된 진실·단서`·`핵심/분위기`, 사용자 `실제 인물`·`메모`·`비밀번호`,
 광고 `의미`, 로그인 탭 전체. 빌드에서 버리고, 비밀번호·PIN·패턴은 해시로만 남긴다.
 
