@@ -36,5 +36,17 @@ window.HW_PHOTOS = {
   "S8-PRESS-019": "img/S8-PRESS-019.jpg",
   "S9-LG-005": "img/S9-LG-005.jpg",
   "S10-TALK-030": "img/S10-TALK-030.jpg",
-  "S1-NOTICE-010": "img/brand/dajeong_ibyeol.png"
+  "S1-NOTICE-010": "img/brand/dajeong_ibyeol.png",
+  "S2-PHOTO-003": "img/S2-PHOTO-003.jpg",
+  "S2-PHOTO-004": "img/S2-PHOTO-004.jpg",
+  "S2-PHOTO-005": "img/S2-PHOTO-005.jpg",
+  "S2-PHOTO-008": "img/S2-PHOTO-008.jpg",
+  "S2-PHOTO-009": "img/S2-PHOTO-009.jpg",
+  "S2-PHOTO-011": "img/S2-PHOTO-011.jpg",
+  "S2-PHOTO-014": "img/S2-PHOTO-014.jpg",
+  "S3-NOTE-001": "img/S3-NOTE-001.jpg",
+  "S3-NOTE-002": "img/S3-NOTE-002.jpg",
+  "S3-NOTE-003": "img/S3-NOTE-003.jpg",
+  "S3-NOTE-004": "img/S3-NOTE-004.jpg",
+  "S3-NOTE-005": "img/S3-NOTE-005.jpg"
 };
