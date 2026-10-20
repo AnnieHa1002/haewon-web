@@ -1,5 +1,11 @@
 # 사진 출처
 
+## 제작 에셋 (드라이브 '이미지 에셋' 폴더)
+
+`img/S2-PHOTO-001.jpg`, `S2-PHOTO-002`, `S4-FEED-003·005·006·008·009·013·014`, `img/brand/*` (로고), `img/avatar/*` (프로필), `img/icon/*` (휴대폰 아이콘)은 직접 만든 에셋이다.
+
+## Unsplash
+
 Unsplash 라이선스(https://unsplash.com/license)로 받은 사진. 상업적 이용 가능, 출처 표기 의무 없음.
 
 | 파일 | 쓰인 글 | 내용 | 원본 |

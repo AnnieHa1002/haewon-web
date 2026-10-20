@@ -17,6 +17,14 @@
   var NOW = D.now;
   // 글ID → 사진 파일 (assets/photos.js). 없으면 사진 설명 글로 대신한다
   var PHOTO = window.HW_PHOTOS || {};
+  // 프로필 사진 (제작 에셋). 없는 계정은 글자로만 보인다
+  var AVATAR = {
+    room702: 'img/avatar/room702.png', kicho_gongsa: 'img/avatar/kicho_gongsa.png', late_letter: 'img/avatar/late_letter.png',
+    nare_nowhere: 'img/avatar/nare_nowhere.png', nare_doran: 'img/avatar/nare_nowhere.png',
+    wiro_cha: 'img/avatar/wiro.png', wiro_doran: 'img/avatar/wiro.png',
+    dadokim_sms: 'img/brand/dadokim_color.png', geumbangul_sms: 'img/brand/geumbangul_color.png'
+  };
+  function av(id) { return AVATAR[id] ? '<img class="av" src="' + AVATAR[id] + '" alt="">' : ''; }
 
   // ── 상태 (로그인·잠금 해제). 저장소가 막혀도 메모리로 돈다 ────
   var KEY = 'hw4-state';
@@ -218,7 +226,7 @@
       if (r) (kids[r] = kids[r] || []).push(c); else roots.push(c);
     });
     function one(c, reply) {
-      var who = opt.anon ? nick(c.a) : '<a href="' + href(p.s, 'u', c.a) + '">' + esc(nick(c.a)) + '</a>';
+      var who = opt.anon ? nick(c.a) : av(c.a) + '<a href="' + href(p.s, 'u', c.a) + '">' + esc(nick(c.a)) + '</a>';
       if (c.a === p.a && opt.op) who += ' <span class="op">' + opt.op + '</span>';
       return '<li class="cm' + (reply ? ' re' : '') + '"><div class="cm-h">' + (reply ? '<span class="re-mark">ㄴ</span>' : '') + '<span class="cm-who">' + who + '</span><span class="cm-d">' + (opt.date ? opt.date(c.d) : when(c.d)) + '</span></div><div class="cm-x">' + esc(c.x).replace(/\n/g, '<br>') + '</div></li>';
     }
@@ -280,21 +288,21 @@
 
   // ── 허브 ────────────────────────────────────────────────
   var APPS = [
-    { r: 'S1', label: '남은자리', ic: '🕯', bg: '#56635a' },
+    { r: 'S1', label: '남은자리', ic: '🕯', bg: '#56635a', img: 'img/brand/namunjari_color.png' },
     { r: 'S5', label: '해원일보', ic: '報', bg: '#163a6b' },
     { r: 'S9', label: '사원증', ic: '▣', bg: '#e8344e' },
-    { r: 'S8', label: '천명그룹', ic: '天', bg: '#0b4fa8' },
-    { r: 'S4', label: '한컷', ic: '◎', bg: 'linear-gradient(135deg,#f7b267,#e05780 60%,#7b5ce0)' },
-    { r: 'S6', label: '금방울당', ic: '🔔', bg: '#a50f0f' },
+    { r: 'S8', label: '천명그룹', ic: '天', bg: '#0b4fa8', img: 'img/brand/cheonmyeong_mark.png' },
+    { r: 'S4', label: '한컷', ic: '◎', bg: 'linear-gradient(135deg,#f7b267,#e05780 60%,#7b5ce0)', img: 'img/brand/hancut_mark.png' },
+    { r: 'S6', label: '금방울당', ic: '🔔', bg: '#a50f0f', img: 'img/brand/geumbangul_color.png', dark: true },
     { r: 'S10', label: '새벽의 방', ic: '☾', bg: '#1d2230' },
-    { r: 'S7', label: '도원 사내망', ic: 'DW', bg: '#2b4c7e', lock: function () { return !sess('S7'); } }
+    { r: 'S7', label: '도원 사내망', ic: 'DW', bg: '#2b4c7e', img: 'img/brand/dowon_color.png', lock: function () { return !sess('S7'); } }
   ];
   // 보관함 1(#/locker)과 이다음의 휴대폰(#/S3)은 허브에 두지 않는다. 소지품 카드의 QR로만 들어간다.
   function hub() {
     document.title = '홈';
     var h = '<div class="hub"><div class="hub-clock"><b>' + hm(NOW) + '</b><span>' + kdate(NOW) + '</span></div><div class="hub-grid">';
     APPS.forEach(function (a) {
-      h += '<a class="app" href="#/' + a.r + '"><span class="app-ic" style="background:' + a.bg + '">' + a.ic +
+      h += '<a class="app" href="#/' + a.r + '"><span class="app-ic' + (a.img ? ' logo' + (a.dark ? ' dark' : '') : '') + '" style="background:' + (a.img ? (a.dark ? a.bg : '#fff') : a.bg) + '">' + (a.img ? '<img src="' + a.img + '" alt="">' : a.ic) +
         (a.lock && a.lock() ? '<i class="app-lock">🔒</i>' : '') + '</span><span class="app-l">' + a.label + '</span></a>';
     });
     h += '</div><button class="hub-reset" data-act="reset">기록 지우기</button></div>';
@@ -305,7 +313,7 @@
   var S1_TAG = { '공지': '공지', '자유게시판': '자유', '천명타워 유족방': '천명타워', '잊어도 될까요': '토론', '산재·사고 유족방': '산재' };
   function s1Shell(active, body, title) {
     var me = sess('S1');
-    var h = '<header class="s1-h"><a class="s1-logo" href="#/S1">남은자리</a><span class="s1-tag">떠난 사람의 자리를 지키는 사람들</span>' +
+    var h = '<header class="s1-h"><a class="s1-logo" href="#/S1"><img src="img/brand/namunjari_white.png" alt="남은자리"></a><span class="s1-tag">떠난 사람의 자리를 지키는 사람들</span>' +
       '<a class="s1-acct" href="' + href('S1', me ? 'me' : 'login') + '">' + (me ? esc(nick(me)) + ' 님' : '로그인') + '</a></header>' +
       adSlot('S1', 'top', NOW, active) +
       '<nav class="tabs s1-tabs"><a href="#/S1"' + (active === '' ? ' class="on"' : '') + '>전체글</a>';
@@ -340,7 +348,7 @@
     var s = postState(p);
     if (s.k === 'draft') return s1Shell(p.b, lockBox('S1', '작성자만 볼 수 있는 글입니다.'));
     var head = '<div class="s1-ph"><div class="crumb"><a href="' + href('S1', 'b', p.b) + '">' + esc(p.b) + '</a></div><h1>' + (s.k === 'secret' ? '🔒 ' : '') + esc(titleOf(p, s)) + '</h1>' +
-      '<div class="s1-pm"><a href="' + href('S1', 'u', p.a) + '">' + esc(nick(p.a)) + '</a> · ' + when(p.d) + (s.k === 'show' ? ' · 조회 ' + num(p.v) : '') + '</div></div>';
+      '<div class="s1-pm">' + av(p.a) + '<a href="' + href('S1', 'u', p.a) + '">' + esc(nick(p.a)) + '</a> · ' + when(p.d) + (s.k === 'show' ? ' · 조회 ' + num(p.v) : '') + '</div></div>';
     var body;
     if (s.k === 'secret') body = lockBox('S1', '비밀글입니다. 작성자만 볼 수 있습니다.');
     else if (s.k === 'blind') body = '<div class="blind">' + BLIND_MSG + '<small>운영 원칙에 따라 게시물이 가려졌습니다.</small></div>';
@@ -357,7 +365,7 @@
 
   // ── S5 해원일보 ─────────────────────────────────────────
   function s5Shell(active, body, d, title) {
-    var h = '<header class="s5-h"><div class="s5-date">' + kdate(NOW) + '</div><a class="s5-logo" href="#/S5">해원일보</a><div class="s5-sub">解冤日報 · 해원의 내일을 기록합니다</div></header>' +
+    var h = '<header class="s5-h"><div class="s5-date">' + kdate(NOW) + '</div><a class="s5-logo" href="#/S5"><img src="img/brand/haewon_ilbo_' + ((d || NOW) < '2000' ? '1999' : '2023') + '.png" alt="해원일보"></a><div class="s5-sub">解冤日報 · 해원의 내일을 기록합니다</div></header>' +
       '<nav class="tabs s5-tabs"><a href="#/S5"' + (active === '' ? ' class="on"' : '') + '>홈</a>';
     D.boards.S5.forEach(function (b) { h += '<a href="' + href('S5', 'b', b.name) + '"' + (active === b.name ? ' class="on"' : '') + '>' + esc(b.name) + '</a>'; });
     h += '<a href="' + href('S5', 'search') + '"' + (active === 'search' ? ' class="on"' : '') + '>기사 검색</a></nav>';
@@ -494,7 +502,7 @@
   // ── S6 금방울당 ────────────────────────────────────────
   function s6Shell(active, body, title) {
     var me = sess('S6');
-    var h = '<header class="s6-h"><div class="s6-bells">🔔 🔔 🔔</div><a class="s6-logo" href="#/S6">金방울堂</a><div class="s6-sub">금방울보살 · 신내림 38년 · 해원시 외곽</div>' +
+    var h = '<header class="s6-h"><img class="s6-banner" src="img/brand/geumbangul_banner.png" alt=""><a class="s6-logo" href="#/S6"><img src="img/brand/geumbangul_color.png" alt="금방울당"></a><div class="s6-sub">금방울보살 · 신내림 38년 · 해원시 외곽</div>' +
       '<div class="s6-mq"><span>★ 삼재풀이 · 천도재 · 재수굿 · 부적 · 망향 ★ 상담 예약은 회원 메시지함으로 ★ 하늘이 듣고 계십니다 ★ 상담 전화 0OO-OOO-OOOO ★</span></div></header>' +
       adSlot('S6', 'top', NOW, active) + '<nav class="s6-nav">';
     D.boards.S6.forEach(function (b) {
@@ -529,7 +537,7 @@
 
   // ── S8 천명그룹 ────────────────────────────────────────
   function s8Shell(active, body, title) {
-    var h = '<header class="s8-h"><a class="s8-logo" href="#/S8"><b>天命</b> 천명그룹</a><span class="s8-en">CHEONMYEONG GROUP</span></header><nav class="tabs s8-tabs">';
+    var h = '<header class="s8-h"><a class="s8-logo" href="#/S8"><img src="img/brand/cheonmyeong_color.png" alt="천명그룹"></a><span class="s8-en">CHEONMYEONG GROUP</span></header><nav class="tabs s8-tabs">';
     D.boards.S8.forEach(function (b) { h += '<a href="' + href('S8', 'b', b.name) + '"' + (active === b.name ? ' class="on"' : '') + '>' + esc(b.name) + '</a>'; });
     h += '</nav>';
     return { html: h + '<main class="s8-main">' + body + '</main>' + adSlot('S8', 'bottom', NOW, active, 's8-partner') +
@@ -572,7 +580,7 @@
   // ── S7 도원화학 사내망 (사번 로그인 게이트) ─────────────
   function s7Shell(active, body, title) {
     var me = sess('S7');
-    var h = '<header class="s7-h"><a class="s7-logo" href="#/S7">DOWON <b>e-Office</b></a><span class="s7-me">' + esc(nick(me)) + ' (' + esc(me) + ') · <a href="#" data-act="logout" data-site="S7">로그아웃</a></span></header>' +
+    var h = '<header class="s7-h"><a class="s7-logo" href="#/S7"><img src="img/brand/dowon_white.png" alt="도원화학"><b>e-Office</b></a><span class="s7-me">' + esc(nick(me)) + ' (' + esc(me) + ') · <a href="#" data-act="logout" data-site="S7">로그아웃</a></span></header>' +
       adSlot('S7', 'top', '2022-06-01 00:00', '', 's7-banner') + '<nav class="tabs s7-tabs">';
     D.boards.S7.forEach(function (b) { h += '<a href="' + href('S7', 'b', b.name) + '"' + (active === b.name ? ' class="on"' : '') + '>' + esc(b.name) + '</a>'; });
     h += '<a href="' + href('S7', 'me') + '"' + (active === 'me' ? ' class="on"' : '') + '>내 문서함</a></nav>';
@@ -580,7 +588,7 @@
   }
   function s7Gate() {
     var ads = adsFor('S7', 'login', NOW, '').map(function (o) { return '<div class="s7-warn"><b>⚠ ' + esc(o.ad.who) + '</b>' + esc(o.ad.x) + '</div>'; }).join('');
-    return { html: '<div class="s7-gate"><div class="s7-gl">DOWON <b>e-Office</b></div><p>도원화학 임직원 전용 시스템입니다.</p>' +
+    return { html: '<div class="s7-gate"><div class="s7-gl"><img src="img/brand/dowon_color.png" alt="도원화학"><b>e-Office</b></div><p>도원화학 임직원 전용 시스템입니다.</p>' +
       loginForm('S7', { head: '', idLabel: '사번', pwLabel: '비밀번호', next: location.hash.slice(1) }) + ads + '<small>비밀번호 분실 시 정보보안팀(내선 2214)에 문의하세요.</small></div>', title: '도원화학 e-Office' };
   }
   function s7List(board, q) {
@@ -611,7 +619,7 @@
   var S4_OWNER = 'nare_nowhere';
   function s4Shell(body, title, tab) {
     var me = sess('S4');
-    var h = '<header class="s4-h"><a class="s4-logo" href="#/S4">한컷</a><a class="s4-dm" href="' + href('S4', 'msg') + '" aria-label="DM">✉' + (me ? '' : '<i>🔒</i>') + '</a></header>';
+    var h = '<header class="s4-h"><a class="s4-logo" href="#/S4"><img src="img/brand/hancut_color.png" alt="한컷"></a><a class="s4-dm" href="' + href('S4', 'msg') + '" aria-label="DM">✉' + (me ? '' : '<i>🔒</i>') + '</a></header>';
     return { html: h + '<main class="s4-main">' + body + '</main><nav class="s4-tabbar"><a href="#/S4"' + (tab !== 'msg' ? ' class="on"' : '') + '>⌂</a><a href="' + href('S4', 'msg') + '"' + (tab === 'msg' ? ' class="on"' : '') + '>✉</a><a href="' + href('S4', me ? 'me' : 'login') + '">' + (me ? '●' : '○') + '</a></nav>', title: title || 'nare_nowhere · 한컷' };
   }
   function photoOf(x) { var m = x.match(/\[(?:사진|캡처)\s*[:：]?\s*([^\]]*)\]/); return m ? m[1] : ''; }
@@ -624,7 +632,7 @@
   function s4List() {
     var all = sitePosts('S4', '피드');
     var u = D.users[S4_OWNER];
-    var head = '<section class="s4-prof"><div class="s4-av">나래</div><div class="s4-stats"><div><b>' + all.length + '</b>게시물</div><div><b>214</b>팔로워</div><div><b>187</b>팔로잉</div></div>' +
+    var head = '<section class="s4-prof"><div class="s4-av"><img src="img/avatar/nare_nowhere.png" alt="나래"></div><div class="s4-stats"><div><b>' + all.length + '</b>게시물</div><div><b>214</b>팔로워</div><div><b>187</b>팔로잉</div></div>' +
       '<div class="s4-bio"><b>나래</b> <span>@nare_nowhere</span><br>어디에도 없고 어디에나 있음. 토요일엔 해바라기의 집 🌻<br><small>가입 ' + ymd(u.j) + '</small></div></section>';
     var tiles = all.map(s4Tile);
     var mids = adsFor('S4', 'mid', NOW, 'grid').concat(adsFor('S4', 'mid', '2022-06-01 00:00', 'grid'));
@@ -638,7 +646,7 @@
     lines.forEach(function (l) { var m = l.trim().match(/^\[(사진|캡처)\s*[:：]?\s*([\s\S]*?)\]$/); if (m && !ph) ph = m[2]; else cap.push(l); });
     var photo = s.k === 'show' ? (PHOTO[p.id] ? '<div class="s4-photo img"><img src="' + esc(PHOTO[p.id]) + '" alt="' + esc(ph || '') + '"></div>' : '<div class="s4-photo" style="background:linear-gradient(160deg,' + tint(p.id, 35, 82) + ',' + tint(p.id + 'x', 30, 64) + ')"><span>' + esc(ph || '') + '</span></div>') :
       '<div class="s4-photo blind-p"><span>' + BLIND_MSG + '<br><small>커뮤니티 가이드라인에 따라 가려진 게시물입니다</small></span></div>';
-    var h = '<div class="s4-ph"><div class="s4-av sm">나래</div><b>nare_nowhere</b>' + (s.label ? ' <span class="lbl">' + s.label + '</span>' : '') + '</div>' + photo +
+    var h = '<div class="s4-ph"><div class="s4-av sm"><img src="img/avatar/nare_nowhere.png" alt=""></div><b>nare_nowhere</b>' + (s.label ? ' <span class="lbl">' + s.label + '</span>' : '') + '</div>' + photo +
       (s.k === 'show' ? '<div class="s4-act">♡ ' + num(p.l) + '</div><div class="s4-cap"><b>nare_nowhere</b> ' + rich(cap.join('\n').trim()) + '</div>' : '') +
       '<div class="s4-d">' + kdate(p.d) + '</div>';
     var mid = adsFor('S4', 'mid', p.d, p.id)[0];
@@ -743,7 +751,7 @@
   }
   function threadList(dev, app, kind) {
     return '<ul class="d-threads">' + devThreads(dev, kind).map(function (t) {
-      return '<li><a href="' + href(dev, app, t.who) + '"><span class="d-av" style="background:' + tint(t.who, 30, 70) + '">' + esc(cname(dev, t.who).slice(0, 1)) + '</span><div><b>' + esc(cname(dev, t.who)) + '</b><p>' + esc(excerpt(t.last.x, 34)) + '</p></div><em>' + short(t.last.d) + '</em></a></li>';
+      return '<li><a href="' + href(dev, app, t.who) + '">' + (AVATAR[t.who] ? '<span class="d-av img' + (AVATAR[t.who].indexOf('brand/') >= 0 ? ' fit' : '') + '"><img src="' + AVATAR[t.who] + '" alt=""></span>' : '<span class="d-av" style="background:' + tint(t.who, 30, 70) + '">' + esc(cname(dev, t.who).slice(0, 1)) + '</span>') + '<div><b>' + esc(cname(dev, t.who)) + '</b><p>' + esc(excerpt(t.last.x, 34)) + '</p></div><em>' + short(t.last.d) + '</em></a></li>';
     }).join('') + '</ul>';
   }
   function appBar(dev, title, back) {
@@ -816,8 +824,8 @@
     var app = parts[1], id = parts[2], h;
     if (!app) {
       h = statusBar('19:16') + '<div class="home flowers"><div class="home-grid">' +
-        '<a href="' + href('S2', 'doran') + '"><i class="ic doran">도</i>도란</a><a href="' + href('S2', 'sms') + '"><i class="ic sms">✉</i>문자</a>' +
-        '<a href="' + href('S2', 'memo') + '"><i class="ic memo">✎</i>메모</a><a href="' + href('S2', 'photo') + '"><i class="ic photo">❀</i>사진첩</a></div>' +
+        '<a href="' + href('S2', 'doran') + '"><i class="ic doran"><img src="img/icon/doran.png" alt=""></i>도란</a><a href="' + href('S2', 'sms') + '"><i class="ic sms"><img src="img/icon/chat.png" alt=""></i>문자</a>' +
+        '<a href="' + href('S2', 'memo') + '"><i class="ic memo"><img src="img/icon/memo.png" alt=""></i>메모</a><a href="' + href('S2', 'photo') + '"><i class="ic photo"><img src="img/icon/photo.png" alt=""></i>사진첩</a></div>' +
         '<a class="ls-back" href="#/locker">‹ 보관함으로</a></div>';
       return phone('p-s2', h, '편지의 휴대폰');
     }
@@ -839,9 +847,9 @@
     var app = parts[1], id = parts[2], h;
     if (!app) {
       h = '<div class="home sea"><div class="home-grid">' +
-        '<a href="' + href('S3', 'doran') + '"><i class="ic doran">도</i>도란</a><a href="' + href('S3', 'memo') + '"><i class="ic memo">✎</i>메모</a>' +
-        '<a href="' + href('S3', 'rec') + '"><i class="ic rec">●</i>녹음</a><a href="' + href('S3', 'note') + '"><i class="ic photo">▤</i>수첩 사진</a>' +
-        '<a href="#" data-act="auto" data-site="S1"><i class="ic web s1">남</i>남은자리</a><a href="#" data-act="auto" data-site="S10"><i class="ic web s10">☾</i>새벽의 방</a></div></div>';
+        '<a href="' + href('S3', 'doran') + '"><i class="ic doran"><img src="img/icon/doran.png" alt=""></i>도란</a><a href="' + href('S3', 'memo') + '"><i class="ic memo"><img src="img/icon/memo.png" alt=""></i>메모</a>' +
+        '<a href="' + href('S3', 'rec') + '"><i class="ic rec"><img src="img/icon/rec.png" alt=""></i>녹음</a><a href="' + href('S3', 'note') + '"><i class="ic photo"><img src="img/icon/photo.png" alt=""></i>수첩 사진</a>' +
+        '<a href="#" data-act="auto" data-site="S1"><i class="ic web s1"><img src="img/brand/namunjari_white.png" alt=""></i>남은자리</a><a href="#" data-act="auto" data-site="S10"><i class="ic web s10">☾</i>새벽의 방</a></div></div>';
       return phone('p-s3', statusBar('19:16') + h + crack, '이다음의 휴대폰');
     }
     if (app === 'doran') h = id ? appBar('S3', cname('S3', id), href('S3', 'doran')) + chatHTML(devThreads('S3').find(function (t) { return t.who === id; }).list, OWNER.S3, 'doran s3c') : appBar('S3', '도란') + threadList('S3', 'doran');
