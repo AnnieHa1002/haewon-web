@@ -409,13 +409,16 @@
     return { html: h + adSlot('S9', 'top', NOW) + '<main class="s9-main">' + body + '</main>', title: title || (co ? co + ' 라운지 · 사원증' : '사원증') };
   }
   function s9Home() {
-    var real = D.boards.S9.map(function (b) { var co = s9Co(b.name); return { co: co, kind: co.indexOf('건설') >= 0 ? '건설' : '화학', n: S9_SIZE[co] || 900, link: href('S9', 'b', b.name), last: (sitePosts('S9', b.name)[0] || {}).p }; });
-    var all = real.concat(S9_FAKE.map(function (f) { return { co: f[0], kind: f[1], n: f[2], link: href('S9', 'c', f[0]) }; }))
-      .sort(function (a, b) { return b.n - a.n; });
-    var h = '<p class="bdesc">회사 메일로 인증한 재직자만 글을 쓸 수 있습니다.</p><ul class="s9-cos">' + all.map(function (c) {
-      return '<li><a href="' + c.link + '"><span class="s9-lg" style="background:' + tint(c.co, 45, 42) + '">' + esc(c.co.slice(0, 1)) + '</span><div><b>' + esc(c.co) + '</b><small>' + esc(c.kind) + ' · 인증 ' + num(c.n) + '명</small></div><em>›</em></a></li>';
-    }).join('') + '</ul>';
-    return s9Shell('', '<h2 class="s9-sec">회사 라운지</h2>' + h);
+    function row(c) {
+      return '<li><a href="' + c.link + '"><span class="s9-lg" style="background:' + tint(c.co, 45, 42) + '">' + esc(c.co.slice(0, 1)) + '</span><div><b>' + esc(c.co) + '</b><small>' + esc(c.kind) + ' · 인증 ' + num(c.n) + '명</small></div><em>' + (c.fav ? '★' : '›') + '</em></a></li>';
+    }
+    // 글이 있는 두 회사는 즐겨찾기로 맨 위, 나머지는 세 개만 보이고 '더보기'는 끝없이 불러오기만 한다
+    var favs = D.boards.S9.map(function (b) { var co = s9Co(b.name); return { co: co, kind: co.indexOf('건설') >= 0 ? '건설' : '화학', n: S9_SIZE[co] || 900, link: href('S9', 'b', b.name), fav: true }; });
+    var others = S9_FAKE.slice().sort(function (a, b) { return b[2] - a[2]; }).slice(0, 3).map(function (f) { return { co: f[0], kind: f[1], n: f[2], link: href('S9', 'c', f[0]) }; });
+    return s9Shell('', '<p class="bdesc">회사 메일로 인증한 재직자만 글을 쓸 수 있습니다.</p>' +
+      '<h2 class="s9-sec">즐겨찾기</h2><ul class="s9-cos">' + favs.map(row).join('') + '</ul>' +
+      '<h2 class="s9-sec">인기 회사 라운지</h2><ul class="s9-cos">' + others.map(row).join('') + '</ul>' +
+      '<button class="more s9-more" data-act="loadmore">더보기</button>');
   }
   function s9Offline(co) {
     return s9Shell(co || '', '<div class="s9-err"><div class="s9-err-i">⚠</div><b>인터넷에 연결되어 있지 않습니다</b><p>네트워크 연결을 확인한 뒤 다시 시도해 주세요.</p><button class="btn" data-act="retry">다시 시도</button></div>', '연결 오류');
@@ -940,6 +943,7 @@
       var pair = (D.auth.auto.S3 || []).find(function (x) { return x[0] === a.dataset.site; });
       if (pair) { st.sess[pair[0]] = pair[1]; save(); location.hash = href(pair[0], 'me'); }
     } else if (act === 'retry') { e.preventDefault(); a.disabled = true; a.textContent = '연결 중…'; setTimeout(function () { a.disabled = false; a.textContent = '다시 시도'; toast('연결할 수 없습니다.'); }, 1400);
+    } else if (act === 'loadmore') { e.preventDefault(); a.disabled = true; a.classList.add('loading'); a.innerHTML = '<i class="spin"></i>불러오는 중…';
     } else if (act === 'play') { e.preventDefault(); toast('파일을 재생할 수 없습니다. (손상된 파일)'); }
   });
 
