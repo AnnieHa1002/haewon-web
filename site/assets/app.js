@@ -269,7 +269,7 @@
     id = id.trim();
     var acct = D.auth.accounts[id] || D.auth.accounts[Object.keys(D.auth.accounts).find(function (k) { return k.toLowerCase() === id.toLowerCase(); })];
     if (acct) id = Object.keys(D.auth.accounts).find(function (k) { return D.auth.accounts[k] === acct; });
-    if (!acct || acct.s !== site || check(id, pw) !== acct.h) return false;
+    if (!acct || acct.s !== site || [].concat(acct.h).indexOf(check(id, pw)) < 0) return false;
     st.sess[site] = id; save();
     return true;
   }
