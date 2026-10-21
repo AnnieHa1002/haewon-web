@@ -561,3 +561,32 @@ img.av { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; verti
 .sheet-x { width: 100%; border: 0; border-top: 1px solid #eee; background: none; padding: 12px 0 2px; font-size: 14px; color: #666; cursor: pointer; }
 @keyframes sheetup { from { transform: translateY(100%); } }
 @keyframes sheetbg { from { opacity: 0; } }
+
+/* ── S11 하루글 : 종이 같은 개인 블로그 ── */
+body.b-S11 { background: #ece6da; }
+.skin-S11 { background: #f8f4ec !important; color: #4a4338; }
+.s11-h { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #e3dccd; }
+.s11-logo { font-size: 16px; color: #6f7d55; font-weight: 600; letter-spacing: .04em; }
+.s11-logo::before { content: "✎ "; }
+.s11-acct { font-size: 12px; color: #8b8270; }
+.s11-cover { padding: 22px 16px 14px; text-align: center; background: linear-gradient(#f1ebdf, #f8f4ec); }
+.s11-cover b { display: block; font-size: 21px; color: #4a4338; font-weight: 500; letter-spacing: .06em; }
+.s11-cover span { display: block; margin-top: 4px; font-size: 12px; color: #9a917e; }
+.s11-tabs { font-size: 13.5px; border-bottom: 1px solid #e3dccd; justify-content: center; }
+.s11-tabs a { color: #9a917e; }
+.s11-tabs a.on { color: #4a4338; box-shadow: inset 0 -2px 0 #8a9a6e; }
+.skin-S11 .bdesc { background: #f3eee3; color: #8b8270; border-color: #e3dccd; }
+.s11-r a { display: block; padding: 13px 16px; border-bottom: 1px solid #ece5d7; }
+.s11-r.dim .s11-t { color: #a39a87; }
+.s11-t { font-size: 15px; color: #4a4338; }
+.s11-m { font-size: 11.5px; color: #a39a87; margin-top: 3px; }
+.s11-ph { padding: 18px 16px 10px; border-bottom: 1px solid #ece5d7; }
+.s11-ph h1 { font-size: 18px; font-weight: 500; color: #3f392f; }
+.skin-S11 .post-x { line-height: 1.9; color: #4a4338; }
+.s11-go { margin: 40px 16px; padding: 20px; background: #fff; border: 1px solid #e3dccd; border-radius: 10px; }
+.s11-go h2 { font-size: 17px; margin-bottom: 4px; }
+.s11-go p { font-size: 13px; color: #8b8270; }
+.s11-url { display: flex; align-items: center; margin: 14px 0 10px; border: 1px solid #d8d0bf; border-radius: 6px; overflow: hidden; background: #fbf9f4; }
+.s11-url span { padding: 0 8px 0 10px; color: #8b8270; font-size: 14px; }
+.s11-url input { flex: 1; min-width: 0; border: 0; background: transparent; padding: 10px 8px 10px 0; font-size: 15px; }
+.s11-f { padding: 22px 16px 30px; text-align: center; font-size: 11.5px; color: #a39a87; }

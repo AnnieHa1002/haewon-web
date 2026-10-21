@@ -295,6 +295,7 @@
     { r: 'S4', label: '한컷', ic: '◎', bg: 'linear-gradient(135deg,#f7b267,#e05780 60%,#7b5ce0)', img: 'img/brand/hancut_mark.png' },
     { r: 'S6', label: '금방울당', ic: '🔔', bg: '#a50f0f', img: 'img/brand/geumbangul_color.png', dark: true },
     { r: 'S10', label: '새벽의 방', ic: '☾', bg: '#1d2230' },
+    { r: 'S11', label: '하루글', ic: '✎', bg: '#8a9a6e' },
     { r: 'S7', label: '도원 사내망', ic: 'DW', bg: '#2b4c7e', img: 'img/brand/dowon_color.png', lock: function () { return !sess('S7'); } }
   ];
   // 보관함 1(#/locker)과 이다음의 휴대폰(#/S3)은 허브에 두지 않는다. 소지품 카드의 QR로만 들어간다.
@@ -516,6 +517,40 @@
   }
   SK.S10 = { list: s10List, post: s10Post, shell: s10Shell };
 
+  // ── S11 하루글 · 늦은 편지 (송은혜의 블로그) ─────────────
+  // 허브의 '하루글'은 블로그 주소를 넣는 화면에서 시작한다. 주소(eunhye_song)는 남은자리 댓글에만 나온다.
+  var S11_OWNER = 'eunhye_song';
+  function s11Shell(active, body, title, landing) {
+    var me = sess('S11');
+    var h = '<header class="s11-h"><a class="s11-logo" href="#/S11">하루글</a><a class="s11-acct" href="' + href('S11', me ? 'me' : 'login') + '">' + (me ? esc(nick(me)) : '로그인') + '</a></header>';
+    if (!landing) {
+      h += '<div class="s11-cover"><a href="' + href('S11', 'b', '일상') + '"><b>' + esc(nick(S11_OWNER)) + '</b></a><span>haru.gl/' + S11_OWNER + ' · 그때그때 적어 두는 것들</span></div><nav class="tabs s11-tabs">';
+      D.boards.S11.forEach(function (b) { h += '<a href="' + href('S11', 'b', b.name) + '"' + (active === b.name ? ' class="on"' : '') + '>' + esc(b.name) + '</a>'; });
+      h += '</nav>';
+    }
+    return { html: h + '<main class="s11-main">' + body + '</main><footer class="s11-f">하루글 · 하루 한 장씩 남기는 블로그</footer>', title: title || (landing ? '하루글' : nick(S11_OWNER)) };
+  }
+  function s11Landing() {
+    return s11Shell('', '<form class="s11-go" data-s11go="1"><h2>블로그 찾기</h2><p>블로그 주소를 입력하세요.</p><label class="s11-url"><span>haru.gl/</span><input name="u" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="아이디"></label><button class="btn">이동</button><p class="login-err" hidden></p></form>', '하루글', true);
+  }
+  function s11List(board, q) {
+    if (!board) return s11Landing();
+    var page = +q.p || 1, all = sitePosts('S11', board);
+    var rows = slice(all, page).map(function (o) {
+      var p = o.p, s = o.s;
+      return '<li class="s11-r' + (s.k !== 'show' ? ' dim' : '') + '"><a href="' + href('S11', 'p', p.id) + '"><div class="s11-t">' + (s.k === 'secret' ? '🔒 ' : '') + esc(titleOf(p, s)) + (s.label ? ' <span class="lbl">' + s.label + '</span>' : '') + '</div><div class="s11-m">' + short(p.d) + '</div></a></li>';
+    }).join('');
+    return s11Shell(board, '<p class="bdesc">' + esc((D.boards.S11.find(function (b) { return b.name === board; }) || {}).desc || '') + '</p><ul class="s11-list">' + rows + '</ul>' + pager(all.length, page, href('S11', 'b', board), {}));
+  }
+  function s11Post(p) {
+    var s = postState(p), body;
+    if (s.k === 'secret') body = lockBox('S11', '비밀글입니다.<br><small>비밀번호 힌트: 손이 기억하는 날 (숫자 여덟 자리)</small>');
+    else body = '<article class="post-x s11-x">' + rich(s.body, p.id) + '</article>';
+    var h = '<div class="s11-ph"><h1>' + esc(titleOf(p, s)) + '</h1><div class="s11-m">' + esc(p.b) + ' · ' + when(p.d) + '</div></div>' + body + (s.k === 'secret' ? '' : commentsHTML(p, { label: '댓글' }));
+    return s11Shell(p.b, h, p.t);
+  }
+  SK.S11 = { list: s11List, post: s11Post, shell: s11Shell };
+
   // ── S6 금방울당 ────────────────────────────────────────
   function s6Shell(active, body, title) {
     var me = sess('S6');
@@ -676,7 +711,8 @@
     S1: function (b, t) { return s1Shell('msg', b, t); }, S5: function (b, t) { return s5Shell('', b, null, t); },
     S6: function (b, t) { return s6Shell('msg', b, t); }, S7: function (b, t) { return s7Shell('me', b, t); },
     S8: function (b, t) { return s8Shell('', b, t); }, S9: function (b, t) { return s9Shell('', b, t); },
-    S10: function (b, t) { return s10Shell('msg', b, t); }, S4: function (b, t) { return s4Shell(b, t, 'msg'); }
+    S10: function (b, t) { return s10Shell('msg', b, t); }, S4: function (b, t) { return s4Shell(b, t, 'msg'); },
+    S11: function (b, t) { return s11Shell('일상', b, t); }
   };
   var MSG_NAME = { S1: '쪽지함', S6: '회원 메시지함', S10: '쪽지', S4: 'DM' };
   function loginPage(site, q) {
@@ -955,6 +991,13 @@
       var before = location.hash;
       location.hash = f.dataset.next || '#/' + site + '/me';
       if (location.hash === before) route();
+      return;
+    }
+    if (f.dataset.s11go) {
+      e.preventDefault();
+      var u = f.u.value.trim().toLowerCase().replace(/^.*\//, '').replace(/^@/, '');
+      if (u === S11_OWNER) { location.hash = href('S11', 'b', '일상'); return; }
+      var er2 = f.querySelector('.login-err'); er2.hidden = false; er2.textContent = u ? '존재하지 않는 블로그입니다.' : '주소를 입력하세요.';
       return;
     }
     if (f.classList.contains('search')) {
