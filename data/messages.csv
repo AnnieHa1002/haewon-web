@@ -124,8 +124,8 @@ S2-SMS-018,S2,dadokim_sms,late_letter,2025-06-17 14:02,그럼요. 모임에서�
 S2-DORAN-049,S2,seo_jeongui_doran,late_letter,2025-06-18 21:40,박고수 씨 부인 송은혜 씨 맞으시죠. 서바름의 아버지입니다.,로그인 필요: S2 잠금 해제
 S2-DORAN-050,S2,seo_jeongui_doran,late_letter,2025-06-18 21:41,"당신 남편이 내 아들을 죽였습니다. 2021년 10월 14일 새벽, 천명건설 제2자재창고 계단입니다.",로그인 필요: S2 잠금 해제
 S2-DORAN-051,S2,seo_jeongui_doran,late_letter,2025-06-19 07:12,4년을 찾았습니다. 모른 척 살 수 있을 거라 생각하지 마십시오.,로그인 필요: S2 잠금 해제
-S2-DORAN-052,S2,late_letter,seo_jeongui_doran,2025-06-19 23:50,알고 있어요. 죄송하다는 말로 안 되는 것도요. 조금만 기다려 주세요. 다 꺼내 놓을게요.,로그인 필요: S2 잠금 해제
-S2-DORAN-053,S2,late_letter,room702,2025-06-20 23:58,아드님 아버님한테서 메시지를 받았어요. 맞는 말이에요. 다 말할 거예요. 사람들 앞에서요.,로그인 필요: S2 잠금 해제
+S2-DORAN-052,S2,late_letter,seo_jeongui_doran,2025-06-19 23:50,"알아요. 미안해요. 7월 17일, 다정한 이별이라는 모임에서 다 말할게요. 거기서 들어 주세요.",로그인 필요: S2 잠금 해제
+S2-DORAN-053,S2,late_letter,room702,2025-06-27 23:58,"7월 17일, 다정한 이별이라는 모임에 가요. 거기서 다 말할 거예요. 아드님 아버님한테서도 메시지를 받았어요. 맞는 말이에요. 사람들 앞에서 다 말할게요.",로그인 필요: S2 잠금 해제
 S2-DORAN-054,S2,late_letter,room702,2025-06-29 02:17,"곧, 사람들 앞에서 불 속에 들어갔다 살아 나올게요.",로그인 필요: S2 잠금 해제
 S2-SMS-019,S2,late_letter,dadokim_sms,2025-06-17 19:10,신청서 보냈습니다. 고인 칸에 남편 이름 적었어요.,로그인 필요: S2 잠금 해제
 S2-SMS-020,S2,dadokim_sms,late_letter,2025-06-18 09:30,잘 받았습니다. 그날 뵙겠습니다. 모임 중에는 휴대폰을 보관함에 넣어 두니 참고해 주세요.,로그인 필요: S2 잠금 해제
@@ -219,8 +219,8 @@ S4-MSG-004,S4,nare_nowhere,bareum_bridge,2020-07-06 21:52,천명? 해원시 건�
 S4-MSG-005,S4,nare_nowhere,bareum_bridge,2020-11-21 19:30,구청 다녀옴. 신고서 발견 장소 '해바라기의 집 앞'. 신고인 이름은 개인정보라 까맣게 칠해서 줌. 이게 다래,로그인 필요: nare_nowhere
 S4-MSG-006,S4,bareum_bridge,nare_nowhere,2020-11-21 20:05,빈칸이 제일 중요한 거예요 선생님. 신고서랑 입소 기록을 나란히 놓고 봐야 돼요. 보육원에 88년 원본 서류철이 남아 있는지 김선생님께 여쭤봐요.,로그인 필요: nare_nowhere
 S4-MSG-007,S4,nare_nowhere,bareum_bridge,2020-11-21 20:07,김선생님은 다 버렸을 거래. 그래도 물어봄. 고맙다 탐정 조수,로그인 필요: nare_nowhere
-S4-MSG-008,S4,bareum_bridge,nare_nowhere,2021-03-30 23:50,"선생님, 회사에서 오래된 서류 하나를 봤는데요. 거기 아는 이름이 있어요. 아직 아무한테도 말 못 했어요. 나중에 얘기할게요.",로그인 필요: nare_nowhere
-S4-MSG-009,S4,nare_nowhere,bareum_bridge,2021-03-31 00:05,뭔데 무섭게. 이상한 거면 혼자 들고 있지 마,로그인 필요: nare_nowhere
+S4-MSG-008,S4,bareum_bridge,nare_nowhere,2021-03-30 23:50,"선생님, 작년 여름에 말한 회사 서류요. 아직도 아무한테도 못 물어봤어요. 작년 추석엔 결국 못 했고요. 올해 추석엔 꼭 아버지한테 여쭤볼 거예요.",로그인 필요: nare_nowhere
+S4-MSG-009,S4,nare_nowhere,bareum_bridge,2021-03-31 00:05,아직도 혼자 들고 있었어? 이번엔 꼭 물어봐. 혼자 들고 있지 마,로그인 필요: nare_nowhere
 S4-MSG-010,S4,bareum_bridge,nare_nowhere,2021-09-22 22:30,추석에 아버지한테 말하려다가 못 했어요. 아버지 얼굴 보니까 그냥 송편만 먹었어요.,로그인 필요: nare_nowhere
 S4-MSG-011,S4,bareum_bridge,nare_nowhere,2021-10-13 21:40,선생님 저 오늘 밤에 잠깐 회사 창고 갔다 올게요. 누가 오늘 밤엔 창고가 비어 있다고 알려 줘서요. 사진만 찍고 나올게요. 토요일 봉사 때 다 말씀드릴게요.,로그인 필요: nare_nowhere
 S4-MSG-012,S4,nare_nowhere,bareum_bridge,2021-10-13 22:05,뭘 찍는데. 누가 알려 줬는데. 위험한 거 하지 마. 너 그런 거 못 하는 애잖아,로그인 필요: nare_nowhere
@@ -271,10 +271,10 @@ S6-MSG-025,S6,geumbangul,haneul_mideum,2024-03-08 21:30,그 미친 여자 조심
 S6-MSG-026,S6,haneul_mideum,geumbangul,2024-03-08 21:40,그이 욕도 했어요. 그이가 다 했다고요. 하늘 같은 사람한테요.,로그인 필요: haneul_mideum
 S6-MSG-027,S6,geumbangul,haneul_mideum,2024-03-08 21:45,남편 욕하는 사람은 거짓말쟁이다. 너도 알지 않느냐.,로그인 필요: haneul_mideum
 S6-MSG-028,S6,geumbangul,haneul_mideum,2024-05-13 09:00,그 여자가 인터넷 유족 모임에 내 욕을 써 놨더라. 다 지우게 했다. 너는 신경 쓰지 마라.,로그인 필요: haneul_mideum
-S6-MSG-029,S6,geumbangul,haneul_mideum,2025-06-24 20:10,"다음 달 17일 저녁 7시, 구도심 다독임 심리상담센터에서 '다정한 이별'이라는 모임이 있다. 가라. 잃은 인연을 만난다.",로그인 필요: haneul_mideum
-S6-MSG-030,S6,haneul_mideum,geumbangul,2025-06-24 20:30,저 같은 늙은이가 가도 되나요. 거긴 상담 선생님이 하는 데잖아요.,로그인 필요: haneul_mideum
-S6-MSG-031,S6,geumbangul,haneul_mideum,2025-06-24 20:40,가라면 가라. 어디서 알았냐 묻거든 금방울당 선생님이 보냈다고 해라.,로그인 필요: haneul_mideum
-S6-MSG-032,S6,haneul_mideum,geumbangul,2025-06-25 07:50,신청서 냈어요. 잃은 인연이 누굴까요. 설레기도 하고 무섭기도 해요.,로그인 필요: haneul_mideum
+S6-MSG-029,S6,geumbangul,haneul_mideum,2025-06-18 20:10,"다음 달 17일 저녁 7시, 구도심 다독임 심리상담센터에서 '다정한 이별'이라는 모임이 있다. 가라. 잃은 인연을 만난다.",로그인 필요: haneul_mideum
+S6-MSG-030,S6,haneul_mideum,geumbangul,2025-06-18 20:30,저 같은 늙은이가 가도 되나요. 거긴 상담 선생님이 하는 데잖아요.,로그인 필요: haneul_mideum
+S6-MSG-031,S6,geumbangul,haneul_mideum,2025-06-18 20:40,가라면 가라. 어디서 알았냐 묻거든 금방울당 선생님이 보냈다고 해라.,로그인 필요: haneul_mideum
+S6-MSG-032,S6,haneul_mideum,geumbangul,2025-06-20 07:50,신청서 냈어요. 잃은 인연이 누굴까요. 설레기도 하고 무섭기도 해요.,로그인 필요: haneul_mideum
 S6-MSG-033,S6,geumbangul,haneul_mideum,2025-07-16 21:00,내일 갈 때 내가 준 부적 주머니하고 정화유 꼭 챙겨라. 이유는 거기 가서 일러 준다.,로그인 필요: haneul_mideum
 S6-MSG-034,S6,haneul_mideum,geumbangul,2025-07-17 17:40,선생님 지금 버스 타요. 비가 너무 와요.,로그인 필요: haneul_mideum
 S6-MSG-035,S6,geumbangul,haneul_mideum,2025-07-17 18:25,도착했으면 화장실에서 전화해라.,로그인 필요: haneul_mideum
@@ -303,3 +303,4 @@ WIRO-DORAN-019,WIRO,wiro_doran,nare_doran,2023-02-11 09:58,상담 끝나고 보�
 WIRO-DORAN-020,WIRO,nare_doran,wiro_doran,2023-02-11 09:58,(웃는 이모티콘),로그인 필요: 보관함 열쇠(별꽃)
 WIRO-DORAN-021,WIRO,wiro_doran,nare_doran,2023-02-11 14:47,부재중 발신 6회 (오후 2:47 ~ 3:30),로그인 필요: 보관함 열쇠(별꽃)
 WIRO-DORAN-022,WIRO,wiro_doran,nare_doran,2023-02-11 15:31,나래야 전화 좀 받아,로그인 필요: 보관함 열쇠(별꽃)
+S3-DORAN-076,S3,late_letter,room702,2025-06-27 23:58,"(받은 메시지 · 제비) 7월 17일, 다정한 이별이라는 모임에 가요. 거기서 다 말할 거예요.",로그인 필요: S3 자동로그인(외골수)
