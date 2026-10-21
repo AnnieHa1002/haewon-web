@@ -96,7 +96,7 @@ site/          배포 산출물. stage.html(진행 화면), index.html + assets/
 - 로그인·잠금 해제는 그 휴대폰의 브라우저에만 저장된다. **게임 사이에 허브 맨 아래 '기록 지우기'** 를 누른다.
 
 `app.js` 맨 위 설정: `SHOW_CASE_HINT`(제비 폰 케이스 안쪽 사진 "702. 첫 글자만 그리면 돼요."를 화면에도 보여 줄지 —
-실물 단서로 확정되면 `false`), `LOCK_TRIES`, `LOCK_SECONDS`, `PAGE`.
+2026-10-21 화면에만 두기로 확정, 실물 없음. `true` 유지), `LOCK_TRIES`, `LOCK_SECONDS`, `PAGE`.
 
 ## 배포
 
