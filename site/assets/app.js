@@ -22,7 +22,8 @@
     room702: 'img/avatar/room702.png', kicho_gongsa: 'img/avatar/kicho_gongsa.png', late_letter: 'img/avatar/late_letter.png',
     nare_nowhere: 'img/avatar/nare_nowhere.png', nare_doran: 'img/avatar/nare_nowhere.png',
     wiro_cha: 'img/avatar/wiro.png', wiro_doran: 'img/avatar/wiro.png',
-    dadokim_sms: 'img/brand/dadokim_color.png', geumbangul_sms: 'img/brand/geumbangul_color.png'
+    dadokim_sms: 'img/brand/dadokim_color.png', geumbangul_sms: 'img/brand/geumbangul_color.png',
+    baram_dad: 'img/avatar/baram_dad.jpg', haneul_mideum: 'img/avatar/haneul_mideum.jpg', eunhye_song: 'img/avatar/eunhye_song.jpg'
   };
   function av(id) { return AVATAR[id] ? '<img class="av" src="' + AVATAR[id] + '" alt="">' : ''; }
 

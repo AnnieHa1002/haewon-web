@@ -2,7 +2,7 @@
 
 ## 제작 에셋 (드라이브 '이미지 에셋' 폴더)
 
-`img/S2-PHOTO-001~016.jpg`, `S2-DORAN-014·032`, `S11-DAY-001`, `S5-SOC-006`, `S3-NOTE-001~011`, `S4-FEED-011·016`, `S4-FEED-003~010·012~015`, `img/brand/*` (로고), `img/avatar/*` (프로필), `img/icon/*` (휴대폰 아이콘)은 직접 만든 에셋이다.
+`img/S2-PHOTO-001~016.jpg`, `S2-DORAN-014·032`, `S11-DAY-001`, `S6-SHOP-001·002·003·011`(상품 사진에 배경을 합성), `S5-SOC-006`, `S3-NOTE-001~011`, `S4-FEED-011·016`, `S4-FEED-003~010·012~015`, `img/brand/*` (로고), `img/avatar/*` (프로필), `img/icon/*` (휴대폰 아이콘)은 직접 만든 에셋이다.
 
 ## Unsplash
 
@@ -36,6 +36,9 @@ Unsplash 라이선스(https://unsplash.com/license)로 받은 사진. 상업적 
 | img/S8-PRESS-019.jpg | S8-PRESS-019 | 아파트 | https://images.unsplash.com/photo-1545324418-cc1a3fa10c00 |
 | img/S9-LG-005.jpg | S9-LG-005 | 야구 | https://images.unsplash.com/photo-1508344928928-7165b67de128 |
 | img/S10-TALK-030.jpg | S10-TALK-030 | 비 오는 거리의 우산 | https://images.unsplash.com/photo-1519692933481-e162a57d6721 |
+| img/avatar/baram_dad.jpg | 바름아빠 프로필 | 도면 위 손 (잘라 씀) | https://images.unsplash.com/photo-1503387762-592deb58ef4e |
+| img/avatar/haneul_mideum.jpg | 하늘바라기 프로필 | 구름 사이 빛 | https://images.unsplash.com/photo-1419833173245-f59e1b93f9ee |
+| img/avatar/eunhye_song.jpg | 늦은 편지 프로필 | 만년필 글씨 | https://images.unsplash.com/photo-1455390582262-044cdead277a |
 | img/S4-FEED-003.jpg | S4-FEED-003 | 제작 이미지 (생성, 인물 초상과 맞춤) | 자체 제작 |
 | img/S4-FEED-005.jpg | S4-FEED-005 | 제작 이미지 (생성, 인물 초상과 맞춤) | 자체 제작 |
 | img/S4-FEED-006.jpg | S4-FEED-006 | 제작 이미지 (생성, 인물 초상과 맞춤) | 자체 제작 |
