@@ -590,3 +590,5 @@ body.b-S11 { background: #ece6da; }
 .s11-url span { padding: 0 8px 0 10px; color: #8b8270; font-size: 14px; }
 .s11-url input { flex: 1; min-width: 0; border: 0; background: transparent; padding: 10px 8px 10px 0; font-size: 15px; }
 .s11-f { padding: 22px 16px 30px; text-align: center; font-size: 11.5px; color: #a39a87; }
+/* 메신저 말풍선 속 사진 */
+.bub .b-img { display: block; width: 100%; max-width: 220px; border-radius: 10px; margin: 2px 0 6px; }

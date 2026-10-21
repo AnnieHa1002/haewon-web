@@ -294,8 +294,8 @@
     { r: 'S8', label: '천명그룹', ic: '天', bg: '#0b4fa8', img: 'img/brand/cheonmyeong_mark.png' },
     { r: 'S4', label: '한컷', ic: '◎', bg: 'linear-gradient(135deg,#f7b267,#e05780 60%,#7b5ce0)', img: 'img/brand/hancut_mark.png' },
     { r: 'S6', label: '금방울당', ic: '🔔', bg: '#a50f0f', img: 'img/brand/geumbangul_color.png', dark: true },
-    { r: 'S10', label: '새벽의 방', ic: '☾', bg: '#1d2230' },
-    { r: 'S11', label: '하루글', ic: '✎', bg: '#8a9a6e' },
+    { r: 'S10', label: '새벽의 방', ic: '☾', bg: '#1d2230', img: 'img/brand/saebyeok_white.png', dark: true },
+    { r: 'S11', label: '하루글', ic: '✎', bg: '#8a9a6e', img: 'img/brand/harugl_color.png' },
     { r: 'S7', label: '도원 사내망', ic: 'DW', bg: '#2b4c7e', img: 'img/brand/dowon_color.png', lock: function () { return !sess('S7'); } }
   ];
   // 보관함 1(#/locker)과 이다음의 휴대폰(#/S3)은 허브에 두지 않는다. 소지품 카드의 QR로만 들어간다.
@@ -774,7 +774,7 @@
       if (sys) { h += '<div class="chat-sys">📞 ' + esc(x.replace(/[()]/g, '')) + ' <em>' + ampm(m.d) + '</em></div>'; return; }
       var inner;
       if (/^\(웃는 이모티콘\)$/.test(x)) inner = '<span class="emo">☺</span>';
-      else if (/^\[사진\]/.test(x)) inner = '<span class="b-ph">사진</span>' + esc(x.replace(/^\[사진\]\s*/, ''));
+      else if (/^\[사진\]/.test(x)) inner = (PHOTO[m.id] ? '<img class="b-img" src="' + PHOTO[m.id] + '" alt="사진" loading="lazy">' : '<span class="b-ph">사진</span>') + esc(x.replace(/^\[사진\]\s*/, ''));
       else if (/^\[해원일보 링크\]/.test(x)) inner = '<span class="b-link">해원일보 · 기사 링크</span>' + esc(x.replace(/^\[해원일보 링크\]\s*/, ''));
       else if (/^\(받은 메시지/.test(x)) inner = '<span class="b-fw">' + esc(x.match(/^\(([^)]*)\)/)[1]) + '</span>' + esc(x.replace(/^\([^)]*\)\s*/, ''));
       else inner = esc(x).replace(/\n/g, '<br>');
