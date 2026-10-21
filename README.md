@@ -1,6 +1,6 @@
 # 꺼지지 않는 이름 · 4막 사이트
 
-4막에서 플레이어가 휴대폰으로 뒤지는 가짜 사이트 묶음(S1~S10, 휴대폰 3대).
+4막에서 플레이어가 휴대폰으로 뒤지는 가짜 사이트 묶음(S1~S11, 휴대폰 3대).
 서버·DB·네트워크 없이 도는 정적 사이트이고, `site/index.html`을 그냥 열어도(file://) 동작한다.
 
 ## QR 코드
@@ -24,6 +24,7 @@
 | S8 천명그룹 | <img src="qr/s8.svg" width="140" alt="S8 천명그룹 QR"> | `https://annieha1002.github.io/haewon-web/#/S8` |
 | S9 사원증 | <img src="qr/s9.svg" width="140" alt="S9 사원증 QR"> | `https://annieha1002.github.io/haewon-web/#/S9` |
 | S10 새벽의 방 | <img src="qr/s10.svg" width="140" alt="S10 새벽의 방 QR"> | `https://annieha1002.github.io/haewon-web/#/S10` |
+| S11 하루글 (블로그 주소 입력 화면) | <img src="qr/s11.svg" width="140" alt="S11 하루글 (블로그 주소 입력 화면) QR"> | `https://annieha1002.github.io/haewon-web/#/S11` |
 <!-- QR:END -->
 
 ## 진행 화면 (`stage.html`)
@@ -94,6 +95,7 @@ site/          배포 산출물. stage.html(진행 화면), index.html + assets/
 - **광고**는 `위치`대로 놓이고, 화면의 시점(목록은 2025-07-17, 글은 그 글의 날짜)이 `노출 기간` 안일 때만 뜬다.
   기간이 끝난 AD-01·AD-17은 캐시된 배너처럼 가끔, AD-08은 '광고 송출 중단' 빈 칸으로 남는다 (`app.js`의 `AD_AFTER`).
 - **S10**은 상단에 109 안내 고정, 삭제 글은 본문 없이 흔적만, 상업 광고 없음.
+- **S11 하루글**(송은혜의 블로그 '늦은 편지')은 허브 아이콘을 누르면 블로그 주소 입력 화면부터 나온다. 주소 `eunhye_song`은 남은자리 S1-FREE-010 댓글에만 있다. '일상'은 공개, '옛 일기장·그이·오늘'은 eunhye_song 로그인(비밀번호 힌트: 손이 기억하는 날)으로만 열린다.
 - 로그인·잠금 해제는 그 휴대폰의 브라우저에만 저장된다. **게임 사이에 허브 맨 아래 '기록 지우기'** 를 누른다.
 
 `app.js` 맨 위 설정: `SHOW_CASE_HINT`(제비 폰 케이스 안쪽 사진 "702. 첫 글자만 그리면 돼요."를 화면에도 보여 줄지 —

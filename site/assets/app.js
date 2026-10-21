@@ -712,7 +712,7 @@
     S6: function (b, t) { return s6Shell('msg', b, t); }, S7: function (b, t) { return s7Shell('me', b, t); },
     S8: function (b, t) { return s8Shell('', b, t); }, S9: function (b, t) { return s9Shell('', b, t); },
     S10: function (b, t) { return s10Shell('msg', b, t); }, S4: function (b, t) { return s4Shell(b, t, 'msg'); },
-    S11: function (b, t) { return s11Shell('일상', b, t); }
+    S11: function (b, t) { return s11Shell('', b, t); }
   };
   var MSG_NAME = { S1: '쪽지함', S6: '회원 메시지함', S10: '쪽지', S4: 'DM' };
   function loginPage(site, q) {
