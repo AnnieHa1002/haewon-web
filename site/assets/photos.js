@@ -44,6 +44,7 @@ window.HW_PHOTOS = {
   "S2-PHOTO-009": "img/S2-PHOTO-009.jpg",
   "S2-PHOTO-011": "img/S2-PHOTO-011.jpg",
   "S2-PHOTO-014": "img/S2-PHOTO-014.jpg",
+  "S2-PHOTO-015": "img/S2-PHOTO-015.jpg",
   "S3-NOTE-001": "img/S3-NOTE-001.jpg",
   "S3-NOTE-002": "img/S3-NOTE-002.jpg",
   "S3-NOTE-003": "img/S3-NOTE-003.jpg",
