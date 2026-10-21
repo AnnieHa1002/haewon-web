@@ -52,18 +52,16 @@ const stage = 'file://' + path.resolve('site/stage.html');
 await page.goto(stage); await page.click('#go'); await page.waitForTimeout(1500);
 await page.screenshot({ path: `${out}/stage-1.png` });
 await page.click('#hud', { force: true }).catch(() => {});
-const jump = (i, ago) => page.evaluate(([i, ago]) => { const s = JSON.parse(localStorage.getItem('hw4-stage-2')); s.i = i; s.t0 = Date.now() - ago * 60000; s.armed = i === 11 ? 'point' : null; localStorage.setItem('hw4-stage-2', JSON.stringify(s)); }, [i, ago]);
-await jump(7, 1); await page.goto(stage); await page.click('#resume'); await page.waitForTimeout(800);
+const jump = (i, ago) => page.evaluate(([i, ago]) => { const s = JSON.parse(localStorage.getItem('hw4-stage-3')); s.i = i; s.t0 = Date.now() - ago * 60000; s.armed = i === 13 ? 'vote' : null; s.turn = 0; localStorage.setItem('hw4-stage-3', JSON.stringify(s)); }, [i, ago]);
+await jump(7, 0.2); await page.goto(stage); await page.click('#resume'); await page.waitForTimeout(800);
 await page.screenshot({ path: `${out}/stage-interview.png` });
-// 지목: 두 번 누르면 하나, 둘, 셋 → 마지막 장 카드 안내 → 다시 두 번 누르면 카드
-await jump(11, 1); await page.goto(stage); await page.click('#resume'); await page.waitForTimeout(800);
+await jump(12, 2.5); await page.goto(stage); await page.click('#resume'); await page.waitForTimeout(800);
+await page.screenshot({ path: `${out}/stage-final.png` });
+// 투표: 두 번 누르면 하나, 둘, 셋 → 카드와 지목을 동시에
+await jump(13, 0.2); await page.goto(stage); await page.click('#resume'); await page.waitForTimeout(800);
 await page.screenshot({ path: `${out}/stage-4.png` });
 await page.mouse.dblclick(200, 200); await page.waitForTimeout(4500);
-await page.screenshot({ path: `${out}/stage-point.png` });
-await page.waitForTimeout(9500);
-await page.screenshot({ path: `${out}/stage-cards-notice.png` });
-await page.mouse.dblclick(200, 200); await page.waitForTimeout(4500);
-await page.screenshot({ path: `${out}/stage-cards.png` });
+await page.screenshot({ path: `${out}/stage-vote.png` });
 await page.waitForTimeout(500);
 await page.keyboard.press('Escape'); await page.waitForTimeout(200);
 await page.screenshot({ path: `${out}/stage-panel.png` });
