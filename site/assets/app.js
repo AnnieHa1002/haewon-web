@@ -32,7 +32,7 @@
   function load() {
     if (mem) return mem;
     try { mem = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { mem = {}; }
-    mem.sess = mem.sess || {}; mem.open = mem.open || {}; mem.fail = mem.fail || {};
+    mem.sess = mem.sess || {}; mem.open = mem.open || {}; mem.fail = mem.fail || {}; mem.like = mem.like || {};
     return mem;
   }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(mem)); } catch (e) { /* 메모리만 */ } }
@@ -353,11 +353,28 @@
     if (s.k === 'secret') body = lockBox('S1', '비밀글입니다. 작성자만 볼 수 있습니다.');
     else if (s.k === 'blind') body = '<div class="blind">' + BLIND_MSG + '<small>운영 원칙에 따라 게시물이 가려졌습니다.</small></div>';
     else if (s.k === 'del') body = '<div class="blind">삭제된 게시물입니다.</div>';
-    else body = '<article class="post-x' + (s.dim ? ' dim' : '') + '">' + rich(s.body, p.id) + '</article>' + (s.k === 'show' && p.l ? '<div class="likes">추천 ' + num(p.l) + '</div>' : '');
+    else body = '<article class="post-x' + (s.dim ? ' dim' : '') + '">' + rich(s.body, p.id) + '</article>' + (s.k === 'show' ? s1Act(p) : '');
     var mid = adsFor('S1', 'mid', p.d, p.id)[0];
     return s1Shell(p.b, head + body + (mid ? adHTML(mid.ad, 'ad-mid' + (mid.cached ? ' ad-cached' : ''), mid.halted) : '') +
       (s.k === 'secret' ? '' : commentsHTML(p, { op: '글쓴이' })), p.t);
   }
+
+  // 좋아요·공유 줄. 좋아요는 이 기기에만 남는다 (허브 '기록 지우기'로 지워짐)
+  function s1Act(p) {
+    var on = !!st.like[p.id];
+    return '<div class="s1-act"><button class="s1-like' + (on ? ' on' : '') + '" data-act="like" data-id="' + esc(p.id) + '" data-n="' + p.l + '" aria-pressed="' + on + '">' +
+      '<i>' + (on ? '♥' : '♡') + '</i>좋아요 <b>' + num(p.l + (on ? 1 : 0)) + '</b></button>' +
+      '<button class="s1-share" data-act="share"><i>↗</i>공유</button></div>';
+  }
+  function shareSheet() {
+    if (document.querySelector('.sheet-bg')) return;
+    var d = document.createElement('div'); d.className = 'sheet-bg';
+    d.innerHTML = '<div class="sheet" role="dialog" aria-label="공유하기"><b>공유하기</b><div class="sheet-row">' +
+      '<button data-act="share-copy"><i>🔗</i>링크 복사</button><button data-act="share-app"><i class="sh-doran">💬</i>도란</button>' +
+      '<button data-act="share-app"><i class="sh-sms">✉</i>문자</button></div><button class="sheet-x" data-act="share-close">닫기</button></div>';
+    document.body.appendChild(d);
+  }
+  function closeSheet() { var d = document.querySelector('.sheet-bg'); if (d) d.remove(); }
 
   // ── 사이트별 껍데기 레지스트리 ─────────────────────────
   var SK = {};
@@ -886,6 +903,7 @@
   }
   var viaPhone = false;
   function route() {
+    closeSheet();
     var r = parse(), parts = r.parts, q = r.q, site = parts[0], out;
     if (!site) out = hub();
     else if (site === 'locker') out = locker();
@@ -946,13 +964,14 @@
     }
   });
   document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('sheet-bg')) { closeSheet(); return; }
     var a = e.target.closest('[data-act],[data-ext]');
     if (!a) return;
     if (a.dataset.ext) { e.preventDefault(); toast('외부 페이지로 연결할 수 없습니다.'); return; }
     var act = a.dataset.act;
     if (act === 'logout') { e.preventDefault(); delete st.sess[a.dataset.site]; save(); location.hash = '#/' + a.dataset.site; route(); }
     else if (act === 'reset') {
-      if (confirm('이 기기의 로그인과 잠금 해제 기록을 모두 지울까요? (다음 게임 전에 누르세요)')) { st = mem = { sess: {}, open: {}, fail: {} }; save(); route(); toast('기록을 지웠습니다.'); }
+      if (confirm('이 기기의 로그인과 잠금 해제 기록을 모두 지울까요? (다음 게임 전에 누르세요)')) { st = mem = { sess: {}, open: {}, fail: {}, like: {} }; save(); route(); toast('기록을 지웠습니다.'); }
     } else if (act === 'locker') {
       if (confirm('보관함 열쇠(‘다독임 · 보관함 1’ 번호표)를 가진 사람이 열쇠를 내놓았나요?')) { st.open.locker = true; save(); route(); }
     } else if (act === 'auto') {
@@ -961,6 +980,20 @@
       if (pair) { st.sess[pair[0]] = pair[1]; save(); location.hash = href(pair[0], 'me'); }
     } else if (act === 'retry') { e.preventDefault(); a.disabled = true; a.textContent = '연결 중…'; setTimeout(function () { a.disabled = false; a.textContent = '다시 시도'; toast('연결할 수 없습니다.'); }, 1400);
     } else if (act === 'loadmore') { e.preventDefault(); a.disabled = true; a.classList.add('loading'); a.innerHTML = '<i class="spin"></i>불러오는 중…';
+    } else if (act === 'like') {
+      e.preventDefault();
+      var id = a.dataset.id, on = !st.like[id];
+      if (on) st.like[id] = 1; else delete st.like[id];
+      save();
+      a.classList.toggle('on', on); a.setAttribute('aria-pressed', on);
+      a.innerHTML = '<i>' + (on ? '♥' : '♡') + '</i>좋아요 <b>' + num(+a.dataset.n + (on ? 1 : 0)) + '</b>';
+    } else if (act === 'share') { e.preventDefault(); shareSheet();
+    } else if (act === 'share-copy') {
+      e.preventDefault(); closeSheet();
+      var url = location.href;
+      try { navigator.clipboard.writeText(url).then(function () { toast('링크를 복사했습니다.'); }, function () { toast('링크를 복사하지 못했습니다.'); }); } catch (x) { toast('링크를 복사하지 못했습니다.'); }
+    } else if (act === 'share-app') { e.preventDefault(); closeSheet(); toast('이 기기에서는 앱을 열 수 없습니다.');
+    } else if (act === 'share-close') { e.preventDefault(); closeSheet();
     } else if (act === 'play') { e.preventDefault(); toast('파일을 재생할 수 없습니다. (손상된 파일)'); }
   });
 
