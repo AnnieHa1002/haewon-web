@@ -49,6 +49,7 @@ button { font: inherit; }
 #panel .mix label { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--dim); padding: 4px 0; }
 #panel .mix span { width: 64px; flex: none; }
 #panel .mix input { flex: 1; min-width: 0; }
+#panel .mix select { flex: 1; min-width: 0; padding: 7px 6px; background: #191b21; color: var(--ink); border: 1px solid #33363f; border-radius: 6px; font-size: 13px; }
 #panel .credit { margin: 14px 2px 0; font-size: 11px; line-height: 1.5; color: #6d707a; }
 #panel .mix button { flex: none; width: 34px; padding: 6px 0; }
 #plist { list-style: none; padding: 0; margin: 12px 0; font-size: 13px; }

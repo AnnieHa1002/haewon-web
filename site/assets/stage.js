@@ -125,12 +125,16 @@
   var bgmEls = {}, bgmCur = null;
   function bgmEl(k) {
     if (!k || !BGM[k]) return null;
-    if (!bgmEls[k]) { var a = new Audio(BGM[k]); a.loop = true; a.preload = 'auto'; a.volume = 0; bgmEls[k] = a; }
+    if (!bgmEls[k]) {
+      var a = new Audio(BGM[k]); a.loop = true; a.preload = 'auto'; a.volume = 0; bgmEls[k] = a;
+      // 파일이 없으면 첫 곡으로 대신한다
+      a.addEventListener('error', function () { if (k === 'open') return; delete bgmEls[k]; BGM[k] = BGM.open; if (bgmCur === k) bgmSet(k); });
+    }
     return bgmEls[k];
   }
   function bgmTarget(k) {
     if (k !== bgmCur || S.muted || !S.started || S.done) return 0;
-    var v = S.vol * (S.mix.bgm == null ? 1 : S.mix.bgm) * .45 * (S.pausedAt ? .35 : 1);
+    var v = S.vol * (S.mix.bgm == null ? 1 : S.mix.bgm) * .8 * (S.pausedAt ? .35 : 1);
     try { if (window.speechSynthesis && speechSynthesis.speaking) v *= .35; } catch (e) { } // 안내 음성이 나오면 줄인다
     return Math.max(0, Math.min(1, v));
   }
@@ -202,9 +206,20 @@
     f.animate([{ opacity: 0 }, { opacity: .35, offset: .05 }, { opacity: .05, offset: .2 }, { opacity: .22, offset: .3 }, { opacity: 0 }], { duration: 900, easing: 'ease-out' });
   }
   // 안내 읽어 주기: 기기에 들어 있는 한국어 음성(speechSynthesis)으로 읽는다. 음성이 없으면 조용히 넘어간다
-  var voiceKo = null;
+  // 메뉴에서 목소리(S.voice: 음성 이름)·빠르기(S.rate)·높이(S.pitch)를 고른다
+  var voiceKo = null, voicesKo = [];
   function pickVoice() {
-    try { var vs = speechSynthesis.getVoices(); voiceKo = vs.filter(function (v) { return /^ko/i.test(v.lang); }).sort(function (a, b) { return (/google|natural|neural|yuna|sora|heami/i.test(b.name) ? 1 : 0) - (/google|natural|neural|yuna|sora|heami/i.test(a.name) ? 1 : 0); })[0] || null; } catch (e) { }
+    try {
+      voicesKo = speechSynthesis.getVoices().filter(function (v) { return /^ko/i.test(v.lang); }).sort(function (a, b) { return (/google|natural|neural|premium|enhanced|yuna|sora|heami/i.test(b.name) ? 1 : 0) - (/google|natural|neural|premium|enhanced|yuna|sora|heami/i.test(a.name) ? 1 : 0); });
+      voiceKo = voicesKo.filter(function (v) { return v.name === S.voice; })[0] || voicesKo[0] || null;
+      syncVoice();
+    } catch (e) { }
+  }
+  function syncVoice() {
+    var sel = $('voice'); if (!sel) return;
+    sel.innerHTML = voicesKo.length ? voicesKo.map(function (v) { return '<option' + (voiceKo === v ? ' selected' : '') + '>' + v.name.replace(/</g, '') + '</option>'; }).join('') : '<option>이 기기에 한국어 음성이 없어요</option>';
+    sel.disabled = !voicesKo.length;
+    $('rate').value = S.rate || .92; $('pitch').value = S.pitch || .95;
   }
   if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
   function speak(text, keep) {
@@ -212,7 +227,7 @@
     try {
       if (!keep) speechSynthesis.cancel();
       var u = new SpeechSynthesisUtterance(text.replace(/[“”"]/g, '').replace(/\n+/g, '. ').replace(/STOP/g, '스톱'));
-      u.lang = 'ko-KR'; if (voiceKo) u.voice = voiceKo; u.rate = .92; u.pitch = .95; u.volume = Math.min(1, S.vol + .2);
+      u.lang = 'ko-KR'; if (voiceKo) u.voice = voiceKo; u.rate = S.rate || .92; u.pitch = S.pitch || .95; u.volume = Math.min(1, S.vol + .2);
       speechSynthesis.speak(u);
     } catch (e) { }
   }
@@ -370,7 +385,7 @@
     var li = e.target.closest('li'); if (!li) return;
     if (confirm('“' + PHASES[+li.dataset.i].act + ' · ' + PHASES[+li.dataset.i].what + '” 처음으로 옮길까요?')) { enter(+li.dataset.i); closePanel(); }
   });
-  function openPanel() { $('panel').hidden = false; renderList(); syncMix(); document.querySelector('[data-c=pause]').textContent = S.pausedAt ? '다시 시작' : '일시정지'; document.querySelector('[data-c=mute]').textContent = S.muted ? '소리 켜기' : '소리 끄기'; document.querySelector('[data-c=tts]').textContent = S.tts === false ? '안내 음성 켜기' : '안내 음성 끄기'; }
+  function openPanel() { $('panel').hidden = false; renderList(); syncMix(); pickVoice(); document.querySelector('[data-c=pause]').textContent = S.pausedAt ? '다시 시작' : '일시정지'; document.querySelector('[data-c=mute]').textContent = S.muted ? '소리 켜기' : '소리 끄기'; document.querySelector('[data-c=tts]').textContent = S.tts === false ? '안내 음성 켜기' : '안내 음성 끄기'; }
   function closePanel() { $('panel').hidden = true; }
   $('panel').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
@@ -392,7 +407,10 @@
   });
   // 소리 층마다 크기 조절 (0이면 그 소리를 끈다)
   function syncMix() { document.querySelectorAll('[data-m]').forEach(function (el) { el.value = el.dataset.m === 'vol' ? S.vol : S.mix[el.dataset.m]; }); }
-  document.querySelector('.mix').addEventListener('input', function (e) {
+  $('voice').addEventListener('change', function () { S.voice = this.value; pickVoice(); save(); speak('이 목소리로 안내합니다.'); });
+  $('rate').addEventListener('change', function () { S.rate = +this.value; save(); speak('이 빠르기로 안내합니다.'); });
+  $('pitch').addEventListener('change', function () { S.pitch = +this.value; save(); speak('이 높이로 안내합니다.'); });
+  document.querySelector('.mix:not(.voice)').addEventListener('input', function (e) {
     var k = e.target.dataset.m; if (!k) return;
     if (k === 'vol') { S.vol = +e.target.value; setVolume(); } else { S.mix[k] = +e.target.value; applySound(phase(), true); }
     save();
@@ -459,7 +477,7 @@
     }
     syncMix();
   }
-  load();
+  load(); if (window.speechSynthesis) pickVoice();
   if (S.started && !S.done) $('resume').hidden = false;
   S.started = false;
   $('go').addEventListener('click', function () { if (!$('resume').hidden && !confirm('처음부터 다시 시작할까요? (이어서 하려면 ‘이어서 진행’)')) return; begin(true); });
