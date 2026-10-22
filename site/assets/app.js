@@ -758,11 +758,24 @@
     return SHELL_OF[site](h, '내 정보');
   }
   function userPage(site, id) {
-    var list = sitePosts(site).filter(function (o) { return o.p.a === id && o.s.k !== 'secret'; });
+    var all = sitePosts(site);
+    var list = all.filter(function (o) { return o.p.a === id && o.s.k !== 'secret'; });
+    // 이 사람이 단 댓글: 어느 글(제목)에 무엇을 썼는지. 비밀글에 단 댓글은 빼고, 최근 것부터
+    var cms = [];
+    all.forEach(function (o) {
+      if (o.s.k === 'secret') return;
+      commentsOf(o.p).forEach(function (c) { if (c.a === id) cms.push({ o: o, c: c }); });
+    });
+    cms.sort(function (a, b) { return a.c.d < b.c.d ? 1 : a.c.d > b.c.d ? -1 : 0; });
     var u = D.users[id] || {};
-    var h = '<div class="me-box"><h2>' + esc(nick(id)) + '</h2><p>가입일 ' + (u.j ? ymd(u.j) : '-') + ' · 작성글 ' + list.length + '</p></div><ul class="me-list">' + list.map(function (o) {
+    var h = '<div class="me-box"><h2>' + av(id) + esc(nick(id)) + '</h2><p>가입일 ' + (u.j ? ymd(u.j) : '-') + ' · 작성글 ' + list.length + ' · 댓글 ' + cms.length + '</p></div>';
+    if (list.length) h += '<div class="me-sec">작성글 ' + list.length + '</div><ul class="me-list">' + list.map(function (o) {
       return '<li><a href="' + href(site, 'p', o.p.id) + '"><b>' + esc(titleOf(o.p, o.s) || '(제목 없음)') + '</b><span>' + esc(o.p.b) + ' · ' + when(o.p.d) + '</span></a></li>';
     }).join('') + '</ul>';
+    if (cms.length) h += '<div class="me-sec">댓글 ' + cms.length + '</div><ul class="me-list me-cms">' + cms.map(function (x) {
+      return '<li><a href="' + href(site, 'p', x.o.p.id) + '"><p>' + esc(excerpt(x.c.x, 80)) + '</p><span>' + esc(titleOf(x.o.p, x.o.s) || '(제목 없음)') + ' · ' + when(x.c.d) + '</span></a></li>';
+    }).join('') + '</ul>';
+    if (!list.length && !cms.length) h += '<div class="cm-empty">작성한 글이나 댓글이 없습니다.</div>';
     return SHELL_OF[site](h, nick(id));
   }
   function msgPage(site, other) {
