@@ -217,7 +217,7 @@
   }
   function syncVoice() {
     var sel = $('voice'); if (!sel) return;
-    sel.innerHTML = voicesKo.length ? voicesKo.map(function (v) { return '<option' + (voiceKo === v ? ' selected' : '') + '>' + v.name.replace(/</g, '') + '</option>'; }).join('') : '<option>이 기기에 한국어 음성이 없어요</option>';
+    sel.innerHTML = voicesKo.length ? voicesKo.map(function (v) { var g = /injoon|hyunsu|minsu|bongjin|gookmin|jaehyun/i.test(v.name) ? ' (남성)' : /sunhi|yuna|sora|heami|jimin|seoyeon|yujin|seohyeon|soon-?bok/i.test(v.name) ? ' (여성)' : ''; return '<option value="' + v.name.replace(/[<"]/g, '') + '"' + (voiceKo === v ? ' selected' : '') + '>' + v.name.replace(/</g, '') + g + '</option>'; }).join('') : '<option>이 기기에 한국어 음성이 없어요</option>';
     sel.disabled = !voicesKo.length;
     $('rate').value = S.rate || .92; $('pitch').value = S.pitch || .95;
   }
