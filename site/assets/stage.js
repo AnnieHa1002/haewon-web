@@ -7,49 +7,49 @@
   // card: 이 구간을 여는 진행 카드. hold: 안내를 누를 때까지 띄워 둔다. arm: 화면을 두 번 누르면 하나, 둘, 셋.
   // turns: 이 구간을 n분씩 나눠 차례를 센다. pulse: 심장 박동
   var PHASES = [
-    { act: '프롤로그', what: '공통 대본을 함께 읽습니다', min: 5, smoke: 1, stick: 'black',
+    { bgm: 'open', act: '프롤로그', what: '공통 대본을 함께 읽습니다', min: 5, smoke: 1, stick: 'black',
       snd: { rain: .5, thunder: .3, drone: .1, root: 55 },
       notice: ['시작', '프롤로그', '공통 대본을 펴고 첫 장부터 함께 소리 내어 읽습니다.\n지문은 가우디가 읽습니다.'] },
-    { act: '1막', what: '대본을 이어 읽습니다', min: 15, smoke: 1,
+    { bgm: 'open', act: '1막', what: '대본을 이어 읽습니다', min: 15, smoke: 1,
       snd: { rain: .45, thunder: .25, drone: .12, root: 55 },
       notice: ['1막', '대본을 이어 읽습니다', '지문은 외골수가 읽습니다.\n대본이 끝나면 진행 카드 A를 뒤집으세요.'] },
-    { act: '2막', what: '설정지를 혼자 읽습니다', min: 10, smoke: .9, card: 'A',
+    { bgm: 'read', act: '2막', what: '설정지를 혼자 읽습니다', min: 10, smoke: .9, card: 'A',
       snd: { rain: .3, thunder: .1, drone: .12, root: 55 },
       notice: ['진행 카드 A · 별꽃', '“자, 숨을 한 번 고르고요.\n이제 한 분씩 이야기를 나눠 볼까요.”', '각자 인물 카드를 내놓고 본명과 직업을 밝힙니다.\n설정지를 다음 STOP까지 10분 동안 읽습니다.'] },
-    { act: '2막', what: '토론', sub: '이 불은 무엇인가. 저 여자는 누구인가.', min: 20, smoke: .85,
+    { bgm: 'talk', act: '2막', what: '토론', sub: '이 불은 무엇인가. 저 여자는 누구인가.', min: 20, smoke: .85,
       snd: { rain: .55, thunder: .35, drone: .26, root: 55 },
       notice: ['2막', '토론을 시작합니다', '20분'] },
-    { act: '3막', what: '설정지를 혼자 읽습니다', min: 10, smoke: .55, card: 'B',
+    { bgm: 'read', act: '3막', what: '설정지를 혼자 읽습니다', min: 10, smoke: .55, card: 'B',
       snd: { rain: .35, thunder: .15, drone: .14, root: 49 },
       notice: ['진행 카드 B · 별꽃', '“조금 더 깊이 들어가 보겠습니다.\n힘드시면 언제든 ‘잠시 쉬어요’라고 말씀하세요.”', '설정지를 다음 STOP까지 10분 동안 읽습니다.'] },
-    { act: '3막', what: '토론', sub: '누가 언제부터 오기로 했나. 불은 왜 꺼지지 않았나.', min: 20, smoke: .5,
+    { bgm: 'deep', act: '3막', what: '토론', sub: '누가 언제부터 오기로 했나. 불은 왜 꺼지지 않았나.', min: 20, smoke: .5,
       snd: { rain: .75, thunder: .5, drone: .3, root: 49 },
       notice: ['3막', '토론을 시작합니다', '20분'] },
-    { act: '4막', what: '조사', sub: '공개 단서 · 소지품 카드 · 사이트', min: 10, smoke: .3, card: 'C',
+    { bgm: 'probe', act: '4막', what: '조사', sub: '공개 단서 · 소지품 카드 · 사이트', min: 10, smoke: .3, card: 'C',
       snd: { rain: .4, thunder: .15, drone: .22, root: 46.25 },
       notice: ['진행 카드 C · 가우디', '“경찰을 부르기 전에, 이 방에 있는 것부터 확인합시다.\n손대기 전에 눈으로 먼저.”', '휴대폰을 돌려받습니다. 보관함은 2번 칸만 열리고 1번 칸은 잠긴 채입니다.\n공개 단서 묶음을 펼치고, 설정지 4막의 소지품 카드 2장을 꺼내고,\n사이트 접속 카드 QR로 들어가 조사합니다. 10분'] },
-    { act: '4막 · 1대1 면담', what: '면담 순서를 정합니다', min: 1, smoke: .25, card: 'D',
+    { bgm: 'probe', act: '4막 · 1대1 면담', what: '면담 순서를 정합니다', min: 1, smoke: .25, card: 'D',
       snd: { rain: .35, thunder: .08, drone: .2, root: 46.25 },
       notice: ['진행 카드 D · 별꽃', '“제가 한 분씩 따로 뵙겠습니다.\n3분이면 됩니다.”', '1분 동안 면담 순서를 정합니다.\n그다음 한 사람씩 3분, 방 한쪽에서 별꽃과 둘이서만.\n나머지는 조사를 이어 갑니다.'] },
-    { act: '4막 · 1대1 면담', what: '첫 번째 면담', sub: '나머지는 조사를 이어 갑니다', min: 3, smoke: .25,
+    { bgm: 'probe', act: '4막 · 1대1 면담', what: '첫 번째 면담', sub: '나머지는 조사를 이어 갑니다', min: 3, smoke: .25,
       snd: { rain: .35, thunder: .08, drone: .2, root: 46.25 },
       notice: ['1대1 면담', '첫 번째 사람', '방 한쪽에서 별꽃과 둘이서만 3분.'] },
-    { act: '4막 · 1대1 면담', what: '두 번째 면담', sub: '나머지는 조사를 이어 갑니다', min: 3, smoke: .25,
+    { bgm: 'probe', act: '4막 · 1대1 면담', what: '두 번째 면담', sub: '나머지는 조사를 이어 갑니다', min: 3, smoke: .25,
       snd: { rain: .35, thunder: .08, drone: .2, root: 46.25 },
       notice: ['1대1 면담', '두 번째 사람', '앞사람은 자리로 돌아오고, 다음 사람이 별꽃과 3분.'] },
-    { act: '4막 · 1대1 면담', what: '세 번째 면담', sub: '나머지는 조사를 이어 갑니다', min: 3, smoke: .25,
+    { bgm: 'probe', act: '4막 · 1대1 면담', what: '세 번째 면담', sub: '나머지는 조사를 이어 갑니다', min: 3, smoke: .25,
       snd: { rain: .35, thunder: .08, drone: .2, root: 46.25 },
       notice: ['1대1 면담', '세 번째 사람', '앞사람은 자리로 돌아오고, 마지막 사람이 별꽃과 3분.'] },
-    { act: '4막', what: '마지막 토론', sub: '다 함께 이야기합니다', min: 20, smoke: .2, card: 'E',
+    { bgm: 'deep', act: '4막', what: '마지막 토론', sub: '다 함께 이야기합니다', min: 20, smoke: .2, card: 'E',
       snd: { rain: .5, thunder: .25, drone: .26, root: 46.25 },
       notice: ['진행 카드 E · 외골수', '“경찰 오기 전에 끝내요. 누가 했는지.”', '마지막 토론 20분'] },
-    { act: '4막', what: '최종 추리', min: 4, smoke: .14, card: 'F', turns: 1,
+    { bgm: 'final', act: '4막', what: '최종 추리', min: 4, smoke: .14, card: 'F', turns: 1,
       snd: { rain: .3, thunder: .1, drone: .26, root: 46.25 },
       notice: ['진행 카드 F · 하늘바라기', '“하늘이 다 보고 계세요.\n이제 각자 마음 가는 대로 하면 돼요.”', '한 사람씩 1분 최종 추리. 1분마다 방울이 울립니다.\n그동안 설정지 마지막 장에서 A·B 중 하나를 고릅니다.'] },
-    { act: '4막', what: '투표', sub: '화면을 두 번 누르면 하나, 둘, 셋', min: 1, smoke: .1, pulse: true, arm: 'vote', hold: true,
+    { bgm: 'final', act: '4막', what: '투표', sub: '화면을 두 번 누르면 하나, 둘, 셋', min: 1, smoke: .1, pulse: true, arm: 'vote', hold: true,
       snd: { rain: .25, thunder: .05, drone: .3, root: 46.25 },
       notice: ['4막', '하나, 둘, 셋에 동시에', '카드를 움직이고 범인을 손가락으로 가리킵니다. 기권은 주먹.\nA는 카드 1을 가운데로, B는 인물 카드를 뒤집습니다. 외골수는 투표로.\n동표면 그 사람들만 놓고 한 번 더. 준비되면 화면을 두 번 누르세요.'] },
-    { act: '엔딩', what: '엔딩북을 읽습니다', min: 10, smoke: 0,
+    { bgm: 'end', act: '엔딩', what: '엔딩북을 읽습니다', min: 10, smoke: 0,
       snd: { rain: .16, thunder: 0, drone: .18, root: 65.4, major: true },
       notice: ['엔딩', '엔딩북', '가장 많이 지목된 사람이 1·2부를 읽습니다. 다시 가리켜도 동표면 차위로가 읽고 2부는 \'그 밖의 경우\'.\n3부 개인 엔딩은 각자 읽습니다.'] }
   ];
@@ -113,7 +113,15 @@
   }
   function setVolume() { if (A) A.master.gain.setTargetAtTime(S.muted ? 0 : S.vol, A.ctx.currentTime, .4); }
   // ── 배경 음악 (무료 음원, site/audio/). 구간마다 p.bgm 곡으로 천천히 바뀐다 ──
-  var BGM = {};
+  var BGM = {
+    open: 'audio/isolated.mp3',     // 프롤로그·1막
+    read: 'audio/sopor.mp3',        // 설정지 읽기
+    talk: 'audio/dark-glow.mp3',    // 2막 토론
+    deep: 'audio/hide-secrets.mp3', // 3막 토론·마지막 토론
+    probe: 'audio/gagool.mp3',      // 조사·면담
+    final: 'audio/devastation.mp3', // 최종 추리·투표
+    end: 'audio/denouement.mp3'     // 엔딩
+  };
   var bgmEls = {}, bgmCur = null;
   function bgmEl(k) {
     if (!k || !BGM[k]) return null;
