@@ -20,7 +20,7 @@
   // 프로필 사진 (제작 에셋). 없는 계정은 글자로만 보인다
   var AVATAR = {
     room702: 'img/avatar/room702.png', kicho_gongsa: 'img/avatar/kicho_gongsa.png', late_letter: 'img/avatar/late_letter.png',
-    nare_nowhere: 'img/avatar/nare_nowhere.png', nare_doran: 'img/avatar/nare_nowhere.png',
+    nare_nowhere: 'img/avatar/nare_nowhere.png', nare_doran: 'img/avatar/nare_nowhere.png', nare_teacher: 'img/avatar/nare_nowhere.png',
     wiro_cha: 'img/avatar/wiro.png', wiro_doran: 'img/avatar/wiro.png',
     dadokim_sms: 'img/brand/dadokim_color.png', geumbangul_sms: 'img/brand/geumbangul_color.png',
     baram_dad: 'img/avatar/baram_dad.jpg', haneul_mideum: 'img/avatar/haneul_mideum.jpg', eunhye_song: 'img/avatar/eunhye_song.jpg'
@@ -679,7 +679,8 @@
   function s4Tile(o, i) {
     var p = o.p, s = o.s;
     var bg = PHOTO[p.id] ? "background:#ddd url('" + esc(PHOTO[p.id]) + "') center/cover" : 'background:linear-gradient(160deg,' + tint(p.id, 35, 80) + ',' + tint(p.id + 'x', 30, 62) + ')';
-    if (s.k !== 'show') return '<a class="s4-tile blind-t" href="' + href('S4', 'p', p.id) + '"><span>!</span></a>';
+    // 가려진 글: 사진을 흐리게 깔고 경고 표시만 (원문은 주인 로그인 시)
+    if (s.k !== 'show') return '<a class="s4-tile blind-t" href="' + href('S4', 'p', p.id) + '">' + (PHOTO[p.id] ? '<i style="background:url(\'' + esc(PHOTO[p.id]) + '\') center/cover"></i>' : '') + '<span>!</span></a>';
     return '<a class="s4-tile" style="' + bg + '" href="' + href('S4', 'p', p.id) + '"><span>' + esc(excerpt(photoOf(s.body) || p.t, 26)) + '</span></a>';
   }
   function s4List() {
