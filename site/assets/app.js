@@ -23,7 +23,22 @@
     nare_nowhere: 'img/avatar/nare_nowhere.png', nare_doran: 'img/avatar/nare_nowhere.png', nare_teacher: 'img/avatar/nare_nowhere.png',
     wiro_cha: 'img/avatar/wiro.png', wiro_doran: 'img/avatar/wiro.png',
     dadokim_sms: 'img/brand/dadokim_color.png', geumbangul_sms: 'img/brand/geumbangul_color.png',
-    baram_dad: 'img/avatar/baram_dad.jpg', haneul_mideum: 'img/avatar/haneul_mideum.jpg', eunhye_song: 'img/avatar/eunhye_song.jpg'
+    baram_dad: 'img/avatar/baram_dad.jpg', haneul_mideum: 'img/avatar/haneul_mideum.jpg', eunhye_song: 'img/avatar/eunhye_song.jpg',
+    // 엑스트라 중 특색 있는 몇 명 (Unsplash)
+    letter_star: 'img/avatar/letter_star.jpg',
+    rain_sound: 'img/avatar/rain_sound.jpg',
+    nyang_jipsa: 'img/avatar/nyang_jipsa.jpg',
+    photo_kang: 'img/avatar/photo_kang.jpg',
+    haebaragi_kim: 'img/avatar/haebaragi_kim.jpg',
+    go3: 'img/avatar/go3.jpg',
+    lotus: 'img/avatar/lotus.jpg',
+    saebyeok_admin: 'img/avatar/saebyeok_admin.jpg',
+    forget_now: 'img/avatar/forget_now.jpg',
+    yoonha_mom: 'img/avatar/yoonha_mom.jpg',
+    alone_rice: 'img/avatar/alone_rice.jpg',
+    dream_daughter: 'img/avatar/dream_daughter.jpg',
+    widow_kim: 'img/avatar/widow_kim.jpg',
+    jimin_mint: 'img/avatar/jimin_mint.jpg'
   };
   // 프로필 사진이 없는 계정은 기본 프로필(사람 실루엣). 바탕색만 계정마다 다르다
   var AV_BLANK = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9.2" r="4.3"/><path d="M3.6 23c.9-5 4.5-7.6 8.4-7.6s7.5 2.6 8.4 7.6z"/></svg>';
