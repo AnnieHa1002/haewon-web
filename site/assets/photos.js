@@ -34,6 +34,8 @@ window.HW_PHOTOS = {
   "S6-SHOP-002": "img/S6-SHOP-002.jpg",
   "S6-SHOP-003": "img/S6-SHOP-003.jpg",
   "S6-SHOP-011": "img/S6-SHOP-011.jpg",
+  "S6-SHOP-017": "img/S6-SHOP-017.jpg",
+  "S6-SHOP-019": "img/S6-SHOP-019.jpg",
   "S7-NOTI-016": "img/S7-NOTI-016.jpg",
   "S8-PRESS-017": "img/S8-PRESS-017.jpg",
   "S8-PRESS-018": "img/S8-PRESS-018.jpg",

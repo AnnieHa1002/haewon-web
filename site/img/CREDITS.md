@@ -39,6 +39,8 @@ Unsplash 라이선스(https://unsplash.com/license)로 받은 사진. 상업적 
 | img/avatar/baram_dad.jpg | 바름아빠 프로필 | 도면 위 손 (잘라 씀) | https://images.unsplash.com/photo-1503387762-592deb58ef4e |
 | img/avatar/haneul_mideum.jpg | 하늘바라기 프로필 | 구름 사이 빛 | https://images.unsplash.com/photo-1419833173245-f59e1b93f9ee |
 | img/avatar/eunhye_song.jpg | 늦은 편지 프로필 | 만년필 글씨 | https://images.unsplash.com/photo-1455390582262-044cdead277a |
+| img/S6-SHOP-017.jpg | S6-SHOP-017 | 나무 숟가락 위 굵은 소금 | https://images.unsplash.com/photo-1518110925495-5fe2fda0442c |
+| img/S6-SHOP-019.jpg | S6-SHOP-019 | 쌀알 | https://images.unsplash.com/photo-1586201375761-83865001e31c |
 | img/S4-FEED-003.jpg | S4-FEED-003 | 제작 이미지 (생성, 인물 초상과 맞춤) | 자체 제작 |
 | img/S4-FEED-005.jpg | S4-FEED-005 | 제작 이미지 (생성, 인물 초상과 맞춤) | 자체 제작 |
 | img/S4-FEED-006.jpg | S4-FEED-006 | 제작 이미지 (생성, 인물 초상과 맞춤) | 자체 제작 |
