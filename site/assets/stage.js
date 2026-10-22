@@ -58,7 +58,7 @@
 
   // ── 상태 (새로고침해도 이어진다) ─────────────────────────
   var KEY = 'hw4-stage-3'; // 진행표가 바뀌면 이름을 바꿔 옛 기록과 섞이지 않게
-  var S = { i: 0, t0: 0, pausedAt: null, started: false, done: false, armed: null, vol: .7, muted: false, mix: { rain: 1, thunder: 1, drone: 1, bell: 1 } };
+  var S = { i: 0, t0: 0, pausedAt: null, started: false, done: false, armed: null, vol: .7, muted: false, mix: { rain: 1, thunder: 1, drone: 1, bell: 1, bgm: 1 } };
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { } }
   function load() { try { var x = JSON.parse(localStorage.getItem(KEY) || 'null'); if (x) { var m = Object.assign({}, S.mix, x.mix || {}); S = Object.assign(S, x); S.mix = m; } } catch (e) { } }
   function now() { return Date.now(); }
@@ -112,7 +112,30 @@
     return A;
   }
   function setVolume() { if (A) A.master.gain.setTargetAtTime(S.muted ? 0 : S.vol, A.ctx.currentTime, .4); }
+  // ── 배경 음악 (무료 음원, site/audio/). 구간마다 p.bgm 곡으로 천천히 바뀐다 ──
+  var BGM = {};
+  var bgmEls = {}, bgmCur = null;
+  function bgmEl(k) {
+    if (!k || !BGM[k]) return null;
+    if (!bgmEls[k]) { var a = new Audio(BGM[k]); a.loop = true; a.preload = 'auto'; a.volume = 0; bgmEls[k] = a; }
+    return bgmEls[k];
+  }
+  function bgmTarget(k) {
+    if (k !== bgmCur || S.muted || !S.started || S.done) return 0;
+    var v = S.vol * (S.mix.bgm == null ? 1 : S.mix.bgm) * .45 * (S.pausedAt ? .35 : 1);
+    try { if (window.speechSynthesis && speechSynthesis.speaking) v *= .35; } catch (e) { } // 안내 음성이 나오면 줄인다
+    return Math.max(0, Math.min(1, v));
+  }
+  function bgmSet(k) { bgmCur = BGM[k] ? k : null; var a = bgmEl(bgmCur); if (a && a.paused) a.play().catch(function () { }); }
+  setInterval(function () {
+    for (var k in bgmEls) {
+      var a = bgmEls[k], tg = bgmTarget(k), v = a.volume;
+      v += Math.max(-.02, Math.min(.02, tg - v)); a.volume = Math.max(0, Math.min(1, v));
+      if (a.volume < .005 && tg === 0 && !a.paused) a.pause();
+    }
+  }, 150);
   function applySound(p, quick) {
+    bgmSet(p.bgm);
     if (!A) return;
     var t = A.ctx.currentTime, tc = quick ? .3 : 4;
     var paused = !!S.pausedAt;
@@ -352,7 +375,7 @@
     else if (c === 'cards') { closePanel(); countdown(S.armed); }
     else if (c === 'try-thunder') { audio(); thunder(true); }
     else if (c === 'try-bell') { audio(); bell(660); }
-    else if (c === 'only-bell' || c === 'all-on') { var on = c === 'all-on' ? 1 : 0; S.mix = { rain: on, thunder: on, drone: on, bell: 1 }; save(); syncMix(); applySound(phase(), true); }
+    else if (c === 'only-bell' || c === 'all-on') { var on = c === 'all-on' ? 1 : 0; S.mix = { rain: on, thunder: on, drone: on, bell: 1, bgm: on }; save(); syncMix(); applySound(phase(), true); }
     else if (c === 'tts') { S.tts = S.tts === false; save(); b.textContent = S.tts === false ? '안내 음성 켜기' : '안내 음성 끄기'; if (S.tts !== false) speak('안내 음성을 켰습니다.'); else if (window.speechSynthesis) speechSynthesis.cancel(); }
     else if (c === 'mute') { S.muted = !S.muted; save(); setVolume(); b.textContent = S.muted ? '소리 켜기' : '소리 끄기'; }
     else if (c === 'full') { var d = document.documentElement; (d.requestFullscreen || d.webkitRequestFullscreen || function () { }).call(d); }
@@ -433,7 +456,7 @@
   S.started = false;
   $('go').addEventListener('click', function () { if (!$('resume').hidden && !confirm('처음부터 다시 시작할까요? (이어서 하려면 ‘이어서 진행’)')) return; begin(true); });
   // 새로고침·탭 닫힘 뒤에도 실제 시각 기준으로 이어서 간다
-  $('go-quiet').addEventListener('click', function () { if (!$('resume').hidden && !confirm('처음부터 다시 시작할까요?')) return; S.mix = { rain: 0, thunder: 0, drone: 0, bell: 1 }; begin(true); });
+  $('go-quiet').addEventListener('click', function () { if (!$('resume').hidden && !confirm('처음부터 다시 시작할까요?')) return; S.mix = { rain: 0, thunder: 0, drone: 0, bell: 1, bgm: 0 }; begin(true); });
   $('resume').addEventListener('click', function () { begin(false); });
 
   resize(); sprite = makeSprite();
