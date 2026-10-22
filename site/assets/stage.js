@@ -7,7 +7,7 @@
   // card: 이 구간을 여는 진행 카드. hold: 안내를 누를 때까지 띄워 둔다. arm: 화면을 두 번 누르면 하나, 둘, 셋.
   // turns: 이 구간을 n분씩 나눠 차례를 센다. pulse: 심장 박동
   var PHASES = [
-    { act: '프롤로그', what: '공통 대본을 함께 읽습니다', min: 5, smoke: 1,
+    { act: '프롤로그', what: '공통 대본을 함께 읽습니다', min: 5, smoke: 1, stick: 'black',
       snd: { rain: .5, thunder: .3, drone: .1, root: 55 },
       notice: ['시작', '프롤로그', '공통 대본을 펴고 첫 장부터 함께 소리 내어 읽습니다.\n지문은 가우디가 읽습니다.'] },
     { act: '1막', what: '대본을 이어 읽습니다', min: 15, smoke: 1,
@@ -170,8 +170,24 @@
     var f = $('flash');
     f.animate([{ opacity: 0 }, { opacity: .35, offset: .05 }, { opacity: .05, offset: .2 }, { opacity: .22, offset: .3 }, { opacity: 0 }], { duration: 900, easing: 'ease-out' });
   }
+  // 안내 읽어 주기: 기기에 들어 있는 한국어 음성(speechSynthesis)으로 읽는다. 음성이 없으면 조용히 넘어간다
+  var voiceKo = null;
+  function pickVoice() {
+    try { var vs = speechSynthesis.getVoices(); voiceKo = vs.filter(function (v) { return /^ko/i.test(v.lang); }).sort(function (a, b) { return (/google|natural|neural|yuna|sora|heami/i.test(b.name) ? 1 : 0) - (/google|natural|neural|yuna|sora|heami/i.test(a.name) ? 1 : 0); })[0] || null; } catch (e) { }
+  }
+  if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function speak(text, keep) {
+    if (!window.speechSynthesis || S.tts === false || S.muted) return;
+    try {
+      if (!keep) speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text.replace(/[“”"]/g, '').replace(/\n+/g, '. ').replace(/STOP/g, '스톱'));
+      u.lang = 'ko-KR'; if (voiceKo) u.voice = voiceKo; u.rate = .92; u.pitch = .95; u.volume = Math.min(1, S.vol + .2);
+      speechSynthesis.speak(u);
+    } catch (e) { }
+  }
   var noticeT;
   function notice(k, t, s, ms) {
+    if (S.started) speak((t || '') + '. ' + (s || ''));
     var n = $('notice');
     n.querySelector('.n-k').textContent = k || ''; n.querySelector('.n-t').textContent = t || ''; n.querySelector('.n-s').textContent = s || '';
     n.hidden = false; clearTimeout(noticeT);
@@ -188,7 +204,7 @@
     var c = $('count'), steps = ['하나', '둘', '셋'], k = 0;
     c.className = ''; c.hidden = false;
     (function step() {
-      if (k < steps.length) { c.textContent = steps[k]; bell(k < 2 ? 520 : 780, k < 2 ? .3 : .45); k++; setTimeout(step, 1300); return; }
+      if (k < steps.length) { c.textContent = steps[k]; speak(steps[k]); bell(k < 2 ? 520 : 780, k < 2 ? .3 : .45); k++; setTimeout(step, 1300); return; }
       if (!AFTER[kind]) { setTimeout(function () { c.hidden = true; }, 1500); return; }
       c.className = 'small'; c.textContent = AFTER[kind];
       setTimeout(function () { c.hidden = true; }, 15000);
@@ -287,7 +303,13 @@
     g.lineCap = 'round';
     g.strokeStyle = '#4a2a1e'; g.lineWidth = 1.6; g.beginPath(); g.moveTo(b.x, b.y - 2); g.lineTo(b.x, b.y - 16); g.stroke();
     if (burning) {
-      g.strokeStyle = '#7a3b26'; g.lineWidth = 3.2; g.beginPath(); g.moveTo(b.x, b.y - 14); g.lineTo(tp.x, tp.y + 5); g.stroke();
+      // 프롤로그에 피우는 것은 금방울당의 검은 향 '망향' (금빛 알갱이가 박혀 있다)
+      var black = S.started && !S.done && phase().stick === 'black';
+      g.strokeStyle = black ? '#1d1a18' : '#7a3b26'; g.lineWidth = 3.2; g.beginPath(); g.moveTo(b.x, b.y - 14); g.lineTo(tp.x, tp.y + 5); g.stroke();
+      if (black) {
+        g.fillStyle = 'rgba(214,170,90,.75)';
+        for (var fy = b.y - 18; fy > tp.y + 8; fy -= 7) g.fillRect(b.x + ((fy * 7) % 3) - 1.5, fy, 1.2, 1.2);
+      }
       g.strokeStyle = '#8d8a85'; g.lineWidth = 3.4; g.beginPath(); g.moveTo(tp.x, tp.y + 5); g.lineTo(tp.x, tp.y); g.stroke();
       var fl = .75 + Math.sin(t * 7) * .08 + Math.sin(t * 13.3) * .06 + Math.random() * .05;
       var eg = g.createRadialGradient(tp.x, tp.y, 0, tp.x, tp.y, 16 * fl);
@@ -317,7 +339,7 @@
     var li = e.target.closest('li'); if (!li) return;
     if (confirm('“' + PHASES[+li.dataset.i].act + ' · ' + PHASES[+li.dataset.i].what + '” 처음으로 옮길까요?')) { enter(+li.dataset.i); closePanel(); }
   });
-  function openPanel() { $('panel').hidden = false; renderList(); syncMix(); document.querySelector('[data-c=pause]').textContent = S.pausedAt ? '다시 시작' : '일시정지'; document.querySelector('[data-c=mute]').textContent = S.muted ? '소리 켜기' : '소리 끄기'; }
+  function openPanel() { $('panel').hidden = false; renderList(); syncMix(); document.querySelector('[data-c=pause]').textContent = S.pausedAt ? '다시 시작' : '일시정지'; document.querySelector('[data-c=mute]').textContent = S.muted ? '소리 켜기' : '소리 끄기'; document.querySelector('[data-c=tts]').textContent = S.tts === false ? '안내 음성 켜기' : '안내 음성 끄기'; }
   function closePanel() { $('panel').hidden = true; }
   $('panel').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
@@ -331,6 +353,7 @@
     else if (c === 'try-thunder') { audio(); thunder(true); }
     else if (c === 'try-bell') { audio(); bell(660); }
     else if (c === 'only-bell' || c === 'all-on') { var on = c === 'all-on' ? 1 : 0; S.mix = { rain: on, thunder: on, drone: on, bell: 1 }; save(); syncMix(); applySound(phase(), true); }
+    else if (c === 'tts') { S.tts = S.tts === false; save(); b.textContent = S.tts === false ? '안내 음성 켜기' : '안내 음성 끄기'; if (S.tts !== false) speak('안내 음성을 켰습니다.'); else if (window.speechSynthesis) speechSynthesis.cancel(); }
     else if (c === 'mute') { S.muted = !S.muted; save(); setVolume(); b.textContent = S.muted ? '소리 켜기' : '소리 끄기'; }
     else if (c === 'full') { var d = document.documentElement; (d.requestFullscreen || d.webkitRequestFullscreen || function () { }).call(d); }
     else if (c === 'reset') { if (confirm('타이머를 처음으로 되돌릴까요?')) { try { localStorage.removeItem(KEY); } catch (x) { } location.reload(); } }
