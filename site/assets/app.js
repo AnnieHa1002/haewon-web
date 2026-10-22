@@ -566,7 +566,7 @@
   }
   function s11Post(p) {
     var s = postState(p), body;
-    if (s.k === 'secret') body = lockBox('S11', '비밀글입니다.<br><small>비밀번호 힌트: 손이 기억하는 날 (숫자 여덟 자리)</small>');
+    if (s.k === 'secret') body = lockBox('S11', '비밀글입니다.');
     else body = '<article class="post-x s11-x">' + rich(s.body, p.id) + '</article>';
     var h = '<div class="s11-ph"><h1>' + esc(titleOf(p, s)) + '</h1><div class="s11-m">' + esc(p.b) + ' · ' + when(p.d) + '</div></div>' + body + (s.k === 'secret' ? '' : commentsHTML(p, { label: '댓글' }));
     return s11Shell(p.b, h, p.t);
