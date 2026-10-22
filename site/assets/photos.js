@@ -57,6 +57,8 @@ window.HW_PHOTOS = {
   "S10-TALK-030": "img/S10-TALK-030.jpg",
   "S1-NOTICE-010": "img/S1-NOTICE-010.jpg",
   "S1-NOTICE-011": "img/brand/dajeong_ibyeol.png",
+  "S5-OPN-021": "img/S5-OPN-021.jpg",
+  "S1-FREE-034": "img/S5-OPN-021.jpg",
   "S2-PHOTO-003": "img/S2-PHOTO-003.jpg",
   "S2-PHOTO-004": "img/S2-PHOTO-004.jpg",
   "S2-PHOTO-005": "img/S2-PHOTO-005.jpg",
