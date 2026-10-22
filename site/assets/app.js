@@ -25,7 +25,13 @@
     dadokim_sms: 'img/brand/dadokim_color.png', geumbangul_sms: 'img/brand/geumbangul_color.png',
     baram_dad: 'img/avatar/baram_dad.jpg', haneul_mideum: 'img/avatar/haneul_mideum.jpg', eunhye_song: 'img/avatar/eunhye_song.jpg'
   };
-  function av(id) { return AVATAR[id] ? '<img class="av" src="' + AVATAR[id] + '" alt="">' : ''; }
+  // 프로필 사진이 없는 계정은 기본 프로필(사람 실루엣). 바탕색만 계정마다 다르다
+  var AV_BLANK = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9.2" r="4.3"/><path d="M3.6 23c.9-5 4.5-7.6 8.4-7.6s7.5 2.6 8.4 7.6z"/></svg>';
+  function av(id) {
+    if (AVATAR[id]) return '<img class="av" src="' + AVATAR[id] + '" alt="">';
+    var h = +hash(String(id));
+    return '<span class="av av-blank" style="background:hsl(' + (h % 360) + ' ' + (h % 3 ? 14 : 22) + '% ' + (78 + h % 9) + '%)">' + AV_BLANK + '</span>';
+  }
 
   // ── 상태 (로그인·잠금 해제). 저장소가 막혀도 메모리로 돈다 ────
   var KEY = 'hw4-state';
