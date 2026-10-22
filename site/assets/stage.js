@@ -116,7 +116,7 @@
   var BGM = {
     open: 'audio/isolated.mp3',     // 프롤로그·1막
     read: 'audio/sopor.mp3',        // 설정지 읽기
-    talk: 'audio/dark-glow.mp3',    // 2막 토론
+    talk: 'audio/cylinder-five.mp3', // 2막 토론
     deep: 'audio/hide-secrets.mp3', // 3막 토론·마지막 토론
     probe: 'audio/gagool.mp3',      // 조사·면담
     final: 'audio/devastation.mp3', // 최종 추리·투표

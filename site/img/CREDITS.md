@@ -78,13 +78,13 @@ Unsplash 라이선스(https://unsplash.com/license)로 받은 사진. 상업적 
 
 # 음악 출처 (진행 화면 배경 음악, `site/audio/`)
 
-Wikimedia Commons에 올라온 Free Music Archive 음원. 짧게 다시 인코딩(mp3)했을 뿐 곡은 바꾸지 않았다.
+Wikimedia Commons에 올라온 Free Music Archive 음원. 모노 mp3로 다시 인코딩하고 곡 사이 음량만 맞췄을 뿐 곡은 바꾸지 않았다.
 
 | 파일 | 곡 | 작가 | 원본 | 라이선스 |
 | --- | --- | --- | --- | --- |
 | audio/isolated.mp3 | Isolated | Kevin MacLeod | [File:Kevin MacLeod - Isolated.ogg](https://commons.wikimedia.org/wiki/File:Kevin_MacLeod_-_Isolated.ogg) | CC BY 3.0 |
 | audio/sopor.mp3 | Sopor | Kai Engel | [File:Kai Engel - 04 - Sopor.ogg](https://commons.wikimedia.org/wiki/File:Kai_Engel_-_04_-_Sopor.ogg) | CC BY 4.0 |
-| audio/dark-glow.mp3 | The Dark Glow of the Mountains | Chris Zabriskie | [File:Chris Zabriskie - 01 - The Dark Glow of the Mountains.ogg](https://commons.wikimedia.org/wiki/File:Chris_Zabriskie_-_01_-_The_Dark_Glow_of_the_Mountains.ogg) | CC BY 4.0 |
+| audio/cylinder-five.mp3 | Cylinder Five | Chris Zabriskie | [File:Chris Zabriskie - 05 - Cylinder Five.ogg](https://commons.wikimedia.org/wiki/File:Chris_Zabriskie_-_05_-_Cylinder_Five.ogg) | CC BY 4.0 |
 | audio/hide-secrets.mp3 | To Hide Their Secrets | Chris Zabriskie | [File:Chris Zabriskie - 05 - To Hide Their Secrets.ogg](https://commons.wikimedia.org/wiki/File:Chris_Zabriskie_-_05_-_To_Hide_Their_Secrets.ogg) | CC BY 4.0 |
 | audio/gagool.mp3 | Gagool | Kevin MacLeod | [File:Kevin MacLeod - Gagool.ogg](https://commons.wikimedia.org/wiki/File:Kevin_MacLeod_-_Gagool.ogg) | CC BY 3.0 |
 | audio/devastation.mp3 | Devastation and Revenge | Kevin MacLeod | [File:Kevin MacLeod - Devastation and Revenge.ogg](https://commons.wikimedia.org/wiki/File:Kevin_MacLeod_-_Devastation_and_Revenge.ogg) | CC BY 3.0 |
