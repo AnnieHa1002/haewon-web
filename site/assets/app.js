@@ -263,13 +263,27 @@
   function searchForm(site, q, ph) {
     return '<form class="search" data-site="' + site + '"><input name="q" type="search" value="' + esc(q || '') + '" placeholder="' + (ph || '검색어') + '" enterkeyhint="search"><button>검색</button></form>';
   }
+  // 검색: 낱말 단위로 찾는다. 제목·본문·닉네임에 게시판 이름과 날짜(2023-07-18 / 2023.7.18 / 2023년 7월 18일)도 넣는다.
+  // 모든 낱말이 든 글만 보여 주고, 그런 글이 없으면 낱말이 하나라도 든 글을 많이 든 순서로 보여 준다
+  function searchText(o) {
+    var p = o.p, d = p.d.slice(0, 10), y = d.slice(0, 4), m = +d.slice(5, 7), dd = +d.slice(8, 10);
+    var meta = [p.b, nick(p.a), p.a, d, ymd(d), y + '.' + m + '.' + dd, y + '년 ' + m + '월 ' + dd + '일', y + '년', m + '월 ' + dd + '일'].join('\n');
+    var body = o.s.k === 'show' ? p.t + '\n' + o.s.body : titleOf(p, o.s);
+    return (body + '\n' + meta).toLowerCase();
+  }
   function searchHits(site, q) {
-    q = q.trim().toLowerCase();
-    if (!q) return [];
-    return sitePosts(site).filter(function (o) {
-      if (o.s.k !== 'show') return o.s.k !== 'secret' && titleOf(o.p, o.s).toLowerCase().indexOf(q) >= 0;
-      return (o.p.t + '\n' + o.s.body + '\n' + nick(o.p.a)).toLowerCase().indexOf(q) >= 0;
+    var words = q.toLowerCase().replace(/[‘’“”"',·]/g, ' ').split(/\s+/).filter(Boolean);
+    if (!words.length) return [];
+    var hits = [];
+    sitePosts(site).forEach(function (o, i) {
+      if (o.s.k === 'secret') return;
+      var text = searchText(o), flat = text.replace(/\s+/g, ''), n = 0;
+      words.forEach(function (w) { if (text.indexOf(w) >= 0 || flat.indexOf(w) >= 0) n++; });
+      if (!n && flat.indexOf(words.join('')) >= 0) n = words.length; // '고객의소리'처럼 붙여 쓴 경우
+      if (n) hits.push({ o: o, n: n, i: i });
     });
+    var all = hits.filter(function (h) { return h.n === words.length; });
+    return (all.length ? all : hits.sort(function (a, b) { return b.n - a.n || a.i - b.i; })).map(function (h) { return h.o; });
   }
 
   // 로그인 폼 (사이트 공통)
