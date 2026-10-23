@@ -46,7 +46,6 @@ def secret(key, value):
 DEVICE_COND = {
     "S2 잠금 해제": "S2",
     "S3 자동로그인(외골수)": "S3",
-    "보관함 열쇠(별꽃)": "WIRO",
 }
 
 
@@ -146,13 +145,10 @@ def build():
         if m:
             devices["S3"] = {"k": "pin", "h": secret("S3", m.group(1)), "n": len(m.group(1))}
             continue
-        m = re.match(r"^별꽃 폰 PIN (\d+)", acct)
-        if m:
-            devices["WIRO"] = {"k": "pin", "h": secret("WIRO", m.group(1)), "n": len(m.group(1))}
     # S3를 열면 자동으로 로그인되는 이다음 계정
     autologin = {"S3": [["S1", "room702"], ["S10", "dawn_702"]]}
 
-    for need in ("S2", "S3", "WIRO"):
+    for need in ("S2", "S3"):
         if need not in devices:
             sys.exit(f"로그인 탭에서 {need} 잠금 정보를 찾지 못했습니다")
 

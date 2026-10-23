@@ -20,8 +20,8 @@
   // 프로필 사진 (제작 에셋). 없는 계정은 글자로만 보인다
   var AVATAR = {
     room702: 'img/avatar/room702.png', kicho_gongsa: 'img/avatar/kicho_gongsa.png', late_letter: 'img/avatar/late_letter.png',
-    nare_nowhere: 'img/avatar/nare_nowhere.png', nare_doran: 'img/avatar/nare_nowhere.png', nare_teacher: 'img/avatar/nare_nowhere.png',
-    wiro_cha: 'img/avatar/wiro.png', wiro_doran: 'img/avatar/wiro.png',
+    nare_nowhere: 'img/avatar/nare_nowhere.png', nare_teacher: 'img/avatar/nare_nowhere.png',
+    wiro_cha: 'img/avatar/wiro.png', wiro_c: 'img/avatar/wiro.png',
     dadokim_sms: 'img/brand/dadokim_color.png', geumbangul_sms: 'img/brand/geumbangul_color.png',
     baram_dad: 'img/avatar/baram_dad.jpg', haneul_mideum: 'img/avatar/haneul_mideum.jpg', eunhye_song: 'img/avatar/eunhye_song.jpg',
     // 엑스트라 중 특색 있는 몇 명 (Unsplash)
@@ -320,7 +320,7 @@
     { r: 'S11', label: '하루글', ic: '✎', bg: '#8a9a6e', img: 'img/brand/harugl_color.png' },
     { r: 'S7', label: '도원 사내망', ic: 'DW', bg: '#2b4c7e', img: 'img/brand/dowon_color.png', lock: function () { return !sess('S7'); } }
   ];
-  // 보관함 1(#/locker)과 이다음의 휴대폰(#/S3)은 허브에 두지 않는다. 소지품 카드의 QR로만 들어간다.
+  // 송은혜의 휴대폰(#/S2)과 이다음의 휴대폰(#/S3)은 허브에 두지 않는다. 카드의 QR로만 들어간다.
   function hub() {
     document.title = '홈';
     var h = '<div class="hub"><div class="hub-clock"><b>' + hm(NOW) + '</b><span>' + kdate(NOW) + '</span></div><div class="hub-grid">';
@@ -566,7 +566,7 @@
   }
   function s11Post(p) {
     var s = postState(p), body;
-    if (s.k === 'secret') body = lockBox('S11', '비밀글입니다.<br><small>비밀번호 힌트: 손이 기억하는 날 (숫자 여덟 자리)</small>');
+    if (s.k === 'secret') body = lockBox('S11', '비밀글입니다.');
     else body = '<article class="post-x s11-x">' + rich(s.body, p.id) + '</article>';
     var h = '<div class="s11-ph"><h1>' + esc(titleOf(p, s)) + '</h1><div class="s11-m">' + esc(p.b) + ' · ' + when(p.d) + '</div></div>' + body + (s.k === 'secret' ? '' : commentsHTML(p, { label: '댓글' }));
     return s11Shell(p.b, h, p.t);
@@ -824,11 +824,10 @@
   // 기기별 연락처 표시 이름 (저장 이름)
   var CONTACT = {
     S2: { seo_jeongui_doran: 'seo_jeongui_doran', late_letter: '나' },
-    S3: { late_letter: '제비', sojin_doran: '소진' },
-    WIRO: { nare_doran: '나래' }
+    S3: { late_letter: '제비', sojin_doran: '소진' }
   };
   function cname(dev, id) { return (CONTACT[dev] && CONTACT[dev][id]) || nick(id); }
-  var OWNER = { S2: 'late_letter', S3: 'room702', WIRO: 'wiro_doran' };
+  var OWNER = { S2: 'late_letter', S3: 'room702' };
 
   function devMsgs(dev, kind) {
     return D.messages.filter(function (m) { return m.s === dev && (!kind || m.id.indexOf(kind) >= 0); });
@@ -889,33 +888,23 @@
     save(); return false;
   }
 
-  // ── 보관함 1 ───────────────────────────────────────────
-  function locker() {
-    if (!isOpen('locker')) {
-      return { html: '<div class="locker"><div class="lk-door"><div class="lk-plate">다독임 · 보관함 1</div><div class="lk-hole"></div></div>' +
-        '<p>모임 중 맡긴 휴대폰이 들어 있는 보관함입니다.<br>열쇠는 진행자가 가지고 있습니다.</p><button class="btn" data-act="locker">열쇠로 연다</button></div>', title: '보관함 1', skin: 'dev' };
-    }
-    var hint = SHOW_CASE_HINT ? '<details class="case"><summary>케이스 안쪽에 접힌 사진이 끼워져 있다</summary><div class="case-ph"><div class="case-front">[바다 사진 출력물]</div><div class="case-back">702.<br>첫 글자만 그리면 돼요.</div></div></details>' : '';
-    return { html: '<div class="locker open"><h2>보관함 1</h2><div class="lk-phones">' +
-      '<a class="lk-ph white" href="#/S2"><span class="lk-scr">' + (isOpen('S2') ? '🔓' : '🔒') + '</span><b>흰 케이스 휴대폰</b><small>그을린 이름표 ‘제비’ 옆에 있던 것</small></a>' +
-      '<a class="lk-ph dark" href="#/WIRO"><span class="lk-scr">' + (isOpen('WIRO') ? '🔓' : '🔒') + '</span><b>검은 휴대폰</b><small>진행자의 것</small></a></div>' + hint +
-      '<p class="lk-note">다른 휴대폰 두 대는 이미 주인에게 돌아갔다.</p></div>', title: '보관함 1', skin: 'dev' };
-  }
-
   // ── S2 송은혜의 휴대폰 ────────────────────────────────────
+  // 4막에 돌려받아 테이블에 놓인 휴대폰. 공개 단서 6 카드의 QR로 들어온다
+  function caseHint() {
+    return SHOW_CASE_HINT ? '<details class="case"><summary>케이스 안쪽에 접힌 사진이 끼워져 있다</summary><div class="case-ph"><div class="case-front">[바다 사진 출력물]</div><div class="case-back">702.<br>첫 글자만 그리면 돼요.</div></div></details>' : '';
+  }
   function s2(parts) {
-    if (!isOpen('locker')) return locker();
     if (!isOpen('S2')) {
       var wait = lockedFor('S2');
       return phone('p-s2 lock', statusBar('19:16') + '<div class="ls-wall flowers"><div class="ls-clock">19:16</div><div class="ls-date">7월 17일 목요일</div>' +
-        '<div class="ls-noti"><b>도란</b> 읽지 않은 메시지 없음</div><p class="ls-msg">' + (wait ? wait + '초 후에 다시 시도하세요' : '패턴을 그려 잠금 해제') + '</p>' + patternLock('S2') + '<a class="ls-back" href="#/locker">‹ 보관함</a></div>', '잠김');
+        '<div class="ls-noti"><b>도란</b> 읽지 않은 메시지 없음</div><p class="ls-msg">' + (wait ? wait + '초 후에 다시 시도하세요' : '패턴을 그려 잠금 해제') + '</p>' + patternLock('S2') + caseHint() + '</div>', '잠김');
     }
     var app = parts[1], id = parts[2], h;
     if (!app) {
       h = statusBar('19:16') + '<div class="home flowers"><div class="home-grid">' +
         '<a href="' + href('S2', 'doran') + '"><i class="ic doran"><img src="img/icon/doran.png" alt=""></i>도란</a><a href="' + href('S2', 'sms') + '"><i class="ic sms"><img src="img/icon/chat.png" alt=""></i>문자</a>' +
         '<a href="' + href('S2', 'memo') + '"><i class="ic memo"><img src="img/icon/memo.png" alt=""></i>메모</a><a href="' + href('S2', 'photo') + '"><i class="ic photo"><img src="img/icon/photo.png" alt=""></i>사진첩</a></div>' +
-        '<a class="ls-back" href="#/locker">‹ 보관함으로</a></div>';
+        '</div>';
       return phone('p-s2', h, '송은혜의 휴대폰');
     }
     if (app === 'doran') h = id ? appBar('S2', cname('S2', id), href('S2', 'doran')) + chatHTML(devThreads('S2', 'DORAN').find(function (t) { return t.who === id; }).list, OWNER.S2, 'doran') : appBar('S2', '도란') + threadList('S2', 'doran', 'DORAN');
@@ -953,20 +942,6 @@
     return phone('p-s3 in', statusBar('19:16') + '<div class="d-app">' + h + '</div>' + crack, '이다음의 휴대폰');
   }
 
-  // ── WIRO 차위로의 휴대폰 ────────────────────────────────
-  function wiro(parts) {
-    if (!isOpen('locker')) return locker();
-    if (!isOpen('WIRO')) {
-      var wait = lockedFor('WIRO');
-      return phone('p-wiro lock', statusBar('19:16') + '<div class="ls-wall plain"><div class="ls-clock">19:16</div><div class="ls-date">7월 17일 목요일 · 방해 금지 모드</div><p class="ls-msg">' +
-        (wait ? wait + '초 후에 다시 시도하세요' : 'PIN 입력') + '</p>' + pinLock('WIRO', D.auth.devices.WIRO.n) + '<a class="ls-back" href="#/locker">‹ 보관함</a></div>', '잠김');
-    }
-    var id = parts[2], h;
-    if (parts[1] === 'doran' && id) h = appBar('WIRO', cname('WIRO', id), href('WIRO', 'doran')) + chatHTML(devThreads('WIRO').find(function (t) { return t.who === id; }).list, OWNER.WIRO, 'doran');
-    else h = appBar('WIRO', '도란', '#/locker') + threadList('WIRO', 'doran') + '<p class="d-empty">다른 대화방은 모두 나간 상태입니다.</p>';
-    return phone('p-wiro in', statusBar('19:16') + '<div class="d-app">' + h + '</div>', '차위로의 휴대폰');
-  }
-
   // ── 라우터 ─────────────────────────────────────────────
   function parse() {
     var raw = location.hash.replace(/^#\/?/, ''), qi = raw.indexOf('?'), q = {};
@@ -978,10 +953,10 @@
     closeSheet();
     var r = parse(), parts = r.parts, q = r.q, site = parts[0], out;
     if (!site) out = hub();
-    else if (site === 'locker') out = locker();
+    else if (site === 'locker') { location.replace('#/S2'); return; } // 예전 보관함 QR
+    else if (site === 'WIRO') { location.replace(href('S4', 'msg')); return; } // 별꽃 폰 대화는 나래 한컷 DM으로 옮겨졌다
     else if (site === 'S2') out = s2(parts);
     else if (site === 'S3') out = s3(parts);
-    else if (site === 'WIRO') out = wiro(parts);
     else if (SK[site]) {
       var sk = SK[site], what = parts[1];
       if (sk.gate && sk.gate() && what !== 'login') out = s7Gate();
@@ -1051,8 +1026,7 @@
     if (act === 'logout') { e.preventDefault(); delete st.sess[a.dataset.site]; save(); location.hash = '#/' + a.dataset.site; route(); }
     else if (act === 'reset') {
       if (confirm('이 기기의 로그인과 잠금 해제 기록을 모두 지울까요? (다음 게임 전에 누르세요)')) { st = mem = { sess: {}, open: {}, fail: {}, like: {} }; save(); route(); toast('기록을 지웠습니다.'); }
-    } else if (act === 'locker') {
-      if (confirm('보관함 열쇠(‘다독임 · 보관함 1’ 번호표)를 가진 사람이 열쇠를 내놓았나요?')) { st.open.locker = true; save(); route(); }
+
     } else if (act === 'auto') {
       e.preventDefault();
       var pair = (D.auth.auto.S3 || []).find(function (x) { return x[0] === a.dataset.site; });

@@ -21,7 +21,7 @@ const routes = [
   ['#/S5', 's5'], ['#/S5/p/S5-SOC-001', 's5-1999'], ['#/S5/search?q=천명타워', 's5-search'],
   ['#/S9', 's9'], ['#/S9/b/천명건설 라운지', 's9-lounge'], ['#/S9/b/샘선전자 라운지', 's9-ss'], ['#/S9/p/S9-CM-001', 's9-post'], ['#/S10', 's10'], ['#/S10/p/S10-TALK-001', 's10-post'], ['#/S11', 's11'], ['#/S11/b/일상', 's11-day'], ['#/S11/p/S11-OLD-003', 's11-lock'],
   ['#/S6', 's6'], ['#/S6/b/상품', 's6-shop'], ['#/S6/p/S6-SHOP-001', 's6-post'], ['#/S8', 's8'], ['#/S8/b/고객의 소리', 's8-voc'], ['#/S8/p/S8-VOC-001', 's8-post'],
-  ['#/S7', 's7-gate'], ['#/S4', 's4'], ['#/S4/p/S4-FEED-001', 's4-post'], ['#/S4/msg', 's4-dm'], ['#/locker', 'locker'], ['#/S3', 's3-lock'],
+  ['#/S7', 's7-gate'], ['#/S4', 's4'], ['#/S4/p/S4-FEED-001', 's4-post'], ['#/S4/msg', 's4-dm'], ['#/S2', 's2-lock'], ['#/S3', 's3-lock'],
 ];
 for (const [h, n] of routes) await go(h, n);
 // 로그인·잠금 해제 흐름
@@ -35,8 +35,6 @@ await page.goto(url + '#/S3');
 for (const k of '0402') await page.click(`.pin-keys button[data-k="${k}"]`);
 await page.waitForTimeout(150); await page.screenshot({ path: `${out}/s3-home.png` });
 await go('#/S3/doran/sojin_doran', 's3-chat'); await go('#/S3/rec', 's3-rec');
-await page.goto(url + '#/locker'); page.once('dialog', d => d.accept()); await page.click('[data-act=locker]'); await page.waitForTimeout(150);
-await page.screenshot({ path: `${out}/locker-open.png` });
 await page.goto(url + '#/S2'); await page.waitForTimeout(100);
 const box = await page.locator('.pat svg').boundingBox();
 const P = n => ({ x: box.x + (50 + ((n - 1) % 3) * 100) * box.width / 300, y: box.y + (50 + Math.floor((n - 1) / 3) * 100) * box.height / 300 });
@@ -45,8 +43,8 @@ for (const n of [2, 3, 5, 7]) await page.mouse.move(P(n).x, P(n).y, { steps: 6 }
 await page.mouse.up(); await page.waitForTimeout(150);
 await page.screenshot({ path: `${out}/s2-home.png` });
 await go('#/S2/doran/room702', 's2-chat'); await go('#/S2/memo', 's2-memo'); await go('#/S2/photo', 's2-photo');
-await page.goto(url + '#/WIRO'); for (const k of '5050') await page.click(`.pin-keys button[data-k="${k}"]`); await page.waitForTimeout(150);
-await go('#/WIRO/doran/nare_doran', 'wiro-chat');
+await page.goto(url + '#/S4/login'); await page.fill('input[name=id]', 'nare_nowhere'); await page.fill('input[name=pw]', '19881024'); await page.click('form.login-box .btn'); await page.waitForTimeout(150);
+await go('#/S4/msg', 's4-dm-in');
 // 진행 화면
 const stage = 'file://' + path.resolve('site/stage.html');
 await page.goto(stage); await page.click('#go'); await page.waitForTimeout(1500);

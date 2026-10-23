@@ -279,30 +279,30 @@ S6-MSG-033,S6,geumbangul,haneul_mideum,2025-07-16 21:00,내일 갈 때 내가 �
 S6-MSG-034,S6,haneul_mideum,geumbangul,2025-07-17 17:40,선생님 지금 버스 타요. 비가 너무 와요.,로그인 필요: haneul_mideum
 S6-MSG-035,S6,geumbangul,haneul_mideum,2025-07-17 18:25,도착했으면 화장실에서 전화해라.,로그인 필요: haneul_mideum
 S6-MSG-036,S6,haneul_mideum,geumbangul,2025-07-17 18:27,네 선생님. 금방 할게요.,로그인 필요: haneul_mideum
-WIRO-DORAN-001,WIRO,nare_doran,wiro_doran,2022-03-05 12:40,오빠 밥 먹었어?,로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-002,WIRO,wiro_doran,nare_doran,2022-03-05 13:30,먹었어. 너는,로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-003,WIRO,nare_doran,wiro_doran,2022-03-05 13:31,해바라기 집 애들이랑 떡볶이 ㅎㅎ,로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-004,WIRO,nare_doran,wiro_doran,2022-05-08 17:20,어버이날이라 애들이랑 카네이션 접었어. 우리 건 누구한테 달아 주지 ㅋㅋ,로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-005,WIRO,wiro_doran,nare_doran,2022-05-08 21:05,서로 달아 주자 그럼,로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-006,WIRO,nare_doran,wiro_doran,2022-08-16 23:12,오빠 이 노래 알아? 나 어릴 때부터 흥얼거리던 거. 어디서 배웠는지 모르겠어 (음성 메시지 0:14),로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-007,WIRO,wiro_doran,nare_doran,2022-08-17 00:40,나도 그거 알아. 이상하네. 나도 어디서 배웠는지 몰라,로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-008,WIRO,nare_doran,wiro_doran,2022-10-14 19:30,오늘 바름이 1주기야. 애들이랑 다녀왔어,로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-009,WIRO,wiro_doran,nare_doran,2022-10-14 22:10,그 고등학생 때부터 봉사 오던 애지. 너 많이 따르던. 고생했다,로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-010,WIRO,nare_doran,wiro_doran,2022-10-14 22:11,응. 나 이것저것 많이 도와줬던 애야,로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-023,WIRO,nare_doran,wiro_doran,2022-10-14 22:13,바름이 일 기사엔 무단 침입 사고라고만 났었잖아. 걔 그런 애 아닌데. 남의 창고에 몰래 들어갈 애가 아니야,로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-024,WIRO,wiro_doran,nare_doran,2022-10-14 22:30,그래도 오늘은 그 얘기 말고 바름이 얘기만 하자. 너도 쉬어,로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-011,WIRO,nare_doran,wiro_doran,2023-01-22 09:00,설인데 오빠 또 일해?,로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-012,WIRO,wiro_doran,nare_doran,2023-01-22 11:45,응 위기상담 당직,로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-013,WIRO,nare_doran,wiro_doran,2023-01-22 11:46,떡국 문 앞에 걸어 둘게,로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-014,WIRO,nare_doran,wiro_doran,2023-02-10 21:40,오빠 내일 토요일이지,로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-015,WIRO,wiro_doran,nare_doran,2023-02-10 22:30,응 오전 상담 있어,로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-016,WIRO,nare_doran,wiro_doran,2023-02-10 22:31,알았어 ㅎㅎ 잘 자,로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-017,WIRO,nare_doran,wiro_doran,2023-02-11 09:12,오빠 오늘 시간 돼?,로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-018,WIRO,nare_doran,wiro_doran,2023-02-11 09:12,할 말 있어. 전화 말고 얼굴 보고,로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-019,WIRO,wiro_doran,nare_doran,2023-02-11 09:58,상담 끝나고 보자,로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-020,WIRO,nare_doran,wiro_doran,2023-02-11 09:58,(웃는 이모티콘),로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-021,WIRO,wiro_doran,nare_doran,2023-02-11 14:47,부재중 발신 6회 (오후 2:47 ~ 3:30),로그인 필요: 보관함 열쇠(별꽃)
-WIRO-DORAN-022,WIRO,wiro_doran,nare_doran,2023-02-11 15:31,나래야 전화 좀 받아,로그인 필요: 보관함 열쇠(별꽃)
+S4-DM-WIRO-001,S4,nare_nowhere,wiro_c,2022-03-05 12:40,오빠 밥 먹었어?,로그인 필요: nare_nowhere
+S4-DM-WIRO-002,S4,wiro_c,nare_nowhere,2022-03-05 13:30,먹었어. 너는,로그인 필요: nare_nowhere
+S4-DM-WIRO-003,S4,nare_nowhere,wiro_c,2022-03-05 13:31,해바라기 집 애들이랑 떡볶이 ㅎㅎ,로그인 필요: nare_nowhere
+S4-DM-WIRO-004,S4,nare_nowhere,wiro_c,2022-05-08 17:20,어버이날이라 애들이랑 카네이션 접었어. 우리 건 누구한테 달아 주지 ㅋㅋ,로그인 필요: nare_nowhere
+S4-DM-WIRO-005,S4,wiro_c,nare_nowhere,2022-05-08 21:05,서로 달아 주자 그럼,로그인 필요: nare_nowhere
+S4-DM-WIRO-006,S4,nare_nowhere,wiro_c,2022-08-16 23:12,오빠 이 노래 알아? 나 어릴 때부터 흥얼거리던 거. 어디서 배웠는지 모르겠어 (음성 메시지 0:14),로그인 필요: nare_nowhere
+S4-DM-WIRO-007,S4,wiro_c,nare_nowhere,2022-08-17 00:40,나도 그거 알아. 이상하네. 나도 어디서 배웠는지 몰라,로그인 필요: nare_nowhere
+S4-DM-WIRO-008,S4,nare_nowhere,wiro_c,2022-10-14 19:30,오늘 바름이 1주기야. 애들이랑 다녀왔어,로그인 필요: nare_nowhere
+S4-DM-WIRO-009,S4,wiro_c,nare_nowhere,2022-10-14 22:10,그 고등학생 때부터 봉사 오던 애지. 너 많이 따르던. 고생했다,로그인 필요: nare_nowhere
+S4-DM-WIRO-010,S4,nare_nowhere,wiro_c,2022-10-14 22:11,응. 나 이것저것 많이 도와줬던 애야,로그인 필요: nare_nowhere
+S4-DM-WIRO-023,S4,nare_nowhere,wiro_c,2022-10-14 22:13,바름이 일 기사엔 무단 침입 사고라고만 났었잖아. 걔 그런 애 아닌데. 남의 창고에 몰래 들어갈 애가 아니야,로그인 필요: nare_nowhere
+S4-DM-WIRO-024,S4,wiro_c,nare_nowhere,2022-10-14 22:30,그래도 오늘은 그 얘기 말고 바름이 얘기만 하자. 너도 쉬어,로그인 필요: nare_nowhere
+S4-DM-WIRO-011,S4,nare_nowhere,wiro_c,2023-01-22 09:00,설인데 오빠 또 일해?,로그인 필요: nare_nowhere
+S4-DM-WIRO-012,S4,wiro_c,nare_nowhere,2023-01-22 11:45,응 위기상담 당직,로그인 필요: nare_nowhere
+S4-DM-WIRO-013,S4,nare_nowhere,wiro_c,2023-01-22 11:46,떡국 문 앞에 걸어 둘게,로그인 필요: nare_nowhere
+S4-DM-WIRO-014,S4,nare_nowhere,wiro_c,2023-02-10 21:40,오빠 내일 토요일이지,로그인 필요: nare_nowhere
+S4-DM-WIRO-015,S4,wiro_c,nare_nowhere,2023-02-10 22:30,응 오전 상담 있어,로그인 필요: nare_nowhere
+S4-DM-WIRO-016,S4,nare_nowhere,wiro_c,2023-02-10 22:31,알았어 ㅎㅎ 잘 자,로그인 필요: nare_nowhere
+S4-DM-WIRO-017,S4,nare_nowhere,wiro_c,2023-02-11 09:12,오빠 오늘 시간 돼?,로그인 필요: nare_nowhere
+S4-DM-WIRO-018,S4,nare_nowhere,wiro_c,2023-02-11 09:12,할 말 있어. 전화 말고 얼굴 보고,로그인 필요: nare_nowhere
+S4-DM-WIRO-019,S4,wiro_c,nare_nowhere,2023-02-11 09:58,상담 끝나고 보자,로그인 필요: nare_nowhere
+S4-DM-WIRO-020,S4,nare_nowhere,wiro_c,2023-02-11 09:58,(웃는 이모티콘),로그인 필요: nare_nowhere
+S4-DM-WIRO-021,S4,wiro_c,nare_nowhere,2023-02-11 14:47,부재중 통화 6회 (오후 2:47 ~ 3:30),로그인 필요: nare_nowhere
+S4-DM-WIRO-022,S4,wiro_c,nare_nowhere,2023-02-11 15:31,나래야 전화 좀 받아,로그인 필요: nare_nowhere
 S3-DORAN-076,S3,late_letter,room702,2025-06-27 23:58,"(받은 메시지 · 제비) 7월 17일 저녁 일곱 시, 다정한 이별이라는 모임에 가요. 거기서 다 말할 거예요. 702호님도 와 주시면 좋겠어요.",로그인 필요: S3 자동로그인(외골수)
 S2-DORAN-059,S2,late_letter,room702,2025-07-17 16:30,"오늘이에요. 잘 하고 올게요. 내일은 꼭 만나요, 702호님.",로그인 필요: S2 잠금 해제
 S3-DORAN-077,S3,late_letter,room702,2025-07-17 16:30,"(받은 메시지 · 제비) 오늘이에요. 잘 하고 올게요. 내일은 꼭 만나요, 702호님.",로그인 필요: S3 자동로그인(외골수)
