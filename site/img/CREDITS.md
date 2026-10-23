@@ -10,6 +10,7 @@ Unsplash 라이선스(https://unsplash.com/license)로 받은 사진. 상업적 
 
 | 파일 | 쓰인 글 | 내용 | 원본 |
 | --- | --- | --- | --- |
+| img/S2-WALL.jpg | 송은혜 폰 잠금 화면 배경 | 부서지는 파도, 옅은 하늘 | https://images.unsplash.com/photo-1500375592092-40eb2168fd21 |
 | img/S4-FEED-001.jpg | S4-FEED-001 | 아이 손과 물감 | https://images.unsplash.com/photo-1560421683-6856ea585c78 |
 | img/S4-FEED-002.jpg | S4-FEED-002 | 레고 블록 | https://images.unsplash.com/photo-1587654780291-39c9404d746b |
 | img/S4-FEED-017.jpg | S4-FEED-017 | 치즈색 고양이 | https://images.unsplash.com/photo-1573865526739-10659fec78a5 |

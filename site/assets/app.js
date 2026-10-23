@@ -904,12 +904,12 @@
   // ── S2 송은혜의 휴대폰 ────────────────────────────────────
   // 4막에 제비 자리에 놓이는 '남겨진 자리의 물건' 카드(공개 단서 6)의 QR로 들어온다
   function caseHint() {
-    return SHOW_CASE_HINT ? '<details class="case"><summary>케이스 안쪽에 접힌 사진이 끼워져 있다</summary><div class="case-ph"><div class="case-front">[바다 사진 출력물]</div><div class="case-back">702.<br>첫 글자만 그리면 돼요.</div></div></details>' : '';
+    return SHOW_CASE_HINT ? '<details class="case"><summary>케이스 안쪽에 접힌 사진이 끼워져 있다</summary><div class="case-ph"><div class="case-front" aria-label="바다 사진 출력물"></div><div class="case-back">702.<br>첫 글자만 그리면 돼요.</div></div></details>' : '';
   }
   function s2(parts) {
     if (!isOpen('S2')) {
       var wait = lockedFor('S2');
-      return phone('p-s2 lock', statusBar('19:16') + '<div class="ls-wall flowers"><div class="ls-clock">19:16</div><div class="ls-date">7월 17일 목요일</div>' +
+      return phone('p-s2 lock', statusBar('19:16') + '<div class="ls-wall sea-photo"><div class="ls-clock">19:16</div><div class="ls-date">7월 17일 목요일</div>' +
         '<div class="ls-noti"><b>도란</b> 읽지 않은 메시지 없음</div><p class="ls-msg">' + (wait ? wait + '초 후에 다시 시도하세요' : '패턴을 그려 잠금 해제') + '</p>' + patternLock('S2') + caseHint() + '</div>', '잠김');
     }
     var app = parts[1], id = parts[2], h;
