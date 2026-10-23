@@ -6,16 +6,16 @@
 ## QR 코드
 
 휴대폰 카메라로 찍으면 바로 그 사이트가 열린다. 주소는 GitHub Pages 기준이라 **배포가 켜져야 동작한다**.
-송은혜의 휴대폰과 이다음의 휴대폰은 허브에 아이콘이 없다. 이 둘의 QR은 해당 카드(공개 단서 6, 외골수 카드 1)에만 인쇄한다.
+송은혜의 휴대폰과 이다음의 휴대폰은 허브에 아이콘이 없다. 이 둘의 QR은 해당 카드('남겨진 자리의 물건', 외골수 소지품 카드 1)에만 인쇄한다. 나머지 사이트는 진행 카드 C-1(4막 휴대폰)의 허브 QR 하나로 들어간다.
 다른 주소로 배포했다면 `python3 tools/qr.py <새 주소>`로 다시 만든다 (`pip install segno` 필요).
 
 <!-- QR:START -->
 | 사이트 | QR | 주소 |
 | --- | --- | --- |
 | 진행 화면 (타이머·향·소리) — **테이블 가운데 노트북·태블릿용** | <img src="qr/stage.svg" width="140" alt="진행 화면 (타이머·향·소리) QR"> | `https://annieha1002.github.io/haewon-web/stage.html` |
-| 허브 (홈 화면) | <img src="qr/hub.svg" width="140" alt="허브 (홈 화면) QR"> | `https://annieha1002.github.io/haewon-web/` |
+| 허브 (홈 화면) — **진행 카드 C-1(4막 휴대폰)에 인쇄** | <img src="qr/hub.svg" width="140" alt="허브 (홈 화면) QR"> | `https://annieha1002.github.io/haewon-web/` |
 | S1 남은자리 | <img src="qr/s1.svg" width="140" alt="S1 남은자리 QR"> | `https://annieha1002.github.io/haewon-web/#/S1` |
-| S2 송은혜의 휴대폰 — **공개 단서 6(송은혜의 휴대폰) 카드에 인쇄** | <img src="qr/s2.svg" width="140" alt="S2 송은혜의 휴대폰 QR"> | `https://annieha1002.github.io/haewon-web/#/S2` |
+| S2 송은혜의 휴대폰 — **'남겨진 자리의 물건' 카드(제비의 자리 · 송은혜의 휴대폰)에 인쇄** | <img src="qr/s2.svg" width="140" alt="S2 송은혜의 휴대폰 QR"> | `https://annieha1002.github.io/haewon-web/#/S2` |
 | S3 이다음의 휴대폰 — **외골수 카드 1에 인쇄** | <img src="qr/s3.svg" width="140" alt="S3 이다음의 휴대폰 QR"> | `https://annieha1002.github.io/haewon-web/#/S3` |
 | S4 한컷 nare_nowhere | <img src="qr/s4.svg" width="140" alt="S4 한컷 nare_nowhere QR"> | `https://annieha1002.github.io/haewon-web/#/S4` |
 | S5 해원일보 | <img src="qr/s5.svg" width="140" alt="S5 해원일보 QR"> | `https://annieha1002.github.io/haewon-web/#/S5` |
@@ -93,7 +93,7 @@ site/          배포 산출물. stage.html(진행 화면), index.html + assets/
 - **검색**은 띄어쓰기로 나눈 낱말 단위로 찾는다. 제목·본문·닉네임과 게시판 이름, 날짜(`2023-07-19`·`2023.7.19`·`2023년 7월 19일`·`7월 19일`)가 대상이다.
   낱말이 하나라도 든 글은 다 나오고, 모든 낱말이 든 글이 맨 앞, 그다음 많이 든 순서다. 낱말 일부(예: '강우')만 쳐도 찾는다. 잠긴 글은 제목만, 비밀글은 찾지 않는다.
 - **쪽지·DM**은 로그인한 계정이 보내거나 받은 것만 보인다.
-- **휴대폰** 송은혜 폰(`#/S2`, 공개 단서 6 카드)과 이다음 폰(`#/S3`, 외골수 카드 1)은 허브에 없고 카드의 QR로만 들어간다.
+- **휴대폰** 송은혜 폰(`#/S2`, '남겨진 자리의 물건' 카드)과 이다음 폰(`#/S3`, 외골수 카드 1)은 허브에 없고 카드의 QR로만 들어간다.
   예전 보관함 주소(`#/locker`)는 송은혜 폰으로, 별꽃 폰 주소(`#/WIRO`)는 한컷 DM으로 넘어간다 (별꽃·나래 대화는 nare_nowhere DM의 wiro_c 방).
   블로그(S11) 비밀글은 게임 중에는 열 수 없게 힌트를 두지 않는다 (비밀번호는 엔딩북 1부 끝에만).
 - **허브로 가는 버튼은 어느 화면에도 없다.** 허브에서 들어온 사이트는 브라우저 뒤로 가기로 돌아간다.

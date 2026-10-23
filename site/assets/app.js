@@ -902,7 +902,7 @@
   }
 
   // ── S2 송은혜의 휴대폰 ────────────────────────────────────
-  // 4막에 돌려받아 테이블에 놓인 휴대폰. 공개 단서 6 카드의 QR로 들어온다
+  // 4막에 제비 자리에 놓이는 '남겨진 자리의 물건' 카드(공개 단서 6)의 QR로 들어온다
   function caseHint() {
     return SHOW_CASE_HINT ? '<details class="case"><summary>케이스 안쪽에 접힌 사진이 끼워져 있다</summary><div class="case-ph"><div class="case-front">[바다 사진 출력물]</div><div class="case-back">702.<br>첫 글자만 그리면 돼요.</div></div></details>' : '';
   }
