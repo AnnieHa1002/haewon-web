@@ -253,3 +253,10 @@ select { font: inherit; padding: 8px 10px; border-radius: 10px; border: 1px soli
 .fab { position: fixed; right: 16px; bottom: 16px; z-index: 30; }
 
 @media print { .top, .nav, .others, .fab { display: none !important; } body { background: #fff; } }
+.top-in { overflow-x: auto; scrollbar-width: none; }
+.top-in::-webkit-scrollbar { display: none; }
+@media (max-width: 480px) {
+  .brand small { display: none; }
+  .brand { font-size: 14px; }
+  .tbtn { padding: 4px 9px; font-size: 12.5px; }
+}

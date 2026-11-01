@@ -54,7 +54,7 @@
     var S = {};
     FACTS.forEach(function (f) { S[f[0]] = null; });
     S.stage = 0;
-    return { S: S, sheets: {}, paper: false, role: null };
+    return { S: S, sheets: {}, paper: false, role: null, room: null, me: null };
   }
   function load() {
     try {
@@ -66,6 +66,8 @@
         b.sheets = o.sheets || {};
         b.paper = !!o.paper;
         b.role = o.role || null;
+        b.room = o.room || null;
+        b.me = o.me || null;
         return b;
       }
     } catch (e) { /* 저장소를 못 써도 화면은 돈다 */ }
@@ -74,7 +76,117 @@
   function save() {
     try { localStorage.setItem(STORE, JSON.stringify(st)); } catch (e) { /* 무시 */ }
   }
-  function set(k, v) { st.S[k] = v; save(); }
+  function set(k, v) {
+    st.S[k] = v; save();
+    if (st.room && DB) DB.set(rp("state/" + k), v == null ? null : v);
+  }
+  function setMany(patch) {
+    Object.keys(patch).forEach(function (k) { st.S[k] = patch[k]; });
+    save();
+    if (st.room && DB) {
+      var o = {};
+      Object.keys(patch).forEach(function (k) { o["state/" + k] = patch[k] == null ? null : patch[k]; });
+      DB.update(rp(""), o);
+    }
+  }
+
+  /* ───────── 방 (Firebase 실시간 DB · 점검용 ?mock) ───────── */
+  var DEVICE = (function () {
+    try {
+      var d = localStorage.getItem("hanbit.device");
+      if (!d) { d = Math.random().toString(36).slice(2, 10); localStorage.setItem("hanbit.device", d); }
+      return d;
+    } catch (e) { return Math.random().toString(36).slice(2, 10); }
+  })();
+  var DB = null;
+  var ROOM = null; // 방 전체 데이터 {players, votes, sheets, state, created}
+  function rp(path) { return "rooms/" + st.room + (path ? "/" + path : ""); }
+  function pathGet(o, parts) { for (var i = 0; i < parts.length; i++) { if (o == null) return null; o = o[parts[i]]; } return o == null ? null : o; }
+  function pathSet(o, parts, v) {
+    for (var i = 0; i < parts.length - 1; i++) { if (o[parts[i]] == null || typeof o[parts[i]] !== "object") o[parts[i]] = {}; o = o[parts[i]]; }
+    if (v == null) delete o[parts[parts.length - 1]]; else o[parts[parts.length - 1]] = JSON.parse(JSON.stringify(v));
+  }
+  function mockDB() {
+    var KEY = "hanbit.mockdb", subs = [];
+    function all() { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { return {}; } }
+    function fire() { var d = all(); subs.forEach(function (x) { x.cb(pathGet(d, x.parts)); }); }
+    window.addEventListener("storage", function (e) { if (e.key === KEY) fire(); });
+    function write(fn) { var d = all(); fn(d); localStorage.setItem(KEY, JSON.stringify(d)); setTimeout(fire, 0); return Promise.resolve(); }
+    return {
+      on: function (path, cb) { var x = { parts: path.split("/"), cb: cb }; subs.push(x); setTimeout(function () { cb(pathGet(all(), x.parts)); }, 0); return function () { subs = subs.filter(function (y) { return y !== x; }); }; },
+      set: function (path, v) { return write(function (d) { pathSet(d, path.split("/"), v); }); },
+      update: function (path, o) { return write(function (d) { Object.keys(o).forEach(function (k) { pathSet(d, (path ? path + "/" + k : k).split("/"), o[k]); }); }); },
+      once: function (path) { return Promise.resolve(pathGet(all(), path.split("/"))); }
+    };
+  }
+  function fireDB() {
+    var cfg = window.HANBIT_FIREBASE;
+    if (!cfg || !window.firebase || !cfg.databaseURL) return null;
+    try {
+      if (!window.firebase.apps.length) window.firebase.initializeApp(cfg);
+      var d = window.firebase.database();
+      return {
+        on: function (path, cb) { var r = d.ref(path); var h = r.on("value", function (snap) { cb(snap.val()); }); return function () { r.off("value", h); }; },
+        set: function (path, v) { return d.ref(path).set(v); },
+        update: function (path, o) { return d.ref(path).update(o); },
+        once: function (path) { return d.ref(path).once("value").then(function (snap) { return snap.val(); }); }
+      };
+    } catch (e) { console.warn("Firebase 연결 실패", e); return null; }
+  }
+  DB = /[?&]mock\b/.test(location.search) ? mockDB() : fireDB();
+
+  var unsub = null;
+  function enterRoom(code) {
+    if (!DB) return;
+    if (unsub) unsub();
+    if (st.room !== code) { var b = blank(); b.room = code; b.me = null; st = b; }
+    save();
+    unsub = DB.on("rooms/" + code, function (val) {
+      var prevStage = st.S.stage || 0;
+      ROOM = val || {};
+      var b = blank();
+      var remote = ROOM.state || {};
+      Object.keys(b.S).forEach(function (k) { b.S[k] = k in remote ? remote[k] : (k === "stage" ? 0 : null); });
+      st.S = b.S;
+      st.sheets = ROOM.sheets || {};
+      save();
+      var newStage = st.S.stage || 0;
+      var h = location.hash;
+      // 다 같이 넘어가기: 지금 보던 단계가 방의 이전 단계였거나 대기 화면이면 새 단계로 따라간다
+      if (newStage !== prevStage && newStage >= stepIndex("ch1") && (h === "#/play/" + STEPS[prevStage].id || /^#\/(wait|vote)/.test(h))) {
+        location.hash = "#/play/" + STEPS[newStage].id;
+        return;
+      }
+      softRender();
+    });
+  }
+  function leaveRoom() { if (unsub) unsub(); unsub = null; ROOM = null; st = blank(); save(); }
+  function softRender() {
+    var a = document.activeElement;
+    if (a && /^(TEXTAREA|INPUT|SELECT)$/.test(a.tagName) && a.closest("form[data-sheet]")) { softRender.pending = true; return; }
+    softRender.pending = false;
+    rerender();
+  }
+  function newRoomCode() {
+    var A = "23456789ABCDEFGHJKMNPQRSTVWXYZ", c = "";
+    for (var i = 0; i < 4; i++) c += A[Math.floor(Math.random() * A.length)];
+    return c;
+  }
+  function createRoom() {
+    var tryOne = function (n) {
+      var code = newRoomCode();
+      return DB.once("rooms/" + code + "/created").then(function (v) {
+        if (v && n < 5) return tryOne(n + 1);
+        return DB.set("rooms/" + code + "/created", Date.now()).then(function () { return code; });
+      });
+    };
+    return tryOne(0);
+  }
+  function joinURL(code) { return location.href.split("#")[0] + "#join=" + code; }
+  function players() { return (ROOM && ROOM.players) || {}; }
+  function claimed() { return ROLES.filter(function (r) { return players()[r.k]; }).map(function (r) { return r.k; }); }
+  function votes() { return (ROOM && ROOM.votes) || {}; }
+  function inRoom() { return !!(st.room && DB); }
 
   /* ───────── 결과 코드 ───────── */
   var ALPH = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
@@ -379,7 +491,8 @@
 
   // 결정지 → 판정 항목 (고른 답은 바로, 글로 쓴 답은 판정 화면에서)
   function syncSheets() {
-    var S = st.S, d = sh("daeun"), n = sh("noa"), h = sh("haeun"), j = sh("junseo"), t = sh("taesu"), x = sh("sehyun");
+    var before = JSON.stringify(st.S), S = JSON.parse(before);
+    var d = sh("daeun"), n = sh("noa"), h = sh("haeun"), j = sh("junseo"), t = sh("taesu"), x = sh("sehyun");
     if (d && d.done) {
       S.d_bully = d.bully === "siwoo" ? "siwoo" : d.bully === "noa" ? "noa" : "other";
       S.d_water = d.water === "junseo";
@@ -405,7 +518,9 @@
       S.t_daughter = t.daughter === "daeun";
     }
     if (x && x.done) S.x_env = !!x.c_env;
-    save();
+    var old = JSON.parse(before), patch = {};
+    Object.keys(S).forEach(function (k) { if (S[k] !== old[k]) patch[k] = S[k]; });
+    if (Object.keys(patch).length) setMany(patch); else save();
   }
 
   /* ───────── 그리기 도구 ───────── */
@@ -538,24 +653,30 @@
     { id: "reveal", t: "진상·해설·일기" }
   ];
   function stepIndex(id) { for (var i = 0; i < STEPS.length; i++) if (STEPS[i].id === id) return i; return 0; }
+  function shownSteps() { return inRoom() ? STEPS.filter(function (s) { return s.id !== "accuse" && s.id !== "sheets"; }) : STEPS; }
 
   function topBar(stepId) {
     var D = derive(st.S);
     var h = '<header class="top"><div class="top-in"><a class="brand" href="#/">오늘도 한빛은 맑음<small>엔딩북</small></a><span class="top-sp"></span>' +
-      '<a class="tbtn" href="#/story">지난 이야기</a><a class="tbtn" href="#/book">책</a><a class="tbtn" href="#/code">코드</a></div>';
+      (inRoom() ? '<a class="tbtn" href="#/room">방 ' + esc(st.room) + (st.me ? " · " + esc(R[st.me].short) : "") + "</a>" : "") +
+      '<a class="tbtn" href="#/story">지난 이야기</a><a class="tbtn" href="#/book">책</a>' + (inRoom() ? "" : '<a class="tbtn" href="#/code">코드</a>') + "</div>";
     if (stepId) {
-      h += '<nav class="steps">' + STEPS.map(function (s, i) {
+      h += '<nav class="steps">' + shownSteps().map(function (s, n) {
+        var i = stepIndex(s.id);
         var cls = s.id === stepId ? "on" : (i < (st.S.stage || 0) ? "done" : "");
-        return '<a class="step ' + cls + '" href="#/play/' + s.id + '">' + (i + 1) + ". " + esc(s.t) + "</a>";
+        return '<a class="step ' + cls + '" href="#/play/' + s.id + '">' + (n + 1) + ". " + esc(s.t) + "</a>";
       }).join("") + "</nav>";
     }
     return h + "</header>";
   }
   function navBtns(stepId, canNext, label) {
-    var i = stepIndex(stepId);
-    var prev = i > 0 ? '<a class="btn ghost" href="#/play/' + STEPS[i - 1].id + '">← ' + esc(STEPS[i - 1].t) + "</a>" : '<a class="btn ghost" href="#/">← 처음</a>';
-    var next = i < STEPS.length - 1 ? '<button class="btn pri" data-next="' + STEPS[i + 1].id + '"' + (canNext ? "" : " disabled") + ">" + esc(label || STEPS[i + 1].t) + " →</button>" : '<a class="btn pri" href="#/story">지난 이야기 다시 보기</a>';
-    return '<div class="nav">' + prev + next + "</div>";
+    var L = shownSteps(), i = 0;
+    for (var n = 0; n < L.length; n++) if (L[n].id === stepId) i = n;
+    var back = inRoom() ? '<a class="btn ghost" href="#/wait">← 결정지</a>' : '<a class="btn ghost" href="#/">← 처음</a>';
+    var prev = i > 0 ? '<a class="btn ghost" href="#/play/' + L[i - 1].id + '">← ' + esc(L[i - 1].t) + "</a>" : back;
+    var next = i < L.length - 1 ? '<button class="btn pri" data-next="' + L[i + 1].id + '"' + (canNext ? "" : " disabled") + ">" + esc(label || L[i + 1].t) + " →</button>" : '<a class="btn pri" href="#/story">지난 이야기 다시 보기</a>';
+    var who = inRoom() && i < L.length - 1 ? '<p class="small muted" style="text-align:right;margin:6px 0 0">누가 눌러도 모두의 화면이 함께 넘어가요</p>' : "";
+    return '<div class="nav">' + prev + next + "</div>" + who;
   }
   function peek(groupId, items, taken) {
     // items: [[sectionId, label]]
@@ -568,7 +689,7 @@
   function vPlay(stepId) {
     var S = st.S, D = derive(S), h = "", can = true;
     var i = stepIndex(stepId);
-    if ((S.stage || 0) < i) { S.stage = i; save(); }
+    if (!inRoom() && (S.stage || 0) < i) { S.stage = i; save(); }
 
     if (stepId === "accuse") {
       h += '<div class="kicker">최후 토론 뒤</div><h2 class="ttl">범인 지목</h2>';
@@ -700,6 +821,7 @@
 
     if (stepId === "personal") {
       h += '<div class="kicker">4장</div><h2 class="ttl">각자의 엔딩</h2>';
+      if (inRoom() && st.me) h += '<a class="big-btn primary" href="#/role/' + st.me + '" style="margin:10px 0"><span class="ic">★</span><span><b>내 엔딩 보기 · ' + esc(R[st.me].name) + "</b><span>내 점수와 엔딩. 아래 판정이 끝나야 다 나와요</span></span></a>";
       h += '<p class="lead">여러 사람의 점수에 함께 쓰이는 답을 먼저 판정하고, 각자 자기 이름을 눌러 점수와 엔딩을 읽습니다.</p>';
       h += '<div class="card"><h3>함께 쓰는 판정</h3>' +
         factRow("다은의 결정지 ‘학교폭력 관계자’", "", seg("d_bully", [["siwoo", "권시우"], ["noa", "강노아"], ["other", "그 밖·빈칸"]], S.d_bully), answerBox("daeun", "bully")) +
@@ -742,8 +864,8 @@
     var r = R[k];
     if (!r) return vHome();
     var s = st.sheets[k] || {};
-    var open = vSheet.open === k;
-    var h = topBar("sheets") + "<main>";
+    var open = vSheet.open === k || (inRoom() && k === st.me);
+    var h = (inRoom() ? topBar() : topBar("sheets")) + "<main>";
     if (!open) {
       h += '<div class="lock"><div class="ic">🔒</div><h2 class="ttl">' + esc(r.name) + "의 최종 결정지</h2><p class=\"lead\">" + esc(r.name) + " 역할만 보세요. 다른 사람은 화면에서 눈을 떼 주세요.</p>" +
         '<button class="btn pri" data-open="' + k + '">' + esc(r.name) + "입니다 · 열기</button> <a class=\"btn ghost\" href=\"#/play/sheets\">돌아가기</a></div>";
@@ -774,7 +896,8 @@
       if (f.type === "count") h += '<label class="f"><span>' + esc(f.q) + '</span><select name="' + f.id + '">' + [0, 1, 2, 3, 4].map(function (n) { return '<option value="' + n + '"' + (+v === n ? " selected" : "") + ">" + n + "장</option>"; }).join("") + "</select></label>";
     });
     if (inExtra) h += "</div>";
-    h += '<div class="nav"><a class="btn ghost" href="#/play/sheets" data-close>취소</a><button class="btn pri" type="submit">다 썼어요 · 가리기</button></div></form>';
+    h += inRoom() ? '<div class="nav"><a class="btn ghost" href="#/vote">← 지목</a><button class="btn pri" type="submit">' + (s.done ? "고친 대로 다시 내기" : "다 썼어요 · 내기") + "</button></div></form>" :
+      '<div class="nav"><a class="btn ghost" href="#/play/sheets" data-close>취소</a><button class="btn pri" type="submit">다 썼어요 · 가리기</button></div></form>';
     return h + "</main>";
   }
 
@@ -976,15 +1099,104 @@
     } catch (e) { box.textContent = ""; }
   }
 
+  /* ───────── 방 화면: 코드 공유 → 캐릭터 → 지목 → 결정지 → 엔딩 ───────── */
+  function roomGuard() {
+    if (!DB) return '<main><div class="card">방 기능이 아직 켜지지 않았어요 (Firebase 설정 필요). <a href="#/">처음으로</a></div></main>';
+    if (!st.room) return '<main><div class="card">들어간 방이 없어요. <a href="#/">처음으로</a></div></main>';
+    if (!ROOM) return topBar() + '<main><p class="muted" style="text-align:center;padding:40px 0">방에 연결하는 중…</p></main>';
+    if (!ROOM.created) return topBar() + '<main><div class="card">‘' + esc(st.room) + '’ 방을 찾지 못했어요. 코드를 다시 확인해 주세요.<div class="row" style="margin-top:10px"><button class="btn" data-leave>나가기</button></div></div></main>';
+    return null;
+  }
+  function progressList() {
+    var P = players(), V = votes();
+    return '<div class="score">' + ROLES.map(function (r) {
+      var p = P[r.k], s = st.sheets[r.k];
+      var stt = !p ? '<span class="muted">비어 있음</span>' : (s && s.done ? "결정지 냄 ✅" : V[r.k] ? "지목함 · 결정지 쓰는 중" : "들어옴");
+      return '<div class="sc-item" style="grid-template-columns:34px 1fr auto"><img alt="" src="' + roleImg(r.k) + '" style="width:30px;height:40px;object-fit:cover;border-radius:5px"><div><b>' + esc(r.name) + "</b>" + (r.k === st.me ? ' <span class="taken-mark">나</span>' : "") + '</div><div class="small">' + stt + "</div></div>";
+    }).join("") + "</div>";
+  }
+  function vRoom() {
+    var g = roomGuard(); if (g) return g;
+    var P = players(), url = joinURL(st.room);
+    var h = topBar() + "<main>";
+    h += '<div class="kicker">1 · 방 코드 나누기</div><h2 class="ttl">방 ' + esc(st.room) + "</h2>";
+    h += '<p class="lead">모두 각자 휴대폰으로 이 코드를 입력하거나 QR을 찍어 같은 방에 들어옵니다.</p>';
+    h += '<div class="card"><div class="code-big">' + esc(st.room) + '</div><div class="qr" id="qr"></div><div class="row" style="justify-content:center"><button class="btn" data-copy="' + esc(st.room) + '">코드 복사</button><button class="btn" data-copy="' + esc(url) + '">링크 복사</button></div></div>';
+    h += '<div class="kicker" style="margin-top:22px">2 · 내 캐릭터 고르기</div><h2 class="ttl" style="font-size:22px">나는 누구인가요?</h2>';
+    h += '<div class="roles">' + ROLES.map(function (r) {
+      var p = P[r.k], mine = r.k === st.me, other = p && !mine;
+      return '<button class="role" style="--rc:' + r.color + (mine ? ";outline:3px solid var(--dusk);outline-offset:2px" : "") + (other ? ";opacity:.55" : "") + '" data-claim="' + r.k + '"><img alt="" src="' + roleImg(r.k) + '">' +
+        (mine ? '<span class="badge">나</span>' : other ? '<span class="badge">선택됨</span>' : "") + '<div class="nm"><b>' + esc(r.name) + "</b><span>" + (mine ? "내 캐릭터" : other ? "다른 사람이 골랐어요" : "고르기") + "</span></div></button>";
+    }).join("") + "</div>";
+    h += '<p class="small muted" style="margin-top:8px">' + claimed().length + " / 7명 들어옴</p>";
+    h += '<div class="nav"><button class="btn ghost" data-leave>방 나가기</button>' + (st.me ? '<a class="btn pri" href="#/vote">지목하러 가기 →</a>' : '<button class="btn pri" disabled>캐릭터를 골라 주세요</button>') + "</div>";
+    setTimeout(function () { drawQR(url); }, 0);
+    return h + "</main>";
+  }
+  function tally() {
+    var V = votes(), c = {};
+    Object.keys(V).forEach(function (k) { if (players()[k]) c[V[k]] = (c[V[k]] || 0) + 1; });
+    var max = 0; Object.keys(c).forEach(function (k) { max = Math.max(max, c[k]); });
+    var top = Object.keys(c).filter(function (k) { return c[k] === max; });
+    return { count: c, top: top, max: max };
+  }
+  function vVote() {
+    var g = roomGuard(); if (g) return g;
+    (function () {
+      var w = claimed(), V = votes();
+      if (w.length && w.every(function (k) { return V[k]; })) { var T = tally(); if (T.top.length === 1 && st.S.acc !== T.top[0]) set("acc", T.top[0]); }
+    })();
+    if (!st.me) { setTimeout(function () { location.hash = "#/room"; }, 0); return ""; }
+    var V = votes(), my = V[st.me], who = claimed(), done = who.filter(function (k) { return V[k]; }).length;
+    var all = who.length > 0 && done === who.length, T = tally();
+    var h = topBar() + "<main>";
+    h += '<div class="kicker">3 · 최후 토론 뒤</div><h2 class="ttl">범인 지목</h2>';
+    h += '<p class="lead">하나, 둘, 셋에 맞춰 각자 지목하세요. 모두 지목할 때까지 누가 누구를 골랐는지는 보이지 않아요. 다 모이면 결과가 함께 열립니다.</p>';
+    h += '<div class="choices">' + ACC.map(function (k) {
+      var on = my === k;
+      var pic = k === "none" ? '<span class="dot" style="background:var(--ink-3)"></span>' : '<img alt="" src="' + roleImg(k) + '">';
+      return '<button class="choice' + (on ? " on" : "") + '" data-vote="' + k + '"' + (all ? " disabled" : "") + ">" + pic + "<b>" + esc(nameOf(k)) + "</b>" + (all && T.count[k] ? ' <span class="muted small">' + T.count[k] + "표</span>" : "") + "</button>";
+    }).join("") + "</div>";
+    h += '<p class="small muted" style="margin-top:10px">지목 ' + done + " / " + who.length + "명</p>";
+    if (all) {
+      h += '<div class="card">';
+      if (T.top.length === 1) h += "<h3>가장 많이 지목된 사람 · " + esc(nameOf(T.top[0])) + " (" + T.max + "표)</h3>";
+      else h += "<h3>동점이에요 (" + T.top.map(nameOf).join(", ") + ")</h3><p class=\"small\">다시 지목하거나, 이야기로 정한 사람을 눌러 주세요.</p>";
+      h += '<div class="row">' + (T.top.length > 1 ? T.top.map(function (k) { return '<button class="btn' + (st.S.acc === k ? " pri" : "") + '" data-set="acc" data-v="' + esc(JSON.stringify(k)) + '">' + esc(nameOf(k)) + "</button>"; }).join("") : "") +
+        '<button class="btn ghost" data-revote>다시 지목하기</button></div></div>';
+    }
+    var ready = !!st.S.acc && all;
+    h += '<div class="nav"><a class="btn ghost" href="#/room">← 방</a>' + (ready ? '<a class="btn pri" href="#/mysheet">최종 결정지 쓰기 →</a>' : '<button class="btn pri" disabled>' + (all ? "지목 결과를 정해 주세요" : "모두 지목할 때까지 기다려요") + "</button>") + "</div>";
+    return h + "</main>";
+  }
+  function vWait() {
+    var g = roomGuard(); if (g) return g;
+    var who = claimed(), done = who.filter(function (k) { var s = st.sheets[k]; return s && s.done; }).length;
+    var all = who.length > 0 && done === who.length;
+    var h = topBar() + "<main>";
+    h += '<div class="kicker">4 · 최종 결정지</div><h2 class="ttl">모두 쓰기를 기다려요</h2>';
+    h += '<p class="lead">모두 결정지를 내면 엔딩북을 함께 엽니다. 엔딩북은 모두의 화면에서 같이 넘어가요.</p>';
+    h += '<div class="card">' + progressList() + "</div>";
+    if (st.me) h += '<p><a class="btn" href="#/mysheet">내 결정지 다시 보기·고치기</a></p>';
+    h += '<div class="nav"><a class="btn ghost" href="#/vote">← 지목</a>' + (all ? '<button class="btn pri" data-start>엔딩북 열기 →</button>' : '<button class="btn pri" data-start data-force>' + done + " / " + who.length + "명 · 그래도 열기</button>") + "</div>";
+    if ((st.S.stage || 0) >= stepIndex("ch1")) h += '<p style="text-align:center"><a class="btn pri" href="#/play/' + STEPS[st.S.stage].id + '">엔딩북이 열렸어요 · 지금 읽는 곳으로</a></p>';
+    return h + "</main>";
+  }
+
   /* ───────── 처음 ───────── */
   function vHome() {
     var S = st.S, D = derive(S), started = S.acc != null;
     var u = img("cover");
     var h = '<main><div class="cover">' + (u ? '<img alt="" src="' + u + '">' : "") + '<div class="cover-in"><p class="small">7인용 머더 미스터리</p><h1>오늘도<br>한빛은 맑음</h1><p>엔딩북</p></div></div>';
     h += '<div class="home-actions">';
-    h += '<a class="big-btn primary" href="#/play/' + (started ? STEPS[Math.min(S.stage || 0, STEPS.length - 1)].id : "accuse") + '"><span class="ic">▶</span><span><b>' + (started ? "이어서 진행하기" : "엔딩 진행하기") + "</b><span>테이블 가운데 한 기기로 지목부터 개인 엔딩까지</span></span></a>";
-    h += '<a class="big-btn" href="#/code"><span class="ic">#</span><span><b>결과 코드로 보기</b><span>진행하는 기기의 코드·QR로 내 휴대폰에서 같은 결과 보기</span></span></a>';
-    if (started) h += '<a class="big-btn" href="#/story"><span class="ic">↺</span><span><b>지난 이야기</b><span>이번 판에 읽은 부분 다시 보기' + (D.ch3 ? " · 내 엔딩 보기" : "") + "</span></span></a>";
+    if (DB) {
+      if (st.room) h += '<a class="big-btn primary" href="#/room"><span class="ic">◎</span><span><b>방 ' + esc(st.room) + "으로 돌아가기</b><span>" + (st.me ? esc(R[st.me].name) + " · " : "") + "진행 중인 방</span></span></a>";
+      h += '<button class="big-btn' + (st.room ? "" : " primary") + '" data-create><span class="ic">＋</span><span><b>방 만들기</b><span>코드를 나누고, 각자 휴대폰으로 캐릭터를 골라 지목·결정지·엔딩까지</span></span></button>';
+      h += '<form class="big-btn" data-joinform style="cursor:default"><span class="ic">#</span><span style="flex:1"><b>방 들어가기</b><span class="row" style="margin-top:6px;flex-wrap:nowrap"><input type="text" name="room" placeholder="방 코드 4자리" maxlength="6" autocomplete="off" style="text-transform:uppercase;font-family:ui-monospace,monospace;min-height:40px"><button class="btn pri">입장</button></span></span></form>';
+    }
+    h += '<a class="big-btn' + (DB ? "" : " primary") + '" href="#/play/' + (started && !st.room ? STEPS[Math.min(S.stage || 0, STEPS.length - 1)].id : "accuse") + '"><span class="ic">▶</span><span><b>' + (started && !st.room ? "이어서 진행하기" : "한 기기로 진행하기") + "</b><span>" + (DB ? "휴대폰 하나로 돌려 가며 진행할 때" : "테이블 가운데 한 기기로 지목부터 개인 엔딩까지") + "</span></span></a>";
+    if (!DB) h += '<a class="big-btn" href="#/code"><span class="ic">#</span><span><b>결과 코드로 보기</b><span>진행하는 기기의 코드·QR로 내 휴대폰에서 같은 결과 보기</span></span></a>';
+    if (started && !st.room) h += '<a class="big-btn" href="#/story"><span class="ic">↺</span><span><b>지난 이야기</b><span>이번 판에 읽은 부분 다시 보기' + (D.ch3 ? " · 내 엔딩 보기" : "") + "</span></span></a>";
     h += '<a class="big-btn" href="#/book"><span class="ic">≡</span><span><b>엔딩북 전체 보기</b><span>모든 갈래와 엔딩을 원고 그대로</span></span></a>';
     h += "</div>";
     if (st.role && started) h += '<p style="text-align:center"><a class="btn" href="#/role/' + st.role + '">' + esc(R[st.role].name) + "의 엔딩으로</a></p>";
@@ -1007,6 +1219,9 @@
       }
       toast("코드를 읽지 못했어요");
     }
+    if ((m = hash.match(/^join=([0-9A-Za-z]+)/))) {
+      if (DB) { enterRoom(m[1].toUpperCase()); location.replace("#/room"); return; }
+    }
     var parts = hash.replace(/^\//, "").split("/");
     var v = parts[0], arg = parts.slice(1).join("/");
     var html;
@@ -1016,6 +1231,10 @@
     else if (v === "story") html = vStory();
     else if (v === "book") html = vBook(arg);
     else if (v === "code") html = vCode();
+    else if (v === "room") html = vRoom();
+    else if (v === "vote") html = vVote();
+    else if (v === "mysheet") { var gg = roomGuard(); html = gg || (st.me ? vSheet(st.me) : (setTimeout(function () { location.hash = "#/room"; }, 0), "")); }
+    else if (v === "wait") html = vWait();
     else html = vHome();
     app.innerHTML = html;
     document.title = "한빛 엔딩북";
@@ -1023,9 +1242,10 @@
     route.keepScroll = 0;
   }
   function rerender() { route.keepScroll = window.scrollY; route(); }
+  document.addEventListener("focusout", function () { setTimeout(function () { if (softRender.pending) softRender(); }, 50); });
 
   app.addEventListener("click", function (ev) {
-    var t = ev.target.closest("[data-set],[data-next],[data-open],[data-peekid],[data-copy],[data-reset],[data-close]");
+    var t = ev.target.closest("[data-set],[data-next],[data-open],[data-peekid],[data-copy],[data-reset],[data-close],[data-create],[data-claim],[data-vote],[data-revote],[data-start],[data-leave]");
     if (!t) return;
     if (t.hasAttribute("data-set")) {
       var k = t.getAttribute("data-set"), val = JSON.parse(t.getAttribute("data-v"));
@@ -1035,7 +1255,7 @@
       rerender();
     } else if (t.hasAttribute("data-next")) {
       var nx = t.getAttribute("data-next");
-      if (stepIndex(nx) > (st.S.stage || 0)) set("stage", stepIndex(nx));
+      if (inRoom() || stepIndex(nx) > (st.S.stage || 0)) set("stage", stepIndex(nx));
       location.hash = "#/play/" + nx;
     } else if (t.hasAttribute("data-open")) {
       vSheet.open = t.getAttribute("data-open"); rerender();
@@ -1051,6 +1271,25 @@
     } else if (t.hasAttribute("data-copy")) {
       var txt = t.getAttribute("data-copy");
       (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(function () { toast("복사했어요"); }, function () { window.prompt("복사하세요", txt); });
+    } else if (t.hasAttribute("data-create")) {
+      t.disabled = true;
+      createRoom().then(function (code) { enterRoom(code); location.hash = "#/room"; }, function (e) { t.disabled = false; toast("방을 만들지 못했어요: " + (e && e.message || e)); });
+    } else if (t.hasAttribute("data-claim")) {
+      var rk = t.getAttribute("data-claim"), P = players();
+      if (P[rk] && P[rk].id !== DEVICE && rk !== st.me && !window.confirm(R[rk].name + "은(는) 이미 다른 기기가 골랐어요. 휴대폰을 바꿔 다시 들어온 거라면 이 기기로 가져올까요?")) return;
+      var up = {}; if (st.me && st.me !== rk && P[st.me] && P[st.me].id === DEVICE) up["players/" + st.me] = null;
+      up["players/" + rk] = { id: DEVICE, at: Date.now() };
+      st.me = rk; st.role = rk; save(); DB.update(rp(""), up);
+    } else if (t.hasAttribute("data-vote")) {
+      DB.set(rp("votes/" + st.me), t.getAttribute("data-vote"));
+    } else if (t.hasAttribute("data-revote")) {
+      DB.update(rp(""), { votes: null, "state/acc": null });
+    } else if (t.hasAttribute("data-start")) {
+      if (t.hasAttribute("data-force") && !window.confirm("아직 결정지를 내지 않은 사람이 있어요. 그래도 엔딩북을 열까요?")) return;
+      var ns = Math.max(stepIndex("ch1"), st.S.stage || 0);
+      set("stage", ns); location.hash = "#/play/" + STEPS[ns].id;
+    } else if (t.hasAttribute("data-leave")) {
+      if (window.confirm("이 기기에서 방을 나갈까요? (방은 그대로 남아요)")) { if (st.me && players()[st.me] && players()[st.me].id === DEVICE) DB.set(rp("players/" + st.me), null); leaveRoom(); location.hash = "#/"; }
     } else if (t.hasAttribute("data-reset")) {
       if (window.confirm("이 기기의 진행 상황과 결정지를 모두 지울까요?")) { st = blank(); save(); vSheet.open = null; location.hash = "#/"; toast("새 판을 시작합니다"); }
     }
@@ -1070,9 +1309,16 @@
         else if (q.type === "radio") { var c = f.querySelector('input[name="' + q.id + '"]:checked'); o[q.id] = c ? c.value : ""; }
         else o[q.id] = el.value.trim();
       });
-      st.sheets[k] = o; syncSheets(); vSheet.open = null;
-      toast(R[k].name + "의 결정지를 가렸어요. 다음 사람에게 넘기세요");
-      location.hash = "#/play/sheets";
+      st.sheets[k] = o;
+      if (inRoom()) DB.set(rp("sheets/" + k), o);
+      syncSheets(); vSheet.open = null;
+      if (inRoom()) { toast("결정지를 냈어요"); location.hash = "#/wait"; }
+      else { toast(R[k].name + "의 결정지를 가렸어요. 다음 사람에게 넘기세요"); location.hash = "#/play/sheets"; }
+    }
+    if (f.hasAttribute("data-joinform")) {
+      var rc = (f.elements.room.value || "").toUpperCase().replace(/[^0-9A-Z]/g, "");
+      if (rc.length < 4) { toast("방 코드 4자리를 넣어 주세요"); return; }
+      enterRoom(rc); location.hash = "#/room"; return;
     }
     if (f.hasAttribute("data-codeform")) {
       var S = readCode(f.elements.code.value);
@@ -1087,5 +1333,6 @@
 
   // 디버그·점검용
   window.HANBIT = { derive: derive, scoreOf: scoreOf, makeCode: makeCode, readCode: readCode, state: function () { return st; }, ROLES: ROLES };
+  if (st.room && DB) enterRoom(st.room);
   route();
 })();
