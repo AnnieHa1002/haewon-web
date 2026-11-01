@@ -70,6 +70,7 @@ await page.click('form button[type=submit]');
 await page.click('a.role:has-text("윤세현")'); await page.click('[data-open]');
 await page.fill('textarea[name=reason]', '다은 엄마랑 만나려고');
 await page.click('form button[type=submit]'); await shot('04-sheets');
+await page.click('[data-next]'); await shot('04b-ch1');
 await page.click('[data-next]');
 await page.click('[data-set=lab] >> text=열렸다'); await shot('05-lab');
 await page.click('[data-next]');

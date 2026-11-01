@@ -529,6 +529,7 @@
   var STEPS = [
     { id: "accuse", t: "지목" },
     { id: "sheets", t: "결정지" },
+    { id: "ch1", t: "1장 지목 결과" },
     { id: "lab", t: "2장 연구실" },
     { id: "truth", t: "진상 판정" },
     { id: "escape", t: "탈출" },
@@ -570,13 +571,20 @@
     if ((S.stage || 0) < i) { S.stage = i; save(); }
 
     if (stepId === "accuse") {
-      h += chHead(1, "가장 많이 지목된 사람");
-      h += '<p class="lead">최후 토론이 끝나면 하나, 둘, 셋에 모두 손가락으로 지목합니다. 가장 많이 지목된 사람을 고르세요.</p>';
+      h += '<div class="kicker">최후 토론 뒤</div><h2 class="ttl">범인 지목</h2>';
+      h += '<p class="lead">하나, 둘, 셋에 모두 손가락으로 지목합니다. 가장 많이 지목된 사람을 고르세요. 엔딩북은 최종 결정지를 다 쓴 뒤에 읽습니다.</p>';
       h += '<div class="choices">' + ACC.map(function (k) {
         var on = S.acc === k;
         var pic = k === "none" ? '<span class="dot" style="background:var(--ink-3)"></span>' : '<img alt="" src="' + roleImg(k) + '">';
         return '<button class="choice' + (on ? " on" : "") + '" data-set="acc" data-v="' + esc(JSON.stringify(k)) + '">' + pic + "<b>" + esc(nameOf(k)) + "</b></button>";
       }).join("") + "</div>";
+      can = !!S.acc;
+      h += navBtns(stepId, can, "최종 결정지 쓰기");
+    }
+
+    if (stepId === "ch1") {
+      h += chHead(1, "가장 많이 지목된 사람");
+      if (!S.acc) h += '<div class="warn">먼저 <a href="#/play/accuse">지목 결과</a>를 골라 주세요.</div>';
       if (S.acc) {
         var sid = ACC_SEC[S.acc];
         var reader = S.acc === "none" ? "임다은 역할" : nameOf(S.acc) + " 역할";
@@ -588,7 +596,7 @@
     }
 
     if (stepId === "sheets") {
-      h += '<div class="kicker">지목 후</div><h2 class="ttl">최종 결정지</h2>';
+      h += '<div class="kicker">지목 후 · 엔딩북을 읽기 전</div><h2 class="ttl">최종 결정지</h2>';
       h += '<p class="lead">이 기기를 돌려 가며 각자 자기 결정지를 씁니다. 엔딩북에서 판정할 때까지 답을 말하거나 남에게 보여 주지 마세요. 다 쓰면 화면을 가리고 다음 사람에게 넘깁니다.</p>';
       h += '<div class="card"><label class="cb"><input type="checkbox" data-paper' + (st.paper ? " checked" : "") + '><span><b>종이 결정지를 썼어요</b><br><span class="small muted">켜면 이 단계를 건너뛰고, 판정할 때 종이를 보며 인정/불인정만 누릅니다.</span></span></label></div>';
       if (!st.paper) {
@@ -600,7 +608,7 @@
         var n = ROLES.filter(function (r) { var s = sh(r.k); return s && s.done; }).length;
         h += '<p class="small muted" style="margin-top:10px">' + n + " / 7 작성</p>";
       }
-      h += navBtns(stepId, true);
+      h += navBtns(stepId, true, "다 썼어요 · 엔딩북 1장");
     }
 
     if (stepId === "lab") {
