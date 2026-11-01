@@ -122,3 +122,34 @@ site/          배포 산출물. stage.html(진행 화면), index.html + assets/
 ```
 node tools/smoke.mjs shots/   # 스크린샷 + 콘솔 에러 확인
 ```
+
+---
+
+# 오늘도 한빛은 맑음 · 웹 엔딩북 (`site/hanbit/`)
+
+주소: `https://annieha1002.github.io/haewon-web/hanbit/` — 위의 4막 사이트와는 따로 도는 페이지다.
+
+- **엔딩 진행하기** 테이블 가운데 한 기기로 지목 → 최종 결정지(기기를 돌려 가며 각자 작성, 잠금 화면 있음 · 종이로 썼다면 건너뜀) → 2장 연구실·진상 판정 → 2-3 탈출 → 3장 → 4장 개인 점수·엔딩 → 5~7장 순서로 진행한다. 엔딩북의 [진행 안내]·[읽기 안내] 규칙대로 갈래와 점수를 자동으로 고른다. 글로 쓴 답(손거울의 비밀 등)은 정답 기준과 함께 보여 주고 '인정/불인정'만 누른다.
+- **결과 코드** 판정 결과를 `HB-…` 코드와 QR·링크로 만든다. 다른 휴대폰에서 코드를 넣으면 같은 갈래·점수로 자기 역할의 엔딩을 본다(서버 없음 — 판정 결과가 코드 안에 다 들어 있다. 결정지에 쓴 글은 들어가지 않는다).
+- **지난 이야기** 이번 판에 읽은 절만 차례대로 다시 보기. **책** 모든 갈래·엔딩을 원고 그대로, 이번 판에 읽은 곳은 표시. 진행 화면 곳곳의 '다른 갈래도 보기'로 안 고른 갈래를 미리 볼 수 있다.
+
+## 원고 고치기
+
+원고의 기준은 구글 문서 '엔딩북 (진행자 또는 마지막에 함께 읽기)'이다.
+
+1. **자동 반영(권장)** 문서를 '링크가 있는 모든 사용자 · 뷰어'로 공유하고, 저장소 Settings → Secrets and variables → Actions → **Variables**에 `HANBIT_DOC_ID` = `1f9T_QffBhWph2au55_qo9vyzC8K68XhBVxgTrkI7WQE` 를 넣는다. 그러면 배포할 때마다, 그리고 3시간마다 문서 최신본으로 다시 만든다. 바로 반영하려면 Actions → Deploy site to GitHub Pages → Run workflow.
+   (사이트 주소를 아는 사람은 결말을 볼 수 있다는 점은 문서 공유와 같다. 검색에는 안 걸리게 막아 두었다.)
+2. **직접** `data/hanbit/endingbook.md`를 고치고 `python3 tools/build_hanbit.py` → 푸시.
+
+문서 형식만 지키면 글은 마음대로 고쳐도 된다: 장은 `## N. 제목`, 절은 `### 1-A`·`### 4-1 · 임다은`처럼 ID로 시작, 개인 엔딩은 `[읽기 안내 · 낭독하지 않음] 엔딩 제목` 한 줄로 시작.
+**갈래·점수 규칙(어느 조건이면 어느 절·엔딩인지)을 바꾸면** `site/hanbit/assets/hanbit.js`의 `derive`·`scoreOf`도 같이 고쳐야 한다. 엔딩 제목을 바꿨는데 코드가 옛 제목을 찾으면 화면에 "원고에서 찾지 못했어요" 안내가 뜨고, 책 보기로 직접 따라갈 수 있다.
+
+## 그림
+
+`site/hanbit/img/`는 맥북 `Hanbit_Is_Sunny_Today/03_Asset/04_Illustrations/For_Ending_Book`(+ `Maps_and_Clues/EB-4-MAP`, `05_Cards/Backs_Art/CD-P-*`)을 웹용(가로 1400px JPEG)으로 줄인 것. 어느 절에 어느 그림을 붙일지는 `data/hanbit/images.json`에서 고친다.
+
+## 점검
+
+```
+node tools/smoke_hanbit.mjs shots/hanbit   # 판정 2만 가지 조합으로 모든 인물에 원고 속 엔딩이 나오는지 + 코드 왕복 + 화면 따라가기
+```
