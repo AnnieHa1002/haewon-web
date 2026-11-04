@@ -53,6 +53,17 @@ await pages[8].goto(base + '#/play/ch1'); await wait(200);
 ok(/가득 찼어요/.test(await pages[8].textContent('main')), '9번째 기기는 엔딩 화면도 못 봄');
 await pages[8].screenshot({ path: `${out}/01b-full.png` });
 await gm.screenshot({ path: `${out}/01-room-gm.png`, fullPage: true });
+// 지목 전에는 결정지도, 엔딩북도 못 연다
+await pages[2].goto(base + '#/mysheet'); await wait(400);
+ok((await pages[2].evaluate(() => location.hash)) === '#/vote', '지목 전 결정지 → 지목 화면으로 돌려보냄');
+await gm.goto(base + '#/wait'); await wait(200);
+ok(!(await gm.$('[data-start]')) && /모두 지목하지 않았어요/.test(await gm.textContent('main')), '지목 전 GM도 엔딩북을 못 엶');
+// 여섯 명만 지목 → 아직 결정지·엔딩북 못 감
+for (let i = 0; i < 6; i++) { await pages[i].goto(base + '#/vote'); await wait(60); await pages[i].click(`[data-vote=${i < 5 ? 'haeun' : 'siwoo'}]`); await wait(60); }
+await wait(300);
+ok((await S(p0)).acc == null, '6/7 지목 땐 지목 결과 없음');
+await pages[1].goto(base + '#/mysheet'); await wait(400);
+ok((await pages[1].evaluate(() => location.hash)) === '#/vote', '6/7 지목 땐 결정지로 못 감');
 // 지목: 다섯 명 하은, 두 명 시우. GM은 지목 못 함
 for (let i = 0; i < 7; i++) { await pages[i].goto(base + '#/vote'); await wait(60); await pages[i].click(`[data-vote=${i < 5 ? 'haeun' : 'siwoo'}]`); await wait(60); }
 await gm.goto(base + '#/vote'); await wait(200);

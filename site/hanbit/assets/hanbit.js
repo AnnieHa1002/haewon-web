@@ -234,6 +234,9 @@
       st.me = rk; if (R[rk]) st.role = rk; save(); rerender(); return true;
     });
   }
+  // 방에 앉은 캐릭터 모두가 지목했고, 지목 결과(가장 많이 지목된 사람)가 정해졌는가
+  function allVoted() { var w = claimed(), V = votes(); return w.length > 0 && w.every(function (k) { return V[k]; }); }
+  function voteDone() { return allVoted() && !!st.S.acc; }
   function advanceIfReady() {
     if (!inRoom() || !ROOM) return;
     var stage = st.S.stage || 0, cur = STEPS[stage];
@@ -243,7 +246,9 @@
     }
     if (stage < stepIndex("ch1")) {
       var w = claimed();
-      if (w.length && w.every(function (k) { var s2 = st.sheets[k]; return s2 && s2.done; }) && st.S.acc) bumpStage(stage, stepIndex("ch1"));
+      // 지목이 끝나기 전에는 지목 결과를 두지 않는다 (늦게 들어온 사람이 있으면 결과를 지우고 다시 모은다)
+      if (st.S.acc != null && !allVoted()) { set("acc", null); return; }
+      if (voteDone() && w.every(function (k) { var s2 = st.sheets[k]; return s2 && s2.done; })) bumpStage(stage, stepIndex("ch1"));
     }
   }
   function bumpStage(from, to) {
@@ -1285,7 +1290,8 @@
     h += '<div class="card">' + progressList() + "</div>";
     if (isPlayer()) h += '<p><a class="btn" href="#/mysheet">내 결정지 다시 보기·고치기</a></p>';
     h += '<div class="nav"><a class="btn ghost" href="#/vote">← 지목</a>' + (all ? '<button class="btn pri" disabled>엔딩북을 여는 중…</button>' : '<button class="btn pri" disabled>' + done + " / " + who.length + "명 냈어요</button>") + "</div>";
-    if (isGM() && !all) h += '<p style="text-align:right"><button class="btn ghost" data-start data-force>GM · 기다리지 않고 엔딩북 열기</button></p>';
+    if (!voteDone()) h += '<div class="warn">아직 모두 지목하지 않았어요. 지목이 끝나야 엔딩북이 열려요. <a href="#/vote">지목 화면으로</a></div>';
+    else if (isGM() && !all) h += '<p style="text-align:right"><button class="btn ghost" data-start data-force>GM · 기다리지 않고 엔딩북 열기</button></p>';
     if ((st.S.stage || 0) >= stepIndex("ch1")) h += '<p style="text-align:center"><a class="btn pri" href="#/play/' + STEPS[st.S.stage].id + '">엔딩북이 열렸어요 · 지금 읽는 곳으로</a></p>';
     return h + "</main>";
   }
@@ -1340,7 +1346,7 @@
     else if (v === "code") html = vCode();
     else if (v === "room") html = vRoom();
     else if (v === "vote") html = vVote();
-    else if (v === "mysheet") { var gg = roomGuard(); html = gg || (isPlayer() ? vSheet(st.me) : (setTimeout(function () { location.hash = isGM() ? "#/wait" : "#/room"; }, 0), "")); }
+    else if (v === "mysheet") { var gg = roomGuard(); html = gg || (isPlayer() && !voteDone() && (st.S.stage || 0) < stepIndex("ch1") ? (setTimeout(function () { toast("모두 지목한 뒤에 결정지를 쓸 수 있어요"); location.hash = "#/vote"; }, 0), "") : isPlayer() ? vSheet(st.me) : (setTimeout(function () { location.hash = isGM() ? "#/wait" : "#/room"; }, 0), "")); }
     else if (v === "wait") html = vWait();
     else html = vHome();
     if (inRoom() && !st.me && /^(play|role|story|vote|mysheet|wait|sheet)$/.test(v)) { var g1 = roomGuard(); html = g1 || vRoom(); }
@@ -1405,7 +1411,7 @@
       DB.update(rp(""), { votes: null, "state/acc": null });
     } else if (t.hasAttribute("data-start")) {
       if (!isGM()) return;
-      if (!st.S.acc) { toast("지목 결과가 먼저 정해져야 해요"); return; }
+      if (!voteDone()) { toast("모두 지목하고 결과가 정해져야 엔딩북을 열 수 있어요"); return; }
       if (!window.confirm("아직 결정지를 내지 않은 사람이 있어요. 그래도 엔딩북을 열까요?")) return;
       bumpStage(st.S.stage || 0, Math.max(stepIndex("ch1"), st.S.stage || 0));
     } else if (t.hasAttribute("data-leave")) {
