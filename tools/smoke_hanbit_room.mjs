@@ -151,6 +151,10 @@ ok(h3.every(h => h === '#/play/personal'), '모두 함께 4장으로');
 await pages[1].screenshot({ path: `${out}/07-personal-noa.png`, fullPage: true });
 await pages[5].goto(base + '#/role/taesu'); await wait(200);
 ok(/아이와 함께 나온 말/.test(await pages[5].textContent('.ending-title')), '태수 엔딩: 아이와 함께 나온 말');
+// GM 강제 넘기기
+await gm.goto(base + '#/play/personal'); await wait(200);
+await gm.click('[data-admin]'); await gm.click('[data-forcenext]'); await wait(500);
+ok((await S(p0)).stage === 8, 'GM 강제로 다음으로 넘기기');
 // GM이 자리 비우기 → 그 기기는 다시 골라야 함
 await gm.goto(base + '#/play/personal'); await wait(200);
 ok(!!(await gm.$('[data-admin]')) && !(await pages[2].$('[data-admin]')), 'GM에게만 어느 화면에서든 관리 버튼 (GM이 있을 때)');

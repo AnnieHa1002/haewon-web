@@ -1292,7 +1292,7 @@
         (mine ? '<span class="badge">나</span>' : off ? '<span class="badge">연결 끊김</span>' : other ? '<span class="badge">선택됨</span>' : "") + '<div class="nm"><b>' + esc(r.name) + "</b><span>" + (mine ? "내 캐릭터" : other ? "본인이면 눌러서 다시 접속" : "고르기") + "</span></div></button>";
     }).join("") + "</div>";
     var gmMine = st.me === "gm", gmOther = P.gm && !gmMine;
-    h += '<button class="big-btn" style="margin-top:10px' + (gmMine ? ";outline:3px solid var(--dusk);outline-offset:2px" : "") + (gmOther ? ";opacity:.5" : "") + '" data-claim="gm"><span class="ic">🎙</span><span><b>GM (진행자) ' + (gmMine ? "· 나" : gmOther ? "· 선택됨" : "") + "</b><span>캐릭터 없이 보기만 해요(없어도 돼요). 지목·결정지·판정·‘다음’은 누르지 않고, 어느 화면에서든 오른쪽 아래 ‘관리’로 자리 비우기만 할 수 있어요. GM이 없으면 캐릭터 누구나 관리할 수 있어요.</span></span></button>";
+    h += '<button class="big-btn" style="margin-top:10px' + (gmMine ? ";outline:3px solid var(--dusk);outline-offset:2px" : "") + (gmOther ? ";opacity:.5" : "") + '" data-claim="gm"><span class="ic">🎙</span><span><b>GM (진행자) ' + (gmMine ? "· 나" : gmOther ? "· 선택됨" : "") + "</b><span>캐릭터 없이 보기만 해요(없어도 돼요). 평소엔 플레이어가 넘기는 대로 함께 넘어가고, 막혔을 때만 오른쪽 아래 ‘관리’로 강제로 넘기기·자리 비우기를 할 수 있어요.</span></span></button>";
     h += '<p class="small muted" style="margin-top:8px">캐릭터 ' + claimed().length + " / 7명 · GM " + (P.gm ? 1 : 0) + " / 1명 · 이 방은 이 8자리에 앉은 사람만 볼 수 있어요</p>";
     var nextHref = isGM() ? "#/vote" : "#/vote";
     h += '<div class="nav"><button class="btn ghost" data-leave>방 나가기</button>' + (st.me ? '<a class="btn pri" href="' + nextHref + '">' + (isGM() ? "지목 진행 보기 →" : "지목하러 가기 →") + "</a>" : '<button class="btn pri" disabled>자리를 골라 주세요</button>') + "</div>";
@@ -1365,7 +1365,9 @@
     var h = '<button class="btn pri fab" data-admin aria-label="관리">⚙ 관리</button><div id="adminpanel" class="card adminpanel" hidden>';
     h += '<h3>' + (isGM() ? "GM 관리" : "방 관리 (GM이 없어서 누구나)") + '</h3><p class="small muted" style="margin:0 0 8px">휴대폰을 바꿨거나 자리를 잘못 고른 사람의 자리를 비우면, 그 사람이 다시 고를 수 있어요. 낸 결정지는 남아요.</p>';
     h += taken.length ? '<div class="chips">' + taken.map(function (k) { var off = P[k] && P[k].online === false; return '<button class="chip" data-release="' + k + '">' + esc(seatName(k)) + (off ? " (연결 끊김)" : "") + " 비우기</button>"; }).join("") + "</div>" : '<p class="small">비울 자리가 없어요.</p>';
-    if ((st.S.stage || 0) < stepIndex("ch1") && voteDone()) h += '<p style="margin:10px 0 0"><button class="btn ghost" data-start data-force>기다리지 않고 엔딩북 열기</button></p>';
+    var stg = st.S.stage || 0;
+    if (stg < stepIndex("ch1") && voteDone()) h += '<p style="margin:10px 0 0"><button class="btn ghost" data-start data-force>기다리지 않고 엔딩북 열기</button></p>';
+    if (stg >= stepIndex("ch1") && stg < STEPS.length - 1) h += '<p style="margin:10px 0 0"><button class="btn ghost" data-forcenext>강제로 다음으로 넘기기 (' + esc(STEPS[stg].t) + " → " + esc(STEPS[stg + 1].t) + ")</button></p>";
     h += '<p style="margin:10px 0 0"><a class="btn ghost" href="#/room">방 화면</a></p></div>';
     return h;
   }
@@ -1434,7 +1436,7 @@
   document.addEventListener("focusout", function () { setTimeout(function () { if (softRender.pending) softRender(); }, 50); });
 
   app.addEventListener("click", function (ev) {
-    var t = ev.target.closest("[data-set],[data-next],[data-open],[data-peekid],[data-copy],[data-reset],[data-close],[data-create],[data-claim],[data-vote],[data-revote],[data-start],[data-leave],[data-roomnext],[data-release],[data-admin]");
+    var t = ev.target.closest("[data-set],[data-next],[data-open],[data-peekid],[data-copy],[data-reset],[data-close],[data-create],[data-claim],[data-vote],[data-revote],[data-start],[data-leave],[data-roomnext],[data-release],[data-admin],[data-forcenext]");
     if (!t) return;
     if (inRoom() && isGM() && (t.hasAttribute("data-set") || t.hasAttribute("data-roomnext") || t.hasAttribute("data-vote") || t.hasAttribute("data-revote"))) return; // GM은 보기만
     if (t.hasAttribute("data-set")) {
@@ -1478,6 +1480,11 @@
       var upd = {}; upd["players/" + rr] = null; DB.update(rp(""), upd); toast(seatName(rr) + " 자리를 비웠어요");
     } else if (t.hasAttribute("data-roomnext")) {
       var gstage = st.S.stage || 0; bumpStage(gstage, stepIndex(t.getAttribute("data-roomnext")));
+    } else if (t.hasAttribute("data-forcenext")) {
+      if (!isAdmin()) return;
+      var fs = st.S.stage || 0;
+      if (!window.confirm("판정이 남았어도 모두의 화면을 다음으로 넘길까요?")) return;
+      bumpStage(fs, Math.min(fs + 1, STEPS.length - 1));
     } else if (t.hasAttribute("data-admin")) {
       var pnl = document.getElementById("adminpanel"); if (pnl) pnl.hidden = !pnl.hidden;
     } else if (t.hasAttribute("data-vote")) {
