@@ -43,7 +43,8 @@
     ["t_a1", B3], ["t_a2", B3], ["t_a3", B3], ["t_a4", B3], ["t_a5", B3],
     ["t_child", 7, ["noa", "junseo", "daeun", "siwoo", "haeun", "blank"]],
     ["t_key", B3], ["t_drug", B3], ["t_daughter", B3],
-    ["x_reason", B3], ["x_env", B3], ["x_exposed", B3]
+    ["x_reason", B3], ["x_env", B3], ["x_exposed", B3],
+    ["s_culprit", B3] // 2026-11-04 추가: 시우 '사건의 진상' (끝에 붙여서 예전 코드도 그대로 읽힌다)
   ];
   var FACT = {};
   FACTS.forEach(function (f) { FACT[f[0]] = f; });
@@ -395,7 +396,8 @@
       else if (D.ch3 === "3-B" && D.siwooSecret === false) ends.push("남겨진 밥그릇");
     }
     if (k === "siwoo") {
-      it.push(item("지목되지 않기", 4, accNot(["siwoo"])));
+      it.push(item("지목되지 않기", 2, accNot(["siwoo"])));
+      it.push(item("사건의 진상", 2, S.s_culprit, null, "허하은 + 벽돌로 머리를 쳤다"));
       it.push(item("학교폭력과 덫·고양이 숨기기", 2, and(is(S.d_bully, "noa"), not(S.n_cat)), null, "다은의 칸에 강노아 + 노아의 고양이 답 불인정"));
       it.push(item("어머니가 하는 일", 3, S.s_mother));
       var xs = [S.s_x1, S.s_x2, S.s_x3];
@@ -489,6 +491,7 @@
     ],
     siwoo: [
       IDQ,
+      { id: "culprit", q: "다은이 엄마를 죽게 한 사람은 누구이고, 어떻게 했는가?", type: "text" },
       { id: "mother", q: "어머니는 연구동 쪽에서 무엇을 하는가?", type: "text" },
       { id: "x1", q: "1. 'Dr.IN'과 'Dr.J'는 어떤 관계인가?", type: "text", extra: true },
       { id: "x2", q: "2. 연구에 대해 아는 것을 쓰시오. (원인, 목적, 과정 등)", type: "text", extra: true },
@@ -544,6 +547,8 @@
     if (d && d.done && d.c_i01) S.i01 = "daeun";
     else if (x && x.done && x.c_i01) S.i01 = "sehyun";
     else if (d && d.done && x && x.done) S.i01 = "other";
+    var sw = sh("siwoo");
+    if (sw && sw.done && S.s_culprit == null && !/하\s*은/.test(sw.culprit || "")) S.s_culprit = false;
     if (h && h.done) S.h_map = !!h.c_map;
     if (j && j.done) {
       S.j_p03 = !!j.c_p03; S.j_drug = !!j.c_drug; S.j_coins = Math.max(0, Math.min(4, +j.coins || 0));
@@ -974,7 +979,8 @@
       h += factRow("[추가목표] 1. 마지막 선택", "", seg("n_choice", [["revenge", "복수"], ["forgive", "용서"], ["none", "고르지 않음"]], S.n_choice));
     }
     if (k === "siwoo") {
-      h += judge("s_mother", "어머니가 하는 일", "정답: 연구동의 연구자이며, 시우의 어머니 역할을 연기한다. 비슷한 답도 인정.", "siwoo", "mother");
+      h += judge("s_culprit", "사건의 진상", "허하은을 적고, 벽돌로 머리를 쳤다는 뜻이 들어 있으면 인정. 덫의 벽돌이 떨어져 맞았다고만 적은 것은 불인정.", "siwoo", "culprit");
+      h += judge("s_mother", "어머니가 하는 일", "정답: 연구동에서 우리(아이들)를 대상으로 실험을 한다. 비슷한 답도 인정. ‘연구자’라고만 적은 것은 불인정.", "siwoo", "mother");
       var tl = truthLines();
       h += judge("s_x1", "[추가목표] 1. Dr.IN과 Dr.J의 관계", "기준: " + (tl[1] || "②"), "siwoo", "x1");
       h += judge("s_x2", "[추가목표] 2. 연구에 대해 아는 것", "기준: " + (tl[3] || "④") + " / " + (tl[4] || "⑤") + " — 둘 다 설명해야 인정", "siwoo", "x2");
@@ -992,7 +998,7 @@
       h += judge("j_x2", "[추가목표] ② 친모가 아파서(투병으로) 아이를 맡겼다는 뜻이 있다", "친부 김민호의 사망은 적지 않아도 됩니다.", null, null);
     }
     if (k === "taesu") {
-      var ANS = ["다은 — 방임(곁에 있어도 봐 주지 않는 무관심·방치)", "노아 — 폭력(때리고 위협하는 적대적 학대)", "시우 — 통제(성적과 행동을 엄격히 통제하고 압박함)", "하은 — 과잉허용(원하는 건 다 들어주고 물건으로 대신하는 방종)", "준서 — 비일관적 강압(같은 일에 어떤 날은 상, 어떤 날은 벌을 주는 변덕)"];
+      var ANS = ["다은 — 방임(곁에 있어도 봐 주지 않는 무관심·방치)", "노아 — 폭력(때리고 위협하는 적대적 학대)", "시우 — 통제(걱정을 이유로 일정과 행동을 하나하나 확인하고 압박함)", "하은 — 과잉허용(원하는 건 다 들어주고 물건으로 대신하는 방종)", "준서 — 비일관적 강압(같은 일에 어떤 날은 상, 어떤 날은 벌을 주는 변덕)"];
       ANS.forEach(function (a, n) { h += judge("t_a" + (n + 1), "학대 알아내기 · " + a.split(" — ")[0], "정답: " + a.split(" — ")[1], "taesu", "a" + (n + 1)); });
       h += factRow("[추가목표] ‘내 딸’에 임다은을 적었다", "", yn("t_daughter", "적었다", "아니다"), answerBox("taesu", "daughter"));
       h += factRow("「다은 입소 기록」(I59)이 공개됐다", "", yn("pubI59", "공개됨", "아니다"));

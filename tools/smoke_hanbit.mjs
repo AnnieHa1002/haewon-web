@@ -25,7 +25,7 @@ const logic = await page.evaluate(() => {
   const problems = [], seen = {};
   for (let n = 0; n < 20000; n++) {
     const S = { stage: 7, acc: pick(['haeun', 'siwoo', 'taesu', 'sehyun', 'noa', 'daeun', 'junseo', 'none']) };
-    ['lab', 't1', 't2', 't3', 't4', 't5', 'pubI59', 'pubI65', 'd_water', 'd_mirror', 'd_plan', 'd_name', 'n_cat', 'n_i65', 's_mother', 's_x1', 's_x2', 's_x3', 'h_map', 'j_p03', 'j_drug', 'j_x1', 'j_x2', 'j_leave', 't_a1', 't_a2', 't_a3', 't_a4', 't_a5', 't_key', 't_drug', 't_daughter', 'x_reason', 'x_env', 'x_exposed'].forEach(k => S[k] = Math.random() < .5);
+    ['lab', 't1', 't2', 't3', 't4', 't5', 'pubI59', 'pubI65', 'd_water', 'd_mirror', 'd_plan', 'd_name', 'n_cat', 'n_i65', 's_mother', 's_x1', 's_x2', 's_x3', 'h_map', 'j_p03', 'j_drug', 'j_x1', 'j_x2', 'j_leave', 't_a1', 't_a2', 't_a3', 't_a4', 't_a5', 't_key', 't_drug', 't_daughter', 'x_reason', 'x_env', 'x_exposed', 's_culprit'].forEach(k => S[k] = Math.random() < .5);
     S.d_bully = pick(['siwoo', 'noa', 'other']); S.i01 = pick(['daeun', 'sehyun', 'other']); S.n_choice = pick(['revenge', 'forgive', 'none']);
     S.j_coins = pick([0, 1, 2, 3, 4]); S.t_child = pick(['noa', 'junseo', 'daeun', 'siwoo', 'haeun', 'blank']);
     const D = H.derive(S);
