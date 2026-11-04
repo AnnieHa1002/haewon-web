@@ -46,27 +46,24 @@ const before = await me(pages[1]);
 await pages[1].evaluate(() => document.querySelector('[data-claim=daeun]').removeAttribute('disabled'));
 await pages[1].click('[data-claim=daeun]'); await wait(300);
 ok((await me(pages[1])) === before && (await me(p0)) === 'daeun', '이미 고른 캐릭터는 다른 사람이 못 고름');
-// 같은 휴대폰의 다른 탭: 노아 자리는 이미 골랐으니 못 고른다
+// 같은 휴대폰의 다른 탭(새로고침·탭 다시 열기) → 자기 자리로 그대로 돌아온다
 const twin = await ctx.newPage();
 await twin.addInitScript(n => {
   const g = Storage.prototype.getItem, s = Storage.prototype.setItem;
   Storage.prototype.getItem = function (k) { return g.call(this, k === 'hanbit.mockdb' ? k : k + '#' + n); };
   Storage.prototype.setItem = function (k, v) { return s.call(this, k === 'hanbit.mockdb' ? k : k + '#' + n, v); };
 }, 1);
-twin.on('dialog', d => d.accept());
-await twin.goto(base + '#/room'); await wait(300);
-ok(/가득 찼어요/.test(await twin.textContent('main')) && (await me(twin)) === null, '같은 휴대폰 다른 탭은 이미 고른 자리를 못 가져감');
-// 같은 휴대폰에서 노아 탭이 닫혔다면(연결 끊김) → 그 휴대폰의 새 탭에서 '다시 앉기'
+await twin.goto(base + '#/room'); await wait(400);
+ok((await me(twin)) === 'noa', '같은 휴대폰에서 다시 열면 자기 자리(노아)로 돌아옴');
+await twin.close();
+// 다른 사람 자리는 연결이 살아 있으면 못 가져감, 끊기면 본인 확인 후 가져올 수 있음
+ok(await pages[8].goto(base + '#/room').then(() => wait(300)).then(() => pages[8].textContent('main')).then(t => /가득 찼어요/.test(t)), '9번째 기기: 연결된 자리는 못 가져감');
 await pages[1].evaluate(() => window.dispatchEvent(new Event('pagehide'))); await wait(300);
-await twin.reload(); await wait(300);
-ok(await twin.$eval('[data-claim=noa]', b => !b.disabled && /다시 앉기/.test(b.textContent)), '닫힌 탭의 자리는 같은 휴대폰에서 다시 앉기');
-ok(await twin.$eval('[data-claim=siwoo]', b => b.disabled), '다른 사람 자리는 여전히 잠김');
-await twin.click('[data-claim=noa]'); await wait(300);
-ok((await me(twin)) === 'noa', '다시 앉음');
-// 원래 탭으로 돌아가기(테스트 계속): 원래 탭이 다시 앉는다
-await twin.evaluate(() => window.dispatchEvent(new Event('pagehide'))); await twin.close(); await wait(200);
-await pages[1].reload(); await wait(300); await pages[1].click('[data-claim=noa]'); await wait(300);
-ok((await me(pages[1])) === 'noa', '원래 탭도 다시 앉기');
+await pages[8].reload(); await wait(300);
+ok(await pages[8].$eval('[data-claim=noa]', b => !b.disabled && /본인이면/.test(b.textContent)), '연결 끊긴 자리는 본인 확인 후 가져오기 가능');
+ok(await pages[8].$eval('[data-claim=siwoo]', b => b.disabled), '연결된 다른 자리는 잠김');
+await pages[1].reload(); await wait(400);
+ok((await me(pages[1])) === 'noa', '원래 휴대폰이 돌아오면 자기 자리 그대로');
 // 9번째 기기 → 가득 참
 await pages[8].goto(base + '#/room'); await wait(300);
 ok(/가득 찼어요/.test(await pages[8].textContent('main')), '9번째 기기는 방에 못 들어감');
@@ -95,6 +92,14 @@ await wait(4000);
 const hv = await Promise.all(pages.slice(0, 8).map(p => p.evaluate(() => location.hash)));
 ok(hv.slice(0, 7).every(h => h === '#/mysheet') && hv[7] === '#/wait', '모두 지목하자 자동으로 결정지로 (' + hv.join(' ') + ')');
 await p0.screenshot({ path: `${out}/02-vote.png`, fullPage: true });
+// 쓰던 결정지는 다른 사람이 움직여도, 다시 들어와도 그대로
+await pages[4].goto(base + '#/mysheet'); await wait(200);
+await pages[4].fill('textarea[name=identity]', '쓰던 글 그대로');
+await pages[4].evaluate(() => document.activeElement.blur());
+await pages[2].goto(base + '#/mysheet'); await wait(200); await pages[2].fill('textarea[name=identity]', 'x'); await wait(900);
+ok((await pages[4].inputValue('textarea[name=identity]')) === '쓰던 글 그대로', '다른 사람이 쓰는 동안 내 글이 안 지워짐');
+await pages[4].goto(base + '#/room'); await wait(200); await pages[4].goto(base + '#/mysheet'); await wait(300);
+ok((await pages[4].inputValue('textarea[name=identity]')) === '쓰던 글 그대로', '나갔다 다시 들어와도 쓰던 글이 남음');
 // 결정지: 엔딩북은 모두 내야 자동으로 열린다
 for (let i = 0; i < 7; i++) {
   const p = pages[i];
@@ -109,18 +114,10 @@ for (let i = 0; i < 7; i++) {
 await wait(500);
 const hashes = await Promise.all(pages.slice(0, 8).map(p => p.evaluate(() => location.hash)));
 ok(hashes.every(h => h === '#/play/ch1'), '모두 내자 8대 모두 1장으로 (' + hashes.join(' ') + ')');
-// 준비: 일곱 명만 누르면 안 넘어가고, 여덟 번째가 누르면 넘어간다
-ok(await gm.$eval('.nav .btn.pri', b => b.disabled && !b.hasAttribute('data-ready')), 'GM에게는 준비 버튼이 없음');
-for (let i = 0; i < 6; i++) { await pages[i].click('[data-ready]'); await wait(70); }
-await wait(300);
-ok((await S(p0)).stage === 2, '6/7 준비 땐 그대로');
-await pages[2].screenshot({ path: `${out}/05-ready-6of7.png`, fullPage: true });
-// 한 명이 취소했다가 다시 누르기
-await pages[3].click('[data-ready]'); await wait(150);
-ok(/5\/7/.test(await pages[3].textContent('[data-ready]')), '준비 취소 반영 (5/7)');
-await pages[3].click('[data-ready]'); await wait(100);
-await pages[6].click('[data-ready]'); await wait(500);
-ok((await S(p0)).stage === 3, '캐릭터 7/7 준비하면 GM 없이 모두 넘어감');
+// 엔딩북 넘기기: 누가 눌러도 모두 함께 (투표 없음)
+ok(!(await gm.$('[data-ready]')), '준비 투표 버튼 없음');
+await pages[3].click('[data-roomnext]'); await wait(500);
+ok((await S(p0)).stage === 3, '한 명이 누르면 넘어감');
 const h2 = await Promise.all(pages.slice(0, 8).map(p => p.evaluate(() => location.hash)));
 ok(h2.every(h => h === '#/play/lab'), '8대 모두 2장 연구실로');
 // 아직 안 열린 곳 미리 보기 막힘
@@ -130,30 +127,31 @@ await pages[5].goto(base + '#/play/lab'); await wait(150);
 // 판정은 아무 폰에서나 → 모두에게
 await pages[4].click('[data-set=lab] >> text=열리지 않았다'); await wait(300);
 ok((await Promise.all(pages.slice(0, 8).map(S))).every(x => x.lab === false), '연구실 판정이 모두에게 반영');
-// GM이 기다리지 않고 넘기기
-await gm.click('[data-gmnext]'); await wait(500);
-ok((await S(p0)).stage === 4, 'GM이 기다리지 않고 넘김');
+await gm.click('[data-roomnext]'); await wait(500);
+ok((await S(p0)).stage === 4, 'GM이 눌러도 넘어감');
 for (const n of [1, 2, 3, 4, 5]) { await pages[1].click(`[data-set=t${n}] >> text=설명했다`); await wait(50); }
-for (let i = 0; i < 7; i++) { await pages[i].click('[data-ready]'); await wait(50); }
-await wait(400);
+await pages[2].click('[data-roomnext]'); await wait(400);
 await pages[6].click('[data-set=x_reason] >> text=불인정'); await wait(300);
 ok((await p0.evaluate(() => window.HANBIT.derive(window.HANBIT.state().S).esc)) === '2-D', '탈출 갈래 2-D');
 await pages[0].screenshot({ path: `${out}/06-escape.png`, fullPage: true });
-for (const step of ['escape', 'ch3']) { for (let i = 0; i < 7; i++) { await pages[i].click('[data-ready]'); await wait(50); } await wait(400); }
+for (const i of [5, 0]) { await pages[i].click('[data-roomnext]'); await wait(400); }
 const h3 = await Promise.all(pages.slice(0, 8).map(p => p.evaluate(() => location.hash)));
 ok(h3.every(h => h === '#/play/personal'), '모두 함께 4장으로');
 await pages[1].screenshot({ path: `${out}/07-personal-noa.png`, fullPage: true });
 await pages[5].goto(base + '#/role/taesu'); await wait(200);
 ok(/아이와 함께 나온 말/.test(await pages[5].textContent('.ending-title')), '태수 엔딩: 아이와 함께 나온 말');
 // GM이 자리 비우기 → 그 기기는 다시 골라야 함
-await gm.goto(base + '#/room'); await wait(200);
-await gm.click('summary:has-text("자리 비우기")'); await gm.click('[data-release=junseo]'); await wait(300);
+await gm.goto(base + '#/play/personal'); await wait(200);
+ok(!!(await gm.$('[data-admin]')) && !(await pages[2].$('[data-admin]')), 'GM에게만 어느 화면에서든 관리 버튼 (GM이 있을 때)');
+await gm.click('[data-admin]'); await gm.click('[data-release=junseo]'); await wait(300);
 ok((await me(pages[4])) === null, 'GM이 비운 자리는 그 기기에서 풀림');
 await pages[4].goto(base + '#/room'); await wait(150);
 await pages[4].click('[data-claim=junseo]'); await wait(200);
 ok((await me(pages[4])) === 'junseo', '비운 자리에 다시 앉기');
-// 동점이면 자동으로 넘어가지 않는다
-await p0.goto(base + '#/'); await p0.evaluate(() => { const v = JSON.parse(localStorage.getItem('hanbit.mockdb')); });
+// GM이 없으면 캐릭터 누구나 관리
+await gm.evaluate(() => window.HANBIT && document.querySelector('[data-leave]')); await gm.goto(base + '#/room'); await wait(200); await gm.click('[data-leave]'); await wait(400);
+await pages[2].reload(); await wait(300);
+ok(!!(await pages[2].$('[data-admin]')), 'GM이 없으면 캐릭터에게 관리 버튼');
 console.log(errors.length ? '콘솔 에러:\n' + errors.join('\n') : '콘솔 에러 없음');
 console.log(fails.length ? `실패 ${fails.length}건` : '모두 통과');
 await browser.close();

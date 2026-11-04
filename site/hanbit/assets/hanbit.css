@@ -260,3 +260,6 @@ select { font: inherit; padding: 8px 10px; border-radius: 10px; border: 1px soli
   .brand { font-size: 14px; }
   .tbtn { padding: 4px 9px; font-size: 12.5px; }
 }
+.adminpanel { position: fixed; right: 16px; bottom: 70px; width: 340px; max-width: calc(100% - 32px); max-height: 60vh; overflow: auto; z-index: 31; margin: 0; }
+.fab { box-shadow: var(--shadow); }
+main { padding-bottom: 140px; }
