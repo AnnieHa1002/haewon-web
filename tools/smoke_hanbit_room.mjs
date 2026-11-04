@@ -59,6 +59,9 @@ await gm.goto(base + '#/vote'); await wait(200);
 ok(await gm.$eval('[data-vote=haeun]', b => b.disabled), 'GM은 지목 버튼이 꺼져 있음');
 await wait(300);
 ok((await S(p0)).acc === 'haeun', '지목 결과 허하은');
+await wait(4000);
+const hv = await Promise.all(pages.slice(0, 8).map(p => p.evaluate(() => location.hash)));
+ok(hv.slice(0, 7).every(h => h === '#/mysheet') && hv[7] === '#/wait', '모두 지목하자 자동으로 결정지로 (' + hv.join(' ') + ')');
 await p0.screenshot({ path: `${out}/02-vote.png`, fullPage: true });
 // 결정지: 엔딩북은 모두 내야 자동으로 열린다
 for (let i = 0; i < 7; i++) {
@@ -75,16 +78,17 @@ await wait(500);
 const hashes = await Promise.all(pages.slice(0, 8).map(p => p.evaluate(() => location.hash)));
 ok(hashes.every(h => h === '#/play/ch1'), '모두 내자 8대 모두 1장으로 (' + hashes.join(' ') + ')');
 // 준비: 일곱 명만 누르면 안 넘어가고, 여덟 번째가 누르면 넘어간다
-for (let i = 0; i < 7; i++) { await pages[i].click('[data-ready]'); await wait(70); }
+ok(await gm.$eval('.nav .btn.pri', b => b.disabled && !b.hasAttribute('data-ready')), 'GM에게는 준비 버튼이 없음');
+for (let i = 0; i < 6; i++) { await pages[i].click('[data-ready]'); await wait(70); }
 await wait(300);
-ok((await S(p0)).stage === 2, '7/8 준비 땐 그대로');
-await pages[2].screenshot({ path: `${out}/05-ready-7of8.png`, fullPage: true });
+ok((await S(p0)).stage === 2, '6/7 준비 땐 그대로');
+await pages[2].screenshot({ path: `${out}/05-ready-6of7.png`, fullPage: true });
 // 한 명이 취소했다가 다시 누르기
 await pages[3].click('[data-ready]'); await wait(150);
-ok(/6\/8/.test(await pages[3].textContent('[data-ready]')), '준비 취소 반영 (6/8)');
+ok(/5\/7/.test(await pages[3].textContent('[data-ready]')), '준비 취소 반영 (5/7)');
 await pages[3].click('[data-ready]'); await wait(100);
-await gm.click('[data-ready]'); await wait(500);
-ok((await S(p0)).stage === 3, '8/8 준비하면 모두 넘어감');
+await pages[6].click('[data-ready]'); await wait(500);
+ok((await S(p0)).stage === 3, '캐릭터 7/7 준비하면 GM 없이 모두 넘어감');
 const h2 = await Promise.all(pages.slice(0, 8).map(p => p.evaluate(() => location.hash)));
 ok(h2.every(h => h === '#/play/lab'), '8대 모두 2장 연구실로');
 // 아직 안 열린 곳 미리 보기 막힘
@@ -98,12 +102,12 @@ ok((await Promise.all(pages.slice(0, 8).map(S))).every(x => x.lab === false), '�
 await gm.click('[data-gmnext]'); await wait(500);
 ok((await S(p0)).stage === 4, 'GM이 기다리지 않고 넘김');
 for (const n of [1, 2, 3, 4, 5]) { await pages[1].click(`[data-set=t${n}] >> text=설명했다`); await wait(50); }
-for (let i = 0; i < 8; i++) { await pages[i].click('[data-ready]'); await wait(50); }
+for (let i = 0; i < 7; i++) { await pages[i].click('[data-ready]'); await wait(50); }
 await wait(400);
 await pages[6].click('[data-set=x_reason] >> text=불인정'); await wait(300);
 ok((await p0.evaluate(() => window.HANBIT.derive(window.HANBIT.state().S).esc)) === '2-D', '탈출 갈래 2-D');
 await pages[0].screenshot({ path: `${out}/06-escape.png`, fullPage: true });
-for (const step of ['escape', 'ch3']) { for (let i = 0; i < 8; i++) { await pages[i].click('[data-ready]'); await wait(50); } await wait(400); }
+for (const step of ['escape', 'ch3']) { for (let i = 0; i < 7; i++) { await pages[i].click('[data-ready]'); await wait(50); } await wait(400); }
 const h3 = await Promise.all(pages.slice(0, 8).map(p => p.evaluate(() => location.hash)));
 ok(h3.every(h => h === '#/play/personal'), '모두 함께 4장으로');
 await pages[1].screenshot({ path: `${out}/07-personal-noa.png`, fullPage: true });
@@ -116,6 +120,8 @@ ok((await me(pages[4])) === null, 'GM이 비운 자리는 그 기기에서 풀�
 await pages[4].goto(base + '#/room'); await wait(150);
 await pages[4].click('[data-claim=junseo]'); await wait(200);
 ok((await me(pages[4])) === 'junseo', '비운 자리에 다시 앉기');
+// 동점이면 자동으로 넘어가지 않는다
+await p0.goto(base + '#/'); await p0.evaluate(() => { const v = JSON.parse(localStorage.getItem('hanbit.mockdb')); });
 console.log(errors.length ? '콘솔 에러:\n' + errors.join('\n') : '콘솔 에러 없음');
 console.log(fails.length ? `실패 ${fails.length}건` : '모두 통과');
 await browser.close();

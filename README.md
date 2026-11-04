@@ -157,6 +157,8 @@ node tools/smoke.mjs shots/   # 스크린샷 + 콘솔 에러 확인
    (로그인 없이 방 코드만 알면 읽고 쓸 수 있는 구조다. 게임용 답만 들어가고, 개인 정보는 넣지 않는다.)
 4. 프로젝트 설정 → 내 앱 → 웹 앱 추가(</>) → 나오는 `firebaseConfig` 값을 `site/hanbit/assets/firebase-config.js`의 `window.HANBIT_FIREBASE = { ... };`에 넣는다 (`databaseURL`이 꼭 있어야 한다).
 
+혼자 테스트: `https://annieha1002.github.io/haewon-web/hanbit/test.html` — '새 테스트 방 만들기'를 누르면 캐릭터 7명 + GM이 한 화면에 휴대폰 8대처럼 뜨고 각자 자리에 자동으로 앉는다(진짜 Firebase 방). 휴대폰에서는 '한 대씩 보기'로 번갈아 본다. 주소 뒤 `?dev=이름&seat=역할`을 붙이면 한 브라우저 안에서 다른 기기처럼 움직인다.
+
 점검: `node tools/smoke_hanbit_room.mjs` — 휴대폰 7대를 흉내 내어(Firebase 대신 브라우저 저장소, 주소 뒤 `?mock`) 방 만들기부터 각자 엔딩까지 돌린다.
 
 ## 원고 고치기

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>한빛 엔딩북 혼자 테스트</title>
+<style>
+  :root { --bg: #ebe4d8; --ink: #2a2520; --card: #fbf7f0; --line: #d4c8b4; --dusk: #2f3566; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #15172a; --ink: #ece5d8; --card: #1f2340; --line: #343a5e; --dusk: #aab3ff; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif; }
+  header { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); padding: 10px 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  header b { font-size: 16px; }
+  button, input { font: inherit; }
+  button { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 10px; padding: 7px 12px; cursor: pointer; }
+  button.pri { background: var(--dusk); color: #fff; border-color: var(--dusk); }
+  input { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 10px; padding: 7px 10px; width: 8em; text-transform: uppercase; font-family: ui-monospace, monospace; }
+  .note { font-size: 13px; opacity: .75; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 14px; padding: 14px 16px 40px; }
+  .ph { background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  .ph h3 { margin: 0; padding: 6px 10px; font-size: 13px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; }
+  .ph h3 a { color: inherit; font-weight: 400; }
+  iframe { width: 100%; height: 680px; border: 0; display: block; background: #fff; }
+  .solo .ph:not(.on) { display: none; }
+  .solo .grid { grid-template-columns: minmax(330px, 430px); justify-content: center; }
+  .tabs { display: none; gap: 4px; flex-wrap: wrap; }
+  .solo .tabs { display: flex; }
+  .tabs button.on { background: var(--dusk); color: #fff; }
+</style>
+</head>
+<body>
+<header>
+  <b>혼자 테스트 · 휴대폰 8대</b>
+  <button class="pri" id="make">새 테스트 방 만들기</button>
+  <span class="note">또는 방 코드</span><input id="code" maxlength="6" placeholder="ABCD"><button id="join">들어가기</button>
+  <button id="layout">한 대씩 보기</button>
+  <span class="note" id="msg">캐릭터 7명 + GM이 자기 자리에 자동으로 앉아요. 각 화면은 서로 다른 휴대폰처럼 따로 움직입니다.</span>
+  <div class="tabs" id="tabs"></div>
+</header>
+<div class="grid" id="grid"></div>
+<script>
+  var SEATS = [["daeun", "임다은"], ["noa", "강노아"], ["siwoo", "권시우"], ["haeun", "허하은"], ["junseo", "변준서"], ["taesu", "강태수"], ["sehyun", "윤세현"], ["gm", "GM"]];
+  var grid = document.getElementById("grid"), msg = document.getElementById("msg"), tabs = document.getElementById("tabs");
+  var run = Date.now().toString(36).slice(-4); // 테스트 방마다 새 '기기'
+  var MOCK = /[?&]mock\b/.test(location.search) ? "&mock" : "";
+  function src(seat, code) { return "index.html?dev=t" + run + "-" + seat + "&seat=" + seat + MOCK + "#join=" + code; }
+  function load(code) {
+    code = String(code || "").toUpperCase().replace(/[^0-9A-Z]/g, "");
+    if (code.length < 4) { msg.textContent = "방 코드 4자리를 넣어 주세요"; return; }
+    document.getElementById("code").value = code;
+    grid.innerHTML = ""; tabs.innerHTML = "";
+    SEATS.forEach(function (s, i) {
+      var box = document.createElement("div"); box.className = "ph" + (i === 0 ? " on" : "");
+      box.innerHTML = '<h3><span>' + (i + 1) + ". " + s[1] + '</span><a href="' + src(s[0], code) + '" target="_blank">새 탭</a></h3><iframe title="' + s[1] + '" src="' + src(s[0], code) + '"></iframe>';
+      grid.appendChild(box);
+      var b = document.createElement("button"); b.textContent = s[1]; if (i === 0) b.className = "on";
+      b.onclick = function () { grid.querySelectorAll(".ph").forEach(function (x, j) { x.classList.toggle("on", j === i); }); tabs.querySelectorAll("button").forEach(function (x, j) { x.classList.toggle("on", j === i); }); };
+      tabs.appendChild(b);
+    });
+    msg.textContent = "방 " + code + " · 다른 휴대폰도 이 코드로 함께 들어올 수 있어요 (자리가 비어 있으면).";
+  }
+  document.getElementById("join").onclick = function () { load(document.getElementById("code").value); };
+  document.getElementById("layout").onclick = function () { var on = document.body.classList.toggle("solo"); this.textContent = on ? "모두 보기" : "한 대씩 보기"; };
+  if (innerWidth < 760) { document.body.classList.add("solo"); document.getElementById("layout").textContent = "모두 보기"; }
+  // 방은 숨은 화면 하나로 만든다(Firebase 설정을 그대로 씀)
+  document.getElementById("make").onclick = function () {
+    var btn = this; btn.disabled = true; msg.textContent = "방을 만드는 중…";
+    var f = document.createElement("iframe"); f.style.display = "none"; f.src = "index.html?dev=t" + run + "-maker" + MOCK;
+    f.onload = function () {
+      var w = f.contentWindow, tries = 0;
+      (function go() {
+        if (!w.HANBIT && tries++ < 40) return setTimeout(go, 100);
+        if (!w.HANBIT || !w.HANBIT.hasDB()) { msg.textContent = "방 기능이 꺼져 있어요 (Firebase 설정 확인)"; btn.disabled = false; return; }
+        w.HANBIT.createRoom().then(function (code) { f.remove(); btn.disabled = false; load(code); }, function (e) { msg.textContent = "방을 만들지 못했어요: " + (e && e.message || e); btn.disabled = false; });
+      })();
+    };
+    document.body.appendChild(f);
+  };
+  var q = location.hash.match(/room=([0-9A-Za-z]+)/); if (q) load(q[1]);
+</script>
+</body>
+</html>

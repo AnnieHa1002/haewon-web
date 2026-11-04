@@ -7,6 +7,16 @@
   var B = window.HANBIT_BOOK;
   var app = document.getElementById("app");
   var STORE = "hanbit.endingbook.v1";
+  (function () {
+    var m = location.search.match(/[?&]dev=([0-9A-Za-z_-]+)/);
+    if (!m) return;
+    var tag = "#" + m[1], g = Storage.prototype.getItem, sI = Storage.prototype.setItem, rI = Storage.prototype.removeItem;
+    var mine = function (k) { return k === "hanbit.mockdb" ? k : k + tag; };
+    Storage.prototype.getItem = function (k) { return g.call(this, mine(k)); };
+    Storage.prototype.setItem = function (k, v) { return sI.call(this, mine(k), v); };
+    Storage.prototype.removeItem = function (k) { return rI.call(this, mine(k)); };
+  })();
+  var AUTOSEAT = (location.search.match(/[?&]seat=(daeun|noa|siwoo|haeun|junseo|taesu|sehyun|gm)/) || [])[1] || null;
 
   /* ───────── 인물 ───────── */
   var ROLES = [
@@ -163,6 +173,7 @@
       if (!st.me) { Object.keys(P0).forEach(function (k) { if (P0[k] && P0[k].id === DEVICE) st.me = k; }); }
       save();
       advanceIfReady();
+      if (AUTOSEAT && !st.me && ROOM.created && !claimSeat.tried) { claimSeat.tried = true; claimSeat(AUTOSEAT); }
       var newStage = st.S.stage || 0;
       var h = location.hash;
       // 다 같이 넘어가기: 지금 보던 단계가 방의 이전 단계였거나 대기 화면이면 새 단계로 따라간다
@@ -207,8 +218,22 @@
   function seatName(k) { return k === "gm" ? "GM" : (R[k] ? R[k].name : k); }
   function seatShort(k) { return k === "gm" ? "GM" : (R[k] ? R[k].short : k); }
   function readyFor(stepId) { return (ROOM && ROOM.ready && ROOM.ready[stepId]) || {}; }
-  function readyCount(stepId) { var r = readyFor(stepId), w = seated(); return { n: w.filter(function (k) { return r[k]; }).length, m: w.length, wait: w.filter(function (k) { return !r[k]; }) }; }
+  // '다음으로' 준비는 캐릭터 7명만 센다 (GM은 빼고, 대신 '기다리지 않고 넘기기'가 있다)
+  function readyCount(stepId) { var r = readyFor(stepId), w = claimed(); return { n: w.filter(function (k) { return r[k]; }).length, m: w.length, wait: w.filter(function (k) { return !r[k]; }) }; }
   // 모두 준비했으면 한 단계 넘긴다(여러 폰이 동시에 해도 한 번만 넘어가게 서버에서 확인)
+  // 서버에서 한 번에 확인: 이미 다른 기기가 앉은 자리는 못 고른다, 한 기기는 한 자리만
+  function claimSeat(rk) {
+    return DB.claim(rp("players"), function (cur) {
+      cur = cur || {};
+      if (cur[rk] && cur[rk].id !== DEVICE) return undefined;
+      Object.keys(cur).forEach(function (k) { if (cur[k] && cur[k].id === DEVICE) delete cur[k]; });
+      cur[rk] = { id: DEVICE, at: Date.now() };
+      return cur;
+    }).then(function (ok) {
+      if (!ok) { toast(seatName(rk) + "은(는) 방금 다른 사람이 골랐어요"); return false; }
+      st.me = rk; if (R[rk]) st.role = rk; save(); rerender(); return true;
+    });
+  }
   function advanceIfReady() {
     if (!inRoom() || !ROOM) return;
     var stage = st.S.stage || 0, cur = STEPS[stage];
@@ -726,6 +751,7 @@
       } else {
         var c = readyCount(stepId), mine = !!readyFor(stepId)[st.me];
         next = !st.me ? '<button class="btn pri" disabled>자리를 골라야 넘길 수 있어요</button>' :
+          isGM() ? '<button class="btn pri" disabled>캐릭터 준비 ' + c.n + "/" + c.m + "</button>" :
           '<button class="btn ' + (mine ? "" : "pri") + '" data-ready="' + stepId + '"' + (canNext || mine ? "" : " disabled") + ">" +
           (mine ? "준비 완료 ✓ " + c.n + "/" + c.m + " · 취소" : esc(label || L[i + 1].t) + " → " + c.n + "/" + c.m) + "</button>";
         who = '<p class="small muted" style="text-align:right;margin:6px 0 0">' + (c.n === c.m ? "모두 준비했어요" : "모두 누르면 함께 넘어가요 · 기다리는 사람: " + esc(c.wait.map(seatShort).join(", "))) + "</p>";
@@ -1238,6 +1264,14 @@
         '<button class="btn ghost" data-revote>다시 지목하기</button></div></div>';
     }
     var ready = !!st.S.acc && all;
+    // 모두 지목하고 결과가 정해지면, 결과를 잠깐 보여 준 뒤 모두 자동으로 결정지로 넘어간다
+    if (ready) {
+      h += '<p class="small" style="text-align:center;margin-top:12px">모두 지목했어요. 잠시 뒤 ' + (gm ? "결정지 진행 화면" : "최종 결정지") + "로 넘어가요…</p>";
+      if (!vVote.timer) vVote.timer = setTimeout(function () {
+        vVote.timer = null;
+        if (location.hash === "#/vote" && st.S.acc) location.hash = isGM() ? "#/wait" : "#/mysheet";
+      }, 3500);
+    } else if (vVote.timer) { clearTimeout(vVote.timer); vVote.timer = null; }
     h += '<div class="nav"><a class="btn ghost" href="#/room">← 방</a>' + (ready ? '<a class="btn pri" href="' + (gm ? "#/wait" : "#/mysheet") + '">' + (gm ? "결정지 진행 보기 →" : "최종 결정지 쓰기 →") + "</a>" : '<button class="btn pri" disabled>' + (all ? "지목 결과를 정해 주세요" : "모두 지목할 때까지 기다려요") + "</button>") + "</div>";
     return h + "</main>";
   }
@@ -1247,7 +1281,7 @@
     var all = who.length > 0 && done === who.length;
     var h = topBar() + "<main>";
     h += '<div class="kicker">4 · 최종 결정지</div><h2 class="ttl">모두 쓰기를 기다려요</h2>';
-    h += '<p class="lead">캐릭터 모두가 결정지를 내면 엔딩북이 모두의 화면에서 함께 열려요. 그다음부터는 방에 있는 모두가 ‘다음’을 눌러야 함께 넘어갑니다.</p>';
+    h += '<p class="lead">캐릭터 모두가 결정지를 내면 엔딩북이 모두의 화면에서 함께 열려요. 그다음부터는 캐릭터 모두가 ‘다음’을 눌러야 함께 넘어갑니다 (GM은 세지 않아요).</p>';
     h += '<div class="card">' + progressList() + "</div>";
     if (isPlayer()) h += '<p><a class="btn" href="#/mysheet">내 결정지 다시 보기·고치기</a></p>';
     h += '<div class="nav"><a class="btn ghost" href="#/vote">← 지목</a>' + (all ? '<button class="btn pri" disabled>엔딩북을 여는 중…</button>' : '<button class="btn pri" disabled>' + done + " / " + who.length + "명 냈어요</button>") + "</div>";
@@ -1353,17 +1387,7 @@
       var rk = t.getAttribute("data-claim");
       if (rk === st.me) return;
       if (st.me && (st.S.stage || 0) >= stepIndex("ch1") && !window.confirm("엔딩북이 이미 열렸어요. 정말 자리를 바꿀까요?")) return;
-      // 서버에서 한 번에 확인: 이미 다른 기기가 앉은 자리는 못 고른다, 한 기기는 한 자리만
-      DB.claim(rp("players"), function (cur) {
-        cur = cur || {};
-        if (cur[rk] && cur[rk].id !== DEVICE) return undefined;
-        Object.keys(cur).forEach(function (k) { if (cur[k] && cur[k].id === DEVICE) delete cur[k]; });
-        cur[rk] = { id: DEVICE, at: Date.now() };
-        return cur;
-      }).then(function (ok) {
-        if (!ok) { toast(seatName(rk) + "은(는) 방금 다른 사람이 골랐어요"); return; }
-        st.me = rk; if (R[rk]) st.role = rk; save(); rerender();
-      });
+      claimSeat(rk);
     } else if (t.hasAttribute("data-release")) {
       var rr = t.getAttribute("data-release");
       if (!isGM() || !window.confirm(seatName(rr) + " 자리를 비울까요? 그 사람은 다시 자리를 골라야 해요 (낸 결정지는 남아요).")) return;
@@ -1428,7 +1452,7 @@
   window.addEventListener("hashchange", route);
 
   // 디버그·점검용
-  window.HANBIT = { createRoom: function () { return createRoom(); }, derive: derive, scoreOf: scoreOf, makeCode: makeCode, readCode: readCode, state: function () { return st; }, ROLES: ROLES };
+  window.HANBIT = { createRoom: function () { return createRoom(); }, hasDB: function () { return !!DB; }, derive: derive, scoreOf: scoreOf, makeCode: makeCode, readCode: readCode, state: function () { return st; }, ROLES: ROLES };
   if (st.room && DB) enterRoom(st.room);
   route();
 })();
