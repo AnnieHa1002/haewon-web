@@ -116,7 +116,13 @@
       on: function (path, cb) { var x = { parts: path.split("/"), cb: cb }; subs.push(x); setTimeout(function () { cb(pathGet(all(), x.parts)); }, 0); return function () { subs = subs.filter(function (y) { return y !== x; }); }; },
       set: function (path, v) { return write(function (d) { pathSet(d, path.split("/"), v); }); },
       update: function (path, o) { return write(function (d) { Object.keys(o).forEach(function (k) { pathSet(d, (path ? path + "/" + k : k).split("/"), o[k]); }); }); },
-      once: function (path) { return Promise.resolve(pathGet(all(), path.split("/"))); }
+      once: function (path) { return Promise.resolve(pathGet(all(), path.split("/"))); },
+      claim: function (path, make) {
+        var d = all(), parts = path.split("/"), v = make(pathGet(d, parts));
+        if (v === undefined) return Promise.resolve(false);
+        pathSet(d, parts, v); localStorage.setItem(KEY, JSON.stringify(d)); setTimeout(fire, 0);
+        return Promise.resolve(true);
+      }
     };
   }
   function fireDB() {
@@ -129,7 +135,9 @@
         on: function (path, cb) { var r = d.ref(path); var h = r.on("value", function (snap) { cb(snap.val()); }); return function () { r.off("value", h); }; },
         set: function (path, v) { return d.ref(path).set(v); },
         update: function (path, o) { return d.ref(path).update(o); },
-        once: function (path) { return d.ref(path).once("value").then(function (snap) { return snap.val(); }); }
+        once: function (path) { return d.ref(path).once("value").then(function (snap) { return snap.val(); }); },
+        // 서버에서 한 번에 확인하고 차지한다(동시에 같은 코드를 만들어도 한 명만 성공)
+        claim: function (path, make) { return d.ref(path).transaction(make).then(function (r) { return r.committed; }); }
       };
     } catch (e) { console.warn("Firebase 연결 실패", e); return null; }
   }
@@ -172,13 +180,15 @@
     for (var i = 0; i < 4; i++) c += A[Math.floor(Math.random() * A.length)];
     return c;
   }
+  var ROOM_TTL = 2 * 24 * 3600 * 1000; // 이틀 지난 방의 코드는 다시 쓸 수 있다
   function createRoom() {
     var tryOne = function (n) {
-      var code = newRoomCode();
-      return DB.once("rooms/" + code + "/created").then(function (v) {
-        if (v && n < 5) return tryOne(n + 1);
-        return DB.set("rooms/" + code + "/created", Date.now()).then(function () { return code; });
-      });
+      if (n >= 20) return Promise.reject(new Error("빈 방 코드를 찾지 못했어요. 잠시 뒤 다시 눌러 주세요"));
+      var code = newRoomCode(), now = Date.now();
+      return DB.claim("rooms/" + code, function (cur) {
+        if (cur && cur.created && now - cur.created < ROOM_TTL) return undefined; // 쓰는 중인 코드 → 다른 코드로
+        return { created: now };
+      }).then(function (ok) { return ok ? code : tryOne(n + 1); });
     };
     return tryOne(0);
   }
@@ -1332,7 +1342,7 @@
   window.addEventListener("hashchange", route);
 
   // 디버그·점검용
-  window.HANBIT = { derive: derive, scoreOf: scoreOf, makeCode: makeCode, readCode: readCode, state: function () { return st; }, ROLES: ROLES };
+  window.HANBIT = { createRoom: function () { return createRoom(); }, derive: derive, scoreOf: scoreOf, makeCode: makeCode, readCode: readCode, state: function () { return st; }, ROLES: ROLES };
   if (st.room && DB) enterRoom(st.room);
   route();
 })();
