@@ -23,7 +23,7 @@ for (let i = 0; i < 9; i++) {
     Storage.prototype.setItem = function (k, v) { return s.call(this, k === 'hanbit.mockdb' ? k : k + '#' + n, v); };
   }, i);
   p.on('pageerror', e => errors.push(`[${i}] ${e.message}`));
-  p.on('dialog', d => d.accept());
+  p.on('dialog', d => (p._dismiss ? (p._dismiss = false, d.dismiss()) : d.accept()));
   p.on('console', m => { if (m.type() === 'error' && !/fonts|ERR_|qrcode|gstatic/.test(m.text())) errors.push(`[${i}] ${m.text()}`); });
   pages.push(p);
 }
@@ -41,12 +41,11 @@ await wait(400);
 for (let i = 0; i < 8; i++) { await pages[i].click(`[data-claim=${SEATS[i]}]`); await wait(80); }
 await wait(300);
 ok((await me(pages[3])) === 'haeun', '하은 자리 차지');
-// 다른 사람이 이미 고른 캐릭터를 다시 골라 보기 → 막혀야 한다
-const before = await me(pages[1]);
-await pages[1].evaluate(() => document.querySelector('[data-claim=daeun]').removeAttribute('disabled'));
+// 다른 사람이 고른 역할을 눌러도, 확인에서 '취소'하면 그대로
+pages[1]._dismiss = true;
 await pages[1].click('[data-claim=daeun]'); await wait(300);
-ok((await me(pages[1])) === before && (await me(p0)) === 'daeun', '이미 고른 캐릭터는 다른 사람이 못 고름');
-// 같은 휴대폰의 다른 탭(새로고침·탭 다시 열기) → 자기 자리로 그대로 돌아온다
+ok((await me(pages[1])) === 'noa' && (await me(p0)) === 'daeun', '남의 역할은 확인을 취소하면 못 가져감');
+// 같은 휴대폰에서 다시 열면 자기 자리
 const twin = await ctx.newPage();
 await twin.addInitScript(n => {
   const g = Storage.prototype.getItem, s = Storage.prototype.setItem;
@@ -56,19 +55,19 @@ await twin.addInitScript(n => {
 await twin.goto(base + '#/room'); await wait(400);
 ok((await me(twin)) === 'noa', '같은 휴대폰에서 다시 열면 자기 자리(노아)로 돌아옴');
 await twin.close();
-// 다른 사람 자리는 연결이 살아 있으면 못 가져감, 끊기면 본인 확인 후 가져올 수 있음
-ok(await pages[8].goto(base + '#/room').then(() => wait(300)).then(() => pages[8].textContent('main')).then(t => /가득 찼어요/.test(t)), '9번째 기기: 연결된 자리는 못 가져감');
-await pages[1].evaluate(() => window.dispatchEvent(new Event('pagehide'))); await wait(300);
-await pages[8].reload(); await wait(300);
-ok(await pages[8].$eval('[data-claim=noa]', b => !b.disabled && /본인이면/.test(b.textContent)), '연결 끊긴 자리는 본인 확인 후 가져오기 가능');
-ok(await pages[8].$eval('[data-claim=siwoo]', b => b.disabled), '연결된 다른 자리는 잠김');
-await pages[1].reload(); await wait(400);
-ok((await me(pages[1])) === 'noa', '원래 휴대폰이 돌아오면 자기 자리 그대로');
-// 9번째 기기 → 가득 참
+// 9번째 휴대폰(노아가 폰을 바꿈): 자리가 다 찼다는 안내 + 노아를 누르면 원래 폰을 끊고 들어감
 await pages[8].goto(base + '#/room'); await wait(300);
-ok(/가득 찼어요/.test(await pages[8].textContent('main')), '9번째 기기는 방에 못 들어감');
+ok(/자리가 모두 찼어요/.test(await pages[8].textContent('main')), '9번째 휴대폰: 자리가 다 찼다는 안내');
+await pages[8].click('[data-claim=noa]'); await wait(400);
+ok((await me(pages[8])) === 'noa' && (await me(pages[1])) === null, '다시 접속한 휴대폰이 노아로 들어가고 원래 폰은 끊김');
+await wait(200);
+ok(/노아 자리에서 나왔어요|강노아<\/b> 자리에서 나왔어요/.test(await pages[1].innerHTML('main')) || /자리에서 나왔어요/.test(await pages[1].textContent('main')), '끊긴 폰에 안내가 뜸');
 await pages[8].goto(base + '#/play/ch1'); await wait(200);
-ok(/가득 찼어요/.test(await pages[8].textContent('main')), '9번째 기기는 엔딩 화면도 못 봄');
+// 원래 폰으로 다시 (테스트 계속)
+await pages[1].click('[data-claim=noa]'); await wait(400);
+ok((await me(pages[1])) === 'noa' && (await me(pages[8])) === null, '원래 폰이 다시 가져감');
+await pages[8].goto(base + '#/play/ch1'); await wait(300);
+ok((await pages[8].evaluate(() => location.hash)) === '#/room', '자리 없는 휴대폰은 엔딩 화면을 못 봄');
 await pages[8].screenshot({ path: `${out}/01b-full.png` });
 await gm.screenshot({ path: `${out}/01-room-gm.png`, fullPage: true });
 // 지목 전에는 결정지도, 엔딩북도 못 연다

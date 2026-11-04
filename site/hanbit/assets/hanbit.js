@@ -192,7 +192,11 @@
       st.S = b.S;
       st.sheets = ROOM.sheets || {};
       var P0 = ROOM.players || {};
-      if (st.me && !isMine(P0[st.me])) { if (enterRoom.seated) toast("내 자리가 비워졌어요. 다시 골라 주세요"); st.me = null; enterRoom.seated = false; }
+      if (st.me && !isMine(P0[st.me])) {
+        if (enterRoom.seated) enterRoom.kicked = { seat: st.me, by: P0[st.me] ? "other" : "freed" };
+        st.me = null; enterRoom.seated = false;
+        if (!/^#\/room/.test(location.hash)) { location.hash = "#/room"; }
+      }
       if (!st.me) { Object.keys(P0).forEach(function (k) { if (isMine(P0[k])) st.me = k; }); }
       if (st.me) enterRoom.seated = true;
       if (st.me && P0[st.me] && P0[st.me].online === false) DB.presence(rp("players/" + st.me + "/online"));
@@ -249,16 +253,17 @@
   function readyCount(stepId) { var r = readyFor(stepId), w = claimed(); return { n: w.filter(function (k) { return r[k]; }).length, m: w.length, wait: w.filter(function (k) { return !r[k]; }) }; }
   // 모두 준비했으면 한 단계 넘긴다(여러 폰이 동시에 해도 한 번만 넘어가게 서버에서 확인)
   // 서버에서 한 번에 확인: 이미 다른 기기가 앉은 자리는 못 고른다, 한 기기는 한 자리만
-  function claimSeat(rk) {
+  // takeover=true: 이미 앉은 휴대폰을 끊고 이 휴대폰이 그 역할로 들어간다 (다시 접속할 때)
+  function claimSeat(rk, takeover) {
     return DB.claim(rp("players"), function (cur) {
       cur = cur || {};
-      if (cur[rk] && !isMine(cur[rk]) && !canReclaim(cur[rk])) return undefined; // 다른 사람이 고른 자리는 못 고른다
+      if (cur[rk] && !isMine(cur[rk]) && !takeover) return undefined; // 확인 없이 남의 자리는 못 고른다
       Object.keys(cur).forEach(function (k) { if (isMine(cur[k])) delete cur[k]; });   // 한 사람(탭)은 한 자리만
       cur[rk] = { id: DEVICE, dev: DEVICE, at: Date.now(), online: true };
       return cur;
     }).then(function (ok) {
       if (!ok) { toast(seatName(rk) + "은(는) 방금 다른 사람이 골랐어요"); return false; }
-      st.me = rk; if (R[rk]) st.role = rk; save();
+      st.me = rk; if (R[rk]) st.role = rk; enterRoom.kicked = null; save();
       DB.presence(rp("players/" + rk + "/online"));
       rerender(); return true;
     });
@@ -1258,20 +1263,22 @@
   function vRoom() {
     var g = roomGuard(); if (g) return g;
     var P = players(), url = joinURL(st.room);
-    var full = seated().length >= 8 && !Object.keys(P).some(function (k) { return canReclaim(P[k]); });
-    if (!st.me && full) return topBar() + '<main><div class="lock"><div class="ic">🚪</div><h2 class="ttl">방이 가득 찼어요</h2><p class="lead">이 방은 캐릭터 7명과 GM 1명이 모두 들어와 있어요.<br>자리를 잘못 골랐다면 GM에게 자리를 비워 달라고 해 주세요.</p><button class="btn" data-leave>나가기</button></div></main>';
+    var full = seated().length >= 8;
     var h = topBar() + "<main>";
+    var kk = enterRoom.kicked;
+    if (kk && !st.me) h += '<div class="warn" style="margin-top:0"><b>' + esc(seatName(kk.seat)) + "</b> 자리에서 나왔어요. " + (kk.by === "other" ? "다른 휴대폰이 이 역할로 다시 접속했어요." : "자리가 비워졌어요.") + " 본인이 맞다면 아래에서 그 역할을 다시 누르세요.</div>";
+    if (!st.me && full) h += '<div class="warn" style="margin-top:0">자리가 모두 찼어요. 다시 접속하는 거라면 원래 자기 역할을 누르세요. 원래 휴대폰은 끊기고 이 휴대폰으로 이어져요.</div>';
     h += '<div class="kicker">1 · 방 코드 나누기</div><h2 class="ttl">방 ' + esc(st.room) + "</h2>";
     h += '<p class="lead">모두 각자 휴대폰으로 이 코드를 입력하거나 QR을 찍어 같은 방에 들어옵니다.</p>';
     h += '<div class="card"><div class="code-big">' + esc(st.room) + '</div><div class="qr" id="qr"></div><div class="row" style="justify-content:center"><button class="btn" data-copy="' + esc(st.room) + '">코드 복사</button><button class="btn" data-copy="' + esc(url) + '">링크 복사</button></div></div>';
     h += '<div class="kicker" style="margin-top:22px">2 · 내 캐릭터 고르기</div><h2 class="ttl" style="font-size:22px">나는 누구인가요?</h2>';
     h += '<div class="roles">' + ROLES.map(function (r) {
-      var p = P[r.k], mine = r.k === st.me, back = !mine && canReclaim(p), other = p && !mine && !back;
-      return '<button class="role" style="--rc:' + r.color + (mine ? ";outline:3px solid var(--dusk);outline-offset:2px" : "") + (other ? ";opacity:.45;cursor:not-allowed" : "") + '" data-claim="' + r.k + '"' + (other ? " disabled" : "") + '><img alt="" src="' + roleImg(r.k) + '">' +
-        (mine ? '<span class="badge">나</span>' : other ? '<span class="badge">선택됨</span>' : back ? '<span class="badge">연결 끊김</span>' : "") + '<div class="nm"><b>' + esc(r.name) + "</b><span>" + (mine ? "내 캐릭터" : other ? "다른 사람이 골랐어요" : back ? "본인이면 다시 앉기" : "고르기") + "</span></div></button>";
+      var p = P[r.k], mine = r.k === st.me, other = p && !mine, off = other && p.online === false;
+      return '<button class="role" style="--rc:' + r.color + (mine ? ";outline:3px solid var(--dusk);outline-offset:2px" : "") + (other ? ";opacity:.5" : "") + '" data-claim="' + r.k + '"><img alt="" src="' + roleImg(r.k) + '">' +
+        (mine ? '<span class="badge">나</span>' : off ? '<span class="badge">연결 끊김</span>' : other ? '<span class="badge">선택됨</span>' : "") + '<div class="nm"><b>' + esc(r.name) + "</b><span>" + (mine ? "내 캐릭터" : other ? "본인이면 눌러서 다시 접속" : "고르기") + "</span></div></button>";
     }).join("") + "</div>";
-    var gmMine = st.me === "gm", gmOther = P.gm && !gmMine && !canReclaim(P.gm);
-    h += '<button class="big-btn" style="margin-top:10px' + (gmMine ? ";outline:3px solid var(--dusk);outline-offset:2px" : "") + (gmOther ? ";opacity:.45;cursor:not-allowed" : "") + '" data-claim="gm"' + (gmOther ? " disabled" : "") + '><span class="ic">🎙</span><span><b>GM (진행자) ' + (gmMine ? "· 나" : gmOther ? "· 선택됨" : "") + "</b><span>캐릭터 없이 진행만 해요(없어도 돼요). 지목·결정지는 하지 않고, 어느 화면에서든 오른쪽 아래 ‘관리’로 자리 비우기를 할 수 있어요. GM이 없으면 캐릭터 누구나 관리할 수 있어요.</span></span></button>";
+    var gmMine = st.me === "gm", gmOther = P.gm && !gmMine;
+    h += '<button class="big-btn" style="margin-top:10px' + (gmMine ? ";outline:3px solid var(--dusk);outline-offset:2px" : "") + (gmOther ? ";opacity:.5" : "") + '" data-claim="gm"><span class="ic">🎙</span><span><b>GM (진행자) ' + (gmMine ? "· 나" : gmOther ? "· 선택됨" : "") + "</b><span>캐릭터 없이 진행만 해요(없어도 돼요). 지목·결정지는 하지 않고, 어느 화면에서든 오른쪽 아래 ‘관리’로 자리 비우기를 할 수 있어요. GM이 없으면 캐릭터 누구나 관리할 수 있어요.</span></span></button>";
     h += '<p class="small muted" style="margin-top:8px">캐릭터 ' + claimed().length + " / 7명 · GM " + (P.gm ? 1 : 0) + " / 1명 · 이 방은 이 8자리에 앉은 사람만 볼 수 있어요</p>";
     var nextHref = isGM() ? "#/vote" : "#/vote";
     h += '<div class="nav"><button class="btn ghost" data-leave>방 나가기</button>' + (st.me ? '<a class="btn pri" href="' + nextHref + '">' + (isGM() ? "지목 진행 보기 →" : "지목하러 가기 →") + "</a>" : '<button class="btn pri" disabled>자리를 골라 주세요</button>') + "</div>";
@@ -1446,9 +1453,10 @@
     } else if (t.hasAttribute("data-claim")) {
       var rk = t.getAttribute("data-claim");
       if (rk === st.me) return;
-      if (canReclaim(players()[rk]) && !window.confirm(seatName(rk) + " 자리는 연결이 끊겨 있어요. 본인이 다른 휴대폰·브라우저로 다시 들어온 거라면 가져올까요?")) return;
+      var taken = players()[rk] && !isMine(players()[rk]);
+      if (taken && !window.confirm("지금 다른 휴대폰이 " + seatName(rk) + "(으)로 들어와 있어요.\n본인이 다시 접속하는 거라면, 그 휴대폰을 끊고 이 휴대폰으로 들어갈까요?\n(쓰던 결정지와 지목은 그대로 이어져요)")) return;
       if (st.me && (st.S.stage || 0) >= stepIndex("ch1") && !window.confirm("엔딩북이 이미 열렸어요. 정말 자리를 바꿀까요?")) return;
-      claimSeat(rk);
+      claimSeat(rk, taken);
     } else if (t.hasAttribute("data-release")) {
       var rr = t.getAttribute("data-release");
       if (!isAdmin() || !window.confirm(seatName(rr) + " 자리를 비울까요? 그 사람은 다시 자리를 골라야 해요 (낸 결정지는 남아요).")) return;
