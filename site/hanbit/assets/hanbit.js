@@ -157,11 +157,15 @@
       Object.keys(b.S).forEach(function (k) { b.S[k] = k in remote ? remote[k] : (k === "stage" ? 0 : null); });
       st.S = b.S;
       st.sheets = ROOM.sheets || {};
+      var P0 = ROOM.players || {};
+      if (st.me && (!P0[st.me] || P0[st.me].id !== DEVICE)) { st.me = null; toast("내 자리가 비워졌어요. 다시 골라 주세요"); }
+      if (!st.me) { Object.keys(P0).forEach(function (k) { if (P0[k] && P0[k].id === DEVICE) st.me = k; }); }
       save();
+      advanceIfReady();
       var newStage = st.S.stage || 0;
       var h = location.hash;
       // 다 같이 넘어가기: 지금 보던 단계가 방의 이전 단계였거나 대기 화면이면 새 단계로 따라간다
-      if (newStage !== prevStage && newStage >= stepIndex("ch1") && (h === "#/play/" + STEPS[prevStage].id || /^#\/(wait|vote)/.test(h))) {
+      if (newStage !== prevStage && newStage >= stepIndex("ch1") && (h === "#/play/" + STEPS[prevStage].id || /^#\/(wait|vote|mysheet)/.test(h))) {
         location.hash = "#/play/" + STEPS[newStage].id;
         return;
       }
@@ -195,6 +199,30 @@
   function joinURL(code) { return location.href.split("#")[0] + "#join=" + code; }
   function players() { return (ROOM && ROOM.players) || {}; }
   function claimed() { return ROLES.filter(function (r) { return players()[r.k]; }).map(function (r) { return r.k; }); }
+  // 방에 앉은 모두(캐릭터 7 + GM 1). GM은 '다음으로' 준비에 함께 세지만 지목·결정지는 하지 않는다
+  function seated() { var P = players(); return claimed().concat(P.gm ? ["gm"] : []); }
+  function isGM() { return st.me === "gm"; }
+  function isPlayer() { return !!(st.me && R[st.me]); }
+  function seatName(k) { return k === "gm" ? "GM" : (R[k] ? R[k].name : k); }
+  function seatShort(k) { return k === "gm" ? "GM" : (R[k] ? R[k].short : k); }
+  function readyFor(stepId) { return (ROOM && ROOM.ready && ROOM.ready[stepId]) || {}; }
+  function readyCount(stepId) { var r = readyFor(stepId), w = seated(); return { n: w.filter(function (k) { return r[k]; }).length, m: w.length, wait: w.filter(function (k) { return !r[k]; }) }; }
+  // 모두 준비했으면 한 단계 넘긴다(여러 폰이 동시에 해도 한 번만 넘어가게 서버에서 확인)
+  function advanceIfReady() {
+    if (!inRoom() || !ROOM) return;
+    var stage = st.S.stage || 0, cur = STEPS[stage];
+    if (stage >= stepIndex("ch1") && stage < STEPS.length - 1) {
+      var c = readyCount(cur.id);
+      if (c.m > 0 && c.n === c.m) bumpStage(stage, stage + 1);
+    }
+    if (stage < stepIndex("ch1")) {
+      var w = claimed();
+      if (w.length && w.every(function (k) { var s2 = st.sheets[k]; return s2 && s2.done; }) && st.S.acc) bumpStage(stage, stepIndex("ch1"));
+    }
+  }
+  function bumpStage(from, to) {
+    DB.claim(rp("state/stage"), function (v) { return (v || 0) === from ? to : undefined; });
+  }
   function votes() { return (ROOM && ROOM.votes) || {}; }
   function inRoom() { return !!(st.room && DB); }
 
@@ -668,7 +696,7 @@
   function topBar(stepId) {
     var D = derive(st.S);
     var h = '<header class="top"><div class="top-in"><a class="brand" href="#/">오늘도 한빛은 맑음<small>엔딩북</small></a><span class="top-sp"></span>' +
-      (inRoom() ? '<a class="tbtn" href="#/room">방 ' + esc(st.room) + (st.me ? " · " + esc(R[st.me].short) : "") + "</a>" : "") +
+      (inRoom() ? '<a class="tbtn" href="#/room">방 ' + esc(st.room) + (st.me ? " · " + esc(seatShort(st.me)) : "") + "</a>" : "") +
       '<a class="tbtn" href="#/story">지난 이야기</a><a class="tbtn" href="#/book">책</a>' + (inRoom() ? "" : '<a class="tbtn" href="#/code">코드</a>') + "</div>";
     if (stepId) {
       h += '<nav class="steps">' + shownSteps().map(function (s, n) {
@@ -685,7 +713,20 @@
     var back = inRoom() ? '<a class="btn ghost" href="#/wait">← 결정지</a>' : '<a class="btn ghost" href="#/">← 처음</a>';
     var prev = i > 0 ? '<a class="btn ghost" href="#/play/' + L[i - 1].id + '">← ' + esc(L[i - 1].t) + "</a>" : back;
     var next = i < L.length - 1 ? '<button class="btn pri" data-next="' + L[i + 1].id + '"' + (canNext ? "" : " disabled") + ">" + esc(label || L[i + 1].t) + " →</button>" : '<a class="btn pri" href="#/story">지난 이야기 다시 보기</a>';
-    var who = inRoom() && i < L.length - 1 ? '<p class="small muted" style="text-align:right;margin:6px 0 0">누가 눌러도 모두의 화면이 함께 넘어가요</p>' : "";
+    var who = "";
+    if (inRoom() && i < L.length - 1) {
+      var stage = st.S.stage || 0;
+      if (stepIndex(stepId) < stage) {
+        next = '<a class="btn pri" href="#/play/' + STEPS[stage].id + '">지금 읽는 곳으로 →</a>';
+      } else {
+        var c = readyCount(stepId), mine = !!readyFor(stepId)[st.me];
+        next = !st.me ? '<button class="btn pri" disabled>자리를 골라야 넘길 수 있어요</button>' :
+          '<button class="btn ' + (mine ? "" : "pri") + '" data-ready="' + stepId + '"' + (canNext || mine ? "" : " disabled") + ">" +
+          (mine ? "준비 완료 ✓ " + c.n + "/" + c.m + " · 취소" : esc(label || L[i + 1].t) + " → " + c.n + "/" + c.m) + "</button>";
+        who = '<p class="small muted" style="text-align:right;margin:6px 0 0">' + (c.n === c.m ? "모두 준비했어요" : "모두 누르면 함께 넘어가요 · 기다리는 사람: " + esc(c.wait.map(seatShort).join(", "))) + "</p>";
+        if (isGM() && c.n < c.m) who += '<p style="text-align:right;margin:4px 0 0"><button class="btn ghost small" data-gmnext="' + L[i + 1].id + '"' + (canNext ? "" : " disabled") + '>GM · 기다리지 않고 넘기기</button></p>';
+      }
+    }
     return '<div class="nav">' + prev + next + "</div>" + who;
   }
   function peek(groupId, items, taken) {
@@ -700,6 +741,11 @@
     var S = st.S, D = derive(S), h = "", can = true;
     var i = stepIndex(stepId);
     if (!inRoom() && (S.stage || 0) < i) { S.stage = i; save(); }
+    if (inRoom()) {
+      var g0 = roomGuard(); if (g0) return g0;
+      if (!st.me) { setTimeout(function () { location.hash = "#/room"; }, 0); return ""; }
+      if (i > (S.stage || 0) || (S.stage || 0) < stepIndex("ch1")) return topBar() + '<main><div class="card">아직 열리지 않은 곳이에요. 모두 함께 넘어갈 때 열립니다.<div class="row" style="margin-top:10px"><a class="btn pri" href="' + ((S.stage || 0) >= stepIndex("ch1") ? "#/play/" + STEPS[S.stage].id : "#/wait") + '">지금 있는 곳으로</a></div></div></main>';
+    }
 
     if (stepId === "accuse") {
       h += '<div class="kicker">최후 토론 뒤</div><h2 class="ttl">범인 지목</h2>';
@@ -831,7 +877,7 @@
 
     if (stepId === "personal") {
       h += '<div class="kicker">4장</div><h2 class="ttl">각자의 엔딩</h2>';
-      if (inRoom() && st.me) h += '<a class="big-btn primary" href="#/role/' + st.me + '" style="margin:10px 0"><span class="ic">★</span><span><b>내 엔딩 보기 · ' + esc(R[st.me].name) + "</b><span>내 점수와 엔딩. 아래 판정이 끝나야 다 나와요</span></span></a>";
+      if (inRoom() && isPlayer()) h += '<a class="big-btn primary" href="#/role/' + st.me + '" style="margin:10px 0"><span class="ic">★</span><span><b>내 엔딩 보기 · ' + esc(R[st.me].name) + "</b><span>내 점수와 엔딩. 아래 판정이 끝나야 다 나와요</span></span></a>";
       h += '<p class="lead">여러 사람의 점수에 함께 쓰이는 답을 먼저 판정하고, 각자 자기 이름을 눌러 점수와 엔딩을 읽습니다.</p>';
       h += '<div class="card"><h3>함께 쓰는 판정</h3>' +
         factRow("다은의 결정지 ‘학교폭력 관계자’", "", seg("d_bully", [["siwoo", "권시우"], ["noa", "강노아"], ["other", "그 밖·빈칸"]], S.d_bully), answerBox("daeun", "bully")) +
@@ -1128,6 +1174,8 @@
   function vRoom() {
     var g = roomGuard(); if (g) return g;
     var P = players(), url = joinURL(st.room);
+    var full = seated().length >= 8;
+    if (!st.me && full) return topBar() + '<main><div class="lock"><div class="ic">🚪</div><h2 class="ttl">방이 가득 찼어요</h2><p class="lead">이 방은 캐릭터 7명과 GM 1명이 모두 들어와 있어요.<br>자리를 잘못 골랐다면 GM에게 자리를 비워 달라고 해 주세요.</p><button class="btn" data-leave>나가기</button></div></main>';
     var h = topBar() + "<main>";
     h += '<div class="kicker">1 · 방 코드 나누기</div><h2 class="ttl">방 ' + esc(st.room) + "</h2>";
     h += '<p class="lead">모두 각자 휴대폰으로 이 코드를 입력하거나 QR을 찍어 같은 방에 들어옵니다.</p>';
@@ -1135,11 +1183,18 @@
     h += '<div class="kicker" style="margin-top:22px">2 · 내 캐릭터 고르기</div><h2 class="ttl" style="font-size:22px">나는 누구인가요?</h2>';
     h += '<div class="roles">' + ROLES.map(function (r) {
       var p = P[r.k], mine = r.k === st.me, other = p && !mine;
-      return '<button class="role" style="--rc:' + r.color + (mine ? ";outline:3px solid var(--dusk);outline-offset:2px" : "") + (other ? ";opacity:.55" : "") + '" data-claim="' + r.k + '"><img alt="" src="' + roleImg(r.k) + '">' +
+      return '<button class="role" style="--rc:' + r.color + (mine ? ";outline:3px solid var(--dusk);outline-offset:2px" : "") + (other ? ";opacity:.45;cursor:not-allowed" : "") + '" data-claim="' + r.k + '"' + (other ? " disabled" : "") + '><img alt="" src="' + roleImg(r.k) + '">' +
         (mine ? '<span class="badge">나</span>' : other ? '<span class="badge">선택됨</span>' : "") + '<div class="nm"><b>' + esc(r.name) + "</b><span>" + (mine ? "내 캐릭터" : other ? "다른 사람이 골랐어요" : "고르기") + "</span></div></button>";
     }).join("") + "</div>";
-    h += '<p class="small muted" style="margin-top:8px">' + claimed().length + " / 7명 들어옴</p>";
-    h += '<div class="nav"><button class="btn ghost" data-leave>방 나가기</button>' + (st.me ? '<a class="btn pri" href="#/vote">지목하러 가기 →</a>' : '<button class="btn pri" disabled>캐릭터를 골라 주세요</button>') + "</div>";
+    var gmMine = st.me === "gm", gmOther = P.gm && !gmMine;
+    h += '<button class="big-btn" style="margin-top:10px' + (gmMine ? ";outline:3px solid var(--dusk);outline-offset:2px" : "") + (gmOther ? ";opacity:.45;cursor:not-allowed" : "") + '" data-claim="gm"' + (gmOther ? " disabled" : "") + '><span class="ic">🎙</span><span><b>GM (진행자) ' + (gmMine ? "· 나" : gmOther ? "· 선택됨" : "") + "</b><span>캐릭터 없이 진행만 해요. 지목·결정지는 하지 않고, 자리 비우기와 ‘기다리지 않고 넘기기’를 할 수 있어요. 1명까지.</span></span></button>";
+    h += '<p class="small muted" style="margin-top:8px">캐릭터 ' + claimed().length + " / 7명 · GM " + (P.gm ? 1 : 0) + " / 1명 · 이 방은 이 8자리에 앉은 사람만 볼 수 있어요</p>";
+    if (gmMine) {
+      var taken = seated().filter(function (k) { return k !== "gm"; });
+      if (taken.length) h += '<details class="others"><summary>GM · 자리 비우기 (휴대폰을 바꿨거나 잘못 고른 사람)</summary><div class="chips">' + taken.map(function (k) { return '<button class="chip" data-release="' + k + '">' + esc(seatName(k)) + " 비우기</button>"; }).join("") + "</div></details>";
+    }
+    var nextHref = isGM() ? "#/vote" : "#/vote";
+    h += '<div class="nav"><button class="btn ghost" data-leave>방 나가기</button>' + (st.me ? '<a class="btn pri" href="' + nextHref + '">' + (isGM() ? "지목 진행 보기 →" : "지목하러 가기 →") + "</a>" : '<button class="btn pri" disabled>자리를 골라 주세요</button>') + "</div>";
     setTimeout(function () { drawQR(url); }, 0);
     return h + "</main>";
   }
@@ -1157,6 +1212,7 @@
       if (w.length && w.every(function (k) { return V[k]; })) { var T = tally(); if (T.top.length === 1 && st.S.acc !== T.top[0]) set("acc", T.top[0]); }
     })();
     if (!st.me) { setTimeout(function () { location.hash = "#/room"; }, 0); return ""; }
+    var gm = isGM();
     var V = votes(), my = V[st.me], who = claimed(), done = who.filter(function (k) { return V[k]; }).length;
     var all = who.length > 0 && done === who.length, T = tally();
     var h = topBar() + "<main>";
@@ -1165,9 +1221,9 @@
     h += '<div class="choices">' + ACC.map(function (k) {
       var on = my === k;
       var pic = k === "none" ? '<span class="dot" style="background:var(--ink-3)"></span>' : '<img alt="" src="' + roleImg(k) + '">';
-      return '<button class="choice' + (on ? " on" : "") + '" data-vote="' + k + '"' + (all ? " disabled" : "") + ">" + pic + "<b>" + esc(nameOf(k)) + "</b>" + (all && T.count[k] ? ' <span class="muted small">' + T.count[k] + "표</span>" : "") + "</button>";
+      return '<button class="choice' + (on ? " on" : "") + '" data-vote="' + k + '"' + (all || gm ? " disabled" : "") + ">" + pic + "<b>" + esc(nameOf(k)) + "</b>" + (all && T.count[k] ? ' <span class="muted small">' + T.count[k] + "표</span>" : "") + "</button>";
     }).join("") + "</div>";
-    h += '<p class="small muted" style="margin-top:10px">지목 ' + done + " / " + who.length + "명</p>";
+    h += '<p class="small muted" style="margin-top:10px">지목 ' + done + " / " + who.length + "명" + (gm ? " · GM은 지목하지 않아요" : "") + "</p>";
     if (all) {
       h += '<div class="card">';
       if (T.top.length === 1) h += "<h3>가장 많이 지목된 사람 · " + esc(nameOf(T.top[0])) + " (" + T.max + "표)</h3>";
@@ -1176,7 +1232,7 @@
         '<button class="btn ghost" data-revote>다시 지목하기</button></div></div>';
     }
     var ready = !!st.S.acc && all;
-    h += '<div class="nav"><a class="btn ghost" href="#/room">← 방</a>' + (ready ? '<a class="btn pri" href="#/mysheet">최종 결정지 쓰기 →</a>' : '<button class="btn pri" disabled>' + (all ? "지목 결과를 정해 주세요" : "모두 지목할 때까지 기다려요") + "</button>") + "</div>";
+    h += '<div class="nav"><a class="btn ghost" href="#/room">← 방</a>' + (ready ? '<a class="btn pri" href="' + (gm ? "#/wait" : "#/mysheet") + '">' + (gm ? "결정지 진행 보기 →" : "최종 결정지 쓰기 →") + "</a>" : '<button class="btn pri" disabled>' + (all ? "지목 결과를 정해 주세요" : "모두 지목할 때까지 기다려요") + "</button>") + "</div>";
     return h + "</main>";
   }
   function vWait() {
@@ -1185,10 +1241,11 @@
     var all = who.length > 0 && done === who.length;
     var h = topBar() + "<main>";
     h += '<div class="kicker">4 · 최종 결정지</div><h2 class="ttl">모두 쓰기를 기다려요</h2>';
-    h += '<p class="lead">모두 결정지를 내면 엔딩북을 함께 엽니다. 엔딩북은 모두의 화면에서 같이 넘어가요.</p>';
+    h += '<p class="lead">캐릭터 모두가 결정지를 내면 엔딩북이 모두의 화면에서 함께 열려요. 그다음부터는 방에 있는 모두가 ‘다음’을 눌러야 함께 넘어갑니다.</p>';
     h += '<div class="card">' + progressList() + "</div>";
-    if (st.me) h += '<p><a class="btn" href="#/mysheet">내 결정지 다시 보기·고치기</a></p>';
-    h += '<div class="nav"><a class="btn ghost" href="#/vote">← 지목</a>' + (all ? '<button class="btn pri" data-start>엔딩북 열기 →</button>' : '<button class="btn pri" data-start data-force>' + done + " / " + who.length + "명 · 그래도 열기</button>") + "</div>";
+    if (isPlayer()) h += '<p><a class="btn" href="#/mysheet">내 결정지 다시 보기·고치기</a></p>';
+    h += '<div class="nav"><a class="btn ghost" href="#/vote">← 지목</a>' + (all ? '<button class="btn pri" disabled>엔딩북을 여는 중…</button>' : '<button class="btn pri" disabled>' + done + " / " + who.length + "명 냈어요</button>") + "</div>";
+    if (isGM() && !all) h += '<p style="text-align:right"><button class="btn ghost" data-start data-force>GM · 기다리지 않고 엔딩북 열기</button></p>';
     if ((st.S.stage || 0) >= stepIndex("ch1")) h += '<p style="text-align:center"><a class="btn pri" href="#/play/' + STEPS[st.S.stage].id + '">엔딩북이 열렸어요 · 지금 읽는 곳으로</a></p>';
     return h + "</main>";
   }
@@ -1200,7 +1257,7 @@
     var h = '<main><div class="cover">' + (u ? '<img alt="" src="' + u + '">' : "") + '<div class="cover-in"><p class="small">7인용 머더 미스터리</p><h1>오늘도<br>한빛은 맑음</h1><p>엔딩북</p></div></div>';
     h += '<div class="home-actions">';
     if (DB) {
-      if (st.room) h += '<a class="big-btn primary" href="#/room"><span class="ic">◎</span><span><b>방 ' + esc(st.room) + "으로 돌아가기</b><span>" + (st.me ? esc(R[st.me].name) + " · " : "") + "진행 중인 방</span></span></a>";
+      if (st.room) h += '<a class="big-btn primary" href="#/room"><span class="ic">◎</span><span><b>방 ' + esc(st.room) + "으로 돌아가기</b><span>" + (st.me ? esc(seatName(st.me)) + " · " : "") + "진행 중인 방</span></span></a>";
       h += '<button class="big-btn' + (st.room ? "" : " primary") + '" data-create><span class="ic">＋</span><span><b>방 만들기</b><span>코드를 나누고, 각자 휴대폰으로 캐릭터를 골라 지목·결정지·엔딩까지</span></span></button>';
       h += '<form class="big-btn" data-joinform style="cursor:default"><span class="ic">#</span><span style="flex:1"><b>방 들어가기</b><span class="row" style="margin-top:6px;flex-wrap:nowrap"><input type="text" name="room" placeholder="방 코드 4자리" maxlength="6" autocomplete="off" style="text-transform:uppercase;font-family:ui-monospace,monospace;min-height:40px"><button class="btn pri">입장</button></span></span></form>';
     }
@@ -1243,9 +1300,10 @@
     else if (v === "code") html = vCode();
     else if (v === "room") html = vRoom();
     else if (v === "vote") html = vVote();
-    else if (v === "mysheet") { var gg = roomGuard(); html = gg || (st.me ? vSheet(st.me) : (setTimeout(function () { location.hash = "#/room"; }, 0), "")); }
+    else if (v === "mysheet") { var gg = roomGuard(); html = gg || (isPlayer() ? vSheet(st.me) : (setTimeout(function () { location.hash = isGM() ? "#/wait" : "#/room"; }, 0), "")); }
     else if (v === "wait") html = vWait();
     else html = vHome();
+    if (inRoom() && !st.me && /^(play|role|story|vote|mysheet|wait|sheet)$/.test(v)) { var g1 = roomGuard(); html = g1 || vRoom(); }
     app.innerHTML = html;
     document.title = "한빛 엔딩북";
     if (v !== "book" || !arg) window.scrollTo(0, route.keepScroll ? route.keepScroll : 0);
@@ -1255,7 +1313,7 @@
   document.addEventListener("focusout", function () { setTimeout(function () { if (softRender.pending) softRender(); }, 50); });
 
   app.addEventListener("click", function (ev) {
-    var t = ev.target.closest("[data-set],[data-next],[data-open],[data-peekid],[data-copy],[data-reset],[data-close],[data-create],[data-claim],[data-vote],[data-revote],[data-start],[data-leave]");
+    var t = ev.target.closest("[data-set],[data-next],[data-open],[data-peekid],[data-copy],[data-reset],[data-close],[data-create],[data-claim],[data-vote],[data-revote],[data-start],[data-leave],[data-ready],[data-gmnext],[data-release]");
     if (!t) return;
     if (t.hasAttribute("data-set")) {
       var k = t.getAttribute("data-set"), val = JSON.parse(t.getAttribute("data-v"));
@@ -1265,7 +1323,8 @@
       rerender();
     } else if (t.hasAttribute("data-next")) {
       var nx = t.getAttribute("data-next");
-      if (inRoom() || stepIndex(nx) > (st.S.stage || 0)) set("stage", stepIndex(nx));
+      if (inRoom()) return;
+      if (stepIndex(nx) > (st.S.stage || 0)) set("stage", stepIndex(nx));
       location.hash = "#/play/" + nx;
     } else if (t.hasAttribute("data-open")) {
       vSheet.open = t.getAttribute("data-open"); rerender();
@@ -1285,21 +1344,42 @@
       t.disabled = true;
       createRoom().then(function (code) { enterRoom(code); location.hash = "#/room"; }, function (e) { t.disabled = false; toast("방을 만들지 못했어요: " + (e && e.message || e)); });
     } else if (t.hasAttribute("data-claim")) {
-      var rk = t.getAttribute("data-claim"), P = players();
-      if (P[rk] && P[rk].id !== DEVICE && rk !== st.me && !window.confirm(R[rk].name + "은(는) 이미 다른 기기가 골랐어요. 휴대폰을 바꿔 다시 들어온 거라면 이 기기로 가져올까요?")) return;
-      var up = {}; if (st.me && st.me !== rk && P[st.me] && P[st.me].id === DEVICE) up["players/" + st.me] = null;
-      up["players/" + rk] = { id: DEVICE, at: Date.now() };
-      st.me = rk; st.role = rk; save(); DB.update(rp(""), up);
+      var rk = t.getAttribute("data-claim");
+      if (rk === st.me) return;
+      if (st.me && (st.S.stage || 0) >= stepIndex("ch1") && !window.confirm("엔딩북이 이미 열렸어요. 정말 자리를 바꿀까요?")) return;
+      // 서버에서 한 번에 확인: 이미 다른 기기가 앉은 자리는 못 고른다, 한 기기는 한 자리만
+      DB.claim(rp("players"), function (cur) {
+        cur = cur || {};
+        if (cur[rk] && cur[rk].id !== DEVICE) return undefined;
+        Object.keys(cur).forEach(function (k) { if (cur[k] && cur[k].id === DEVICE) delete cur[k]; });
+        cur[rk] = { id: DEVICE, at: Date.now() };
+        return cur;
+      }).then(function (ok) {
+        if (!ok) { toast(seatName(rk) + "은(는) 방금 다른 사람이 골랐어요"); return; }
+        st.me = rk; if (R[rk]) st.role = rk; save(); rerender();
+      });
+    } else if (t.hasAttribute("data-release")) {
+      var rr = t.getAttribute("data-release");
+      if (!isGM() || !window.confirm(seatName(rr) + " 자리를 비울까요? 그 사람은 다시 자리를 골라야 해요 (낸 결정지는 남아요).")) return;
+      var upd = {}; upd["players/" + rr] = null; DB.update(rp(""), upd); toast(seatName(rr) + " 자리를 비웠어요");
+    } else if (t.hasAttribute("data-ready")) {
+      var sid = t.getAttribute("data-ready"), mine = !!readyFor(sid)[st.me];
+      DB.set(rp("ready/" + sid + "/" + st.me), mine ? null : true);
+    } else if (t.hasAttribute("data-gmnext")) {
+      if (!window.confirm("아직 준비하지 않은 사람이 있어요. 기다리지 않고 모두 넘길까요?")) return;
+      var gstage = st.S.stage || 0; bumpStage(gstage, stepIndex(t.getAttribute("data-gmnext")));
     } else if (t.hasAttribute("data-vote")) {
+      if (!isPlayer()) return;
       DB.set(rp("votes/" + st.me), t.getAttribute("data-vote"));
     } else if (t.hasAttribute("data-revote")) {
       DB.update(rp(""), { votes: null, "state/acc": null });
     } else if (t.hasAttribute("data-start")) {
-      if (t.hasAttribute("data-force") && !window.confirm("아직 결정지를 내지 않은 사람이 있어요. 그래도 엔딩북을 열까요?")) return;
-      var ns = Math.max(stepIndex("ch1"), st.S.stage || 0);
-      set("stage", ns); location.hash = "#/play/" + STEPS[ns].id;
+      if (!isGM()) return;
+      if (!st.S.acc) { toast("지목 결과가 먼저 정해져야 해요"); return; }
+      if (!window.confirm("아직 결정지를 내지 않은 사람이 있어요. 그래도 엔딩북을 열까요?")) return;
+      bumpStage(st.S.stage || 0, Math.max(stepIndex("ch1"), st.S.stage || 0));
     } else if (t.hasAttribute("data-leave")) {
-      if (window.confirm("이 기기에서 방을 나갈까요? (방은 그대로 남아요)")) { if (st.me && players()[st.me] && players()[st.me].id === DEVICE) DB.set(rp("players/" + st.me), null); leaveRoom(); location.hash = "#/"; }
+      if (window.confirm("이 기기에서 방을 나갈까요? 내 자리는 비워져요 (방은 그대로 남아요).")) { if (st.me && players()[st.me] && players()[st.me].id === DEVICE) DB.set(rp("players/" + st.me), null); leaveRoom(); location.hash = "#/"; }
     } else if (t.hasAttribute("data-reset")) {
       if (window.confirm("이 기기의 진행 상황과 결정지를 모두 지울까요?")) { st = blank(); save(); vSheet.open = null; location.hash = "#/"; toast("새 판을 시작합니다"); }
     }

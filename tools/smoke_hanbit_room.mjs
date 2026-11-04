@@ -1,5 +1,6 @@
-// 한빛 엔딩북 '방' 점검: 휴대폰 7대를 흉내 내어(?mock, 브라우저 저장소로 Firebase 대신)
-// 방 만들기 → 캐릭터 → 지목 → 결정지 → 엔딩북 함께 넘기기 → 각자 엔딩까지 돌려 본다.
+// 한빛 엔딩북 '방' 점검: 휴대폰 9대를 흉내 내어(?mock, 브라우저 저장소로 Firebase 대신)
+// 캐릭터 7 + GM 1이 들어오고 9번째는 막히는지, 같은 캐릭터를 두 명이 못 고르는지,
+// 지목 → 결정지 → (모두 내면 자동으로) 엔딩북 → 모두 준비해야 넘어가는지 → 각자 엔딩까지 본다.
 // node tools/smoke_hanbit_room.mjs [출력폴더]
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
@@ -9,74 +10,113 @@ const out = process.argv[2] || 'shots/hanbit-room'; fs.mkdirSync(out, { recursiv
 const base = 'file://' + path.resolve('site/hanbit/index.html') + '?mock';
 const browser = await pw.chromium.launch();
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
-const errors = [];
-const ROLES = ['daeun', 'noa', 'siwoo', 'haeun', 'junseo', 'taesu', 'sehyun'];
-const NAMES = { daeun: '임다은', noa: '강노아', siwoo: '권시우', haeun: '허하은', junseo: '변준서', taesu: '강태수', sehyun: '윤세현' };
+const errors = [], fails = [];
+const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? '✔ ' : '✘ ') + msg); };
+const SEATS = ['daeun', 'noa', 'siwoo', 'haeun', 'junseo', 'taesu', 'sehyun', 'gm'];
 const pages = [];
-for (let i = 0; i < 7; i++) {
+for (let i = 0; i < 9; i++) {
   const p = await ctx.newPage();
-  // 기기마다 다른 ID가 되도록 sessionStorage가 아니라 localStorage를 쓰므로, 기기 ID는 페이지마다 덮어쓴다
+  // 한 브라우저라 저장소를 같이 쓰므로, '방 데이터'만 함께 쓰고 나머지(기기 ID·진행 상태)는 기기마다 따로
+  await p.addInitScript(n => {
+    const g = Storage.prototype.getItem, s = Storage.prototype.setItem;
+    Storage.prototype.getItem = function (k) { return g.call(this, k === 'hanbit.mockdb' ? k : k + '#' + n); };
+    Storage.prototype.setItem = function (k, v) { return s.call(this, k === 'hanbit.mockdb' ? k : k + '#' + n, v); };
+  }, i);
   p.on('pageerror', e => errors.push(`[${i}] ${e.message}`));
+  p.on('dialog', d => d.accept());
   p.on('console', m => { if (m.type() === 'error' && !/fonts|ERR_|qrcode|gstatic/.test(m.text())) errors.push(`[${i}] ${m.text()}`); });
   pages.push(p);
 }
 const wait = ms => new Promise(r => setTimeout(r, ms));
-await pages[0].goto(base + '#/'); await pages[0].evaluate(() => localStorage.clear());
-// 같은 브라우저라 저장소를 같이 쓰므로, 기기마다 '이 기기의 진행 상태' 키를 따로 쓰게 한다
-for (let i = 0; i < 7; i++) await pages[i].addInitScript(n => { const k = Storage.prototype.getItem, s = Storage.prototype.setItem; Storage.prototype.getItem = function (key) { return k.call(this, key === 'hanbit.mockdb' ? key : key + '#' + n); }; Storage.prototype.setItem = function (key, v) { return s.call(this, key === 'hanbit.mockdb' ? key : key + '#' + n, v); }; }, i);
-
-const p0 = pages[0];
-await p0.goto(base + '#/'); await wait(200);
+const S = p => p.evaluate(() => window.HANBIT.state().S);
+const me = p => p.evaluate(() => window.HANBIT.state().me);
+const p0 = pages[0], gm = pages[7];
+await p0.goto(base + '#/'); await p0.evaluate(() => localStorage.clear()); await p0.reload(); await wait(150);
 await p0.screenshot({ path: `${out}/00-home.png` });
 await p0.click('[data-create]'); await wait(300);
 const code = (await p0.textContent('.code-big')).trim();
 console.log('방 코드', code);
-for (let i = 1; i < 7; i++) { await pages[i].goto(base + '#join=' + code); }
+for (let i = 1; i < 9; i++) await pages[i].goto(base + '#join=' + code);
 await wait(400);
-for (let i = 0; i < 7; i++) { await pages[i].click(`[data-claim=${ROLES[i]}]`); await wait(80); }
+for (let i = 0; i < 8; i++) { await pages[i].click(`[data-claim=${SEATS[i]}]`); await wait(80); }
 await wait(300);
-await p0.screenshot({ path: `${out}/01-room.png`, fullPage: true });
-// 지목: 다섯 명은 하은, 두 명은 시우
+ok((await me(pages[3])) === 'haeun', '하은 자리 차지');
+// 다른 사람이 이미 고른 캐릭터를 다시 골라 보기 → 막혀야 한다
+const before = await me(pages[1]);
+await pages[1].evaluate(() => document.querySelector('[data-claim=daeun]').removeAttribute('disabled'));
+await pages[1].click('[data-claim=daeun]'); await wait(300);
+ok((await me(pages[1])) === before && (await me(p0)) === 'daeun', '이미 고른 캐릭터는 다른 사람이 못 고름');
+// 9번째 기기 → 가득 참
+await pages[8].goto(base + '#/room'); await wait(300);
+ok(/가득 찼어요/.test(await pages[8].textContent('main')), '9번째 기기는 방에 못 들어감');
+await pages[8].goto(base + '#/play/ch1'); await wait(200);
+ok(/가득 찼어요/.test(await pages[8].textContent('main')), '9번째 기기는 엔딩 화면도 못 봄');
+await pages[8].screenshot({ path: `${out}/01b-full.png` });
+await gm.screenshot({ path: `${out}/01-room-gm.png`, fullPage: true });
+// 지목: 다섯 명 하은, 두 명 시우. GM은 지목 못 함
 for (let i = 0; i < 7; i++) { await pages[i].goto(base + '#/vote'); await wait(60); await pages[i].click(`[data-vote=${i < 5 ? 'haeun' : 'siwoo'}]`); await wait(60); }
-await wait(400);
+await gm.goto(base + '#/vote'); await wait(200);
+ok(await gm.$eval('[data-vote=haeun]', b => b.disabled), 'GM은 지목 버튼이 꺼져 있음');
+await wait(300);
+ok((await S(p0)).acc === 'haeun', '지목 결과 허하은');
 await p0.screenshot({ path: `${out}/02-vote.png`, fullPage: true });
-const acc = await p0.evaluate(() => window.HANBIT.state().S.acc);
-console.log('지목 결과', acc);
-// 결정지
+// 결정지: 엔딩북은 모두 내야 자동으로 열린다
 for (let i = 0; i < 7; i++) {
   const p = pages[i];
   await p.goto(base + '#/mysheet'); await wait(150);
-  if (ROLES[i] === 'daeun') { await p.selectOption('select[name=bully]', 'siwoo'); await p.fill('textarea[name=plan]', '기자에게 USB 자료를 넘기려 함'); await p.check('input[name=c_i01]'); }
-  if (ROLES[i] === 'taesu') { await p.selectOption('select[name=child]', 'junseo'); await p.check('input[name=c_key]'); }
-  if (ROLES[i] === 'sehyun') await p.fill('textarea[name=reason]', '모르겠다');
+  if (SEATS[i] === 'daeun') { await p.selectOption('select[name=bully]', 'siwoo'); await p.fill('textarea[name=plan]', '기자에게 USB 자료를 넘기려 함'); await p.check('input[name=c_i01]'); }
+  if (SEATS[i] === 'taesu') { await p.selectOption('select[name=child]', 'junseo'); await p.check('input[name=c_key]'); }
+  if (SEATS[i] === 'sehyun') await p.fill('textarea[name=reason]', '모르겠다');
   if (i === 0) await p.screenshot({ path: `${out}/03-mysheet.png`, fullPage: true });
-  await p.click('form button[type=submit]'); await wait(120);
+  if (i === 6) { const st = await S(p0); ok((st.stage || 0) < 2, '6명만 냈을 땐 엔딩북이 안 열림'); await gm.goto(base + '#/wait'); await wait(150); await gm.screenshot({ path: `${out}/04-wait-gm.png`, fullPage: true }); }
+  await p.click('form button[type=submit]'); await wait(150);
 }
+await wait(500);
+const hashes = await Promise.all(pages.slice(0, 8).map(p => p.evaluate(() => location.hash)));
+ok(hashes.every(h => h === '#/play/ch1'), '모두 내자 8대 모두 1장으로 (' + hashes.join(' ') + ')');
+// 준비: 일곱 명만 누르면 안 넘어가고, 여덟 번째가 누르면 넘어간다
+for (let i = 0; i < 7; i++) { await pages[i].click('[data-ready]'); await wait(70); }
 await wait(300);
-await p0.screenshot({ path: `${out}/04-wait.png`, fullPage: true });
-await p0.click('[data-start]'); await wait(500);
-const hashes = await Promise.all(pages.map(p => p.evaluate(() => location.hash)));
-console.log('엔딩북 연 뒤 각 기기 화면', hashes.join(' '));
-// 다른 기기에서 연구실 판정 → 모두에게 반영
-await pages[3].click('[data-next]'); await wait(400);
+ok((await S(p0)).stage === 2, '7/8 준비 땐 그대로');
+await pages[2].screenshot({ path: `${out}/05-ready-7of8.png`, fullPage: true });
+// 한 명이 취소했다가 다시 누르기
+await pages[3].click('[data-ready]'); await wait(150);
+ok(/6\/8/.test(await pages[3].textContent('[data-ready]')), '준비 취소 반영 (6/8)');
+await pages[3].click('[data-ready]'); await wait(100);
+await gm.click('[data-ready]'); await wait(500);
+ok((await S(p0)).stage === 3, '8/8 준비하면 모두 넘어감');
+const h2 = await Promise.all(pages.slice(0, 8).map(p => p.evaluate(() => location.hash)));
+ok(h2.every(h => h === '#/play/lab'), '8대 모두 2장 연구실로');
+// 아직 안 열린 곳 미리 보기 막힘
+await pages[5].goto(base + '#/play/personal'); await wait(150);
+ok(/아직 열리지 않은 곳/.test(await pages[5].textContent('main')), '앞 단계 미리 보기 막힘');
+await pages[5].goto(base + '#/play/lab'); await wait(150);
+// 판정은 아무 폰에서나 → 모두에게
 await pages[4].click('[data-set=lab] >> text=열리지 않았다'); await wait(300);
-const labSeen = await Promise.all(pages.map(p => p.evaluate(() => window.HANBIT.state().S.lab)));
-console.log('연구실 판정 공유', labSeen.join(','));
-await pages[2].screenshot({ path: `${out}/05-lab-other-phone.png`, fullPage: true });
-await pages[4].click('[data-next]'); await wait(300);
-for (const n of [1, 2, 3, 4, 5]) { await pages[1].click(`[data-set=t${n}] >> text=설명했다`); await wait(60); }
-await pages[1].click('[data-next]'); await wait(300);
+ok((await Promise.all(pages.slice(0, 8).map(S))).every(x => x.lab === false), '연구실 판정이 모두에게 반영');
+// GM이 기다리지 않고 넘기기
+await gm.click('[data-gmnext]'); await wait(500);
+ok((await S(p0)).stage === 4, 'GM이 기다리지 않고 넘김');
+for (const n of [1, 2, 3, 4, 5]) { await pages[1].click(`[data-set=t${n}] >> text=설명했다`); await wait(50); }
+for (let i = 0; i < 8; i++) { await pages[i].click('[data-ready]'); await wait(50); }
+await wait(400);
 await pages[6].click('[data-set=x_reason] >> text=불인정'); await wait(300);
-const esc = await p0.evaluate(() => window.HANBIT.derive(window.HANBIT.state().S).esc);
-console.log('탈출 갈래', esc);
+ok((await p0.evaluate(() => window.HANBIT.derive(window.HANBIT.state().S).esc)) === '2-D', '탈출 갈래 2-D');
 await pages[0].screenshot({ path: `${out}/06-escape.png`, fullPage: true });
-await pages[6].click('[data-next]'); await wait(300);
-await pages[6].click('[data-next]'); await wait(300);
-const where = await Promise.all(pages.map(p => p.evaluate(() => location.hash)));
-console.log('4장으로 함께', where.join(' '));
+for (const step of ['escape', 'ch3']) { for (let i = 0; i < 8; i++) { await pages[i].click('[data-ready]'); await wait(50); } await wait(400); }
+const h3 = await Promise.all(pages.slice(0, 8).map(p => p.evaluate(() => location.hash)));
+ok(h3.every(h => h === '#/play/personal'), '모두 함께 4장으로');
 await pages[1].screenshot({ path: `${out}/07-personal-noa.png`, fullPage: true });
 await pages[5].goto(base + '#/role/taesu'); await wait(200);
-console.log('태수 엔딩', (await pages[5].textContent('.ending-title')).trim());
-await pages[5].screenshot({ path: `${out}/08-taesu.png`, fullPage: true });
+ok(/아이와 함께 나온 말/.test(await pages[5].textContent('.ending-title')), '태수 엔딩: 아이와 함께 나온 말');
+// GM이 자리 비우기 → 그 기기는 다시 골라야 함
+await gm.goto(base + '#/room'); await wait(200);
+await gm.click('summary:has-text("자리 비우기")'); await gm.click('[data-release=junseo]'); await wait(300);
+ok((await me(pages[4])) === null, 'GM이 비운 자리는 그 기기에서 풀림');
+await pages[4].goto(base + '#/room'); await wait(150);
+await pages[4].click('[data-claim=junseo]'); await wait(200);
+ok((await me(pages[4])) === 'junseo', '비운 자리에 다시 앉기');
 console.log(errors.length ? '콘솔 에러:\n' + errors.join('\n') : '콘솔 에러 없음');
+console.log(fails.length ? `실패 ${fails.length}건` : '모두 통과');
 await browser.close();
+process.exit(fails.length || errors.length ? 1 : 0);
