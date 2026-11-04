@@ -89,7 +89,11 @@
   }
   function set(k, v) {
     st.S[k] = v; save();
-    if (st.room && DB) DB.set(rp("state/" + k), v == null ? null : v);
+    if (st.room && DB) {
+      var o = {}; o["state/" + k] = v == null ? null : v;
+      if (k !== "stage" && k !== "acc") o["by/" + k] = v == null || !st.me ? null : st.me;
+      DB.update(rp(""), o);
+    }
   }
   function setMany(patch) {
     Object.keys(patch).forEach(function (k) { st.S[k] = patch[k]; });
@@ -721,7 +725,10 @@
     return '<span class="seg">' + opts.map(function (o) {
       var on = cur === o[0];
       return '<button type="button" data-set="' + key + '" data-v="' + esc(JSON.stringify(o[0])) + '" class="' + (on ? "on " : "") + (o[2] || "") + '">' + esc(o[1]) + "</button>";
-    }).join("") + "</span>";
+    }).join("") + "</span>" + (function () {
+      var by = inRoom() && ROOM && ROOM.by && ROOM.by[key];
+      return by && cur != null ? ' <span class="small muted">· ' + esc(seatShort(by)) + (by === st.me ? "(나)" : "") + "가 골랐어요</span>" : "";
+    })();
   }
   function yn(key, yes, no) { return seg(key, [[true, yes || "그렇다", "yes"], [false, no || "아니다", "no"]], st.S[key]); }
   function verdict(v, ok, no) {
@@ -1424,7 +1431,7 @@
     if (!t) return;
     if (t.hasAttribute("data-set")) {
       var k = t.getAttribute("data-set"), val = JSON.parse(t.getAttribute("data-v"));
-      if (st.S[k] === val && FACT[k] && FACT[k][1] === 3) val = null; // 다시 누르면 미정으로
+      if (st.S[k] === val) return; // 이미 그 답이면 아무것도 안 한다 (여러 명이 같이 눌러도 그대로)
       set(k, val);
       if (k === "acc") { /* 지목이 바뀌면 그대로 다시 그림 */ }
       rerender();

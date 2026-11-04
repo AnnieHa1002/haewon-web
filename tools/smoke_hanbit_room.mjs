@@ -129,6 +129,12 @@ ok((await Promise.all(pages.slice(0, 8).map(S))).every(x => x.lab === false), '�
 await gm.click('[data-roomnext]'); await wait(500);
 ok((await S(p0)).stage === 4, 'GM이 눌러도 넘어감');
 for (const n of [1, 2, 3, 4, 5]) { await pages[1].click(`[data-set=t${n}] >> text=설명했다`); await wait(50); }
+// 여러 명이 같은 답을 눌러도 지워지지 않는다
+await pages[3].click('[data-set=t1] >> text=설명했다'); await wait(150);
+await pages[5].click('[data-set=t1] >> text=설명했다'); await wait(300);
+ok((await S(p0)).t1 === true, '여러 명이 같은 답을 눌러도 그대로');
+ok(/노아\(나\)가 골랐어요|노아가 골랐어요/.test(await pages[1].textContent('main')) || /가 골랐어요/.test(await pages[2].textContent('main')), '누가 골랐는지 표시');
+ok(await pages[2].$eval('[data-roomnext]', b => !b.disabled), '판정이 끝나면 다음 버튼이 켜짐');
 await pages[2].click('[data-roomnext]'); await wait(400);
 await pages[6].click('[data-set=x_reason] >> text=불인정'); await wait(300);
 ok((await p0.evaluate(() => window.HANBIT.derive(window.HANBIT.state().S).esc)) === '2-D', '탈출 갈래 2-D');
