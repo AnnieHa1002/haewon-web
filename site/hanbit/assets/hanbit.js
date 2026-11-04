@@ -109,6 +109,16 @@
       return d;
     } catch (e) { return Math.random().toString(36).slice(2, 10); }
   })();
+  var TAB = (function () {
+    try {
+      var t = sessionStorage.getItem("hanbit.tab");
+      if (!t) { t = Math.random().toString(36).slice(2, 10); sessionStorage.setItem("hanbit.tab", t); }
+      return t;
+    } catch (e) { return Math.random().toString(36).slice(2, 10); }
+  })();
+  function isMine(p) { return !!(p && p.id === TAB); }
+  // 같은 휴대폰에서 고른 자리인데, 그 탭이 닫혀(연결이 끊겨) 있으면 다시 앉을 수 있다
+  function canReclaim(p) { return !!(p && p.id !== TAB && p.dev === DEVICE && p.online === false); }
   var DB = null;
   var ROOM = null; // 방 전체 데이터 {players, votes, sheets, state, created}
   function rp(path) { return "rooms/" + st.room + (path ? "/" + path : ""); }
@@ -133,6 +143,11 @@
         if (v === undefined) return Promise.resolve(false);
         pathSet(d, parts, v); localStorage.setItem(KEY, JSON.stringify(d)); setTimeout(fire, 0);
         return Promise.resolve(true);
+      },
+      presence: function (path) {
+        var parts = path.split("/");
+        write(function (d) { pathSet(d, parts, true); });
+        window.addEventListener("pagehide", function () { var d = all(); if (pathGet(d, parts.slice(0, -1))) { pathSet(d, parts, false); localStorage.setItem(KEY, JSON.stringify(d)); } });
       }
     };
   }
@@ -148,7 +163,14 @@
         update: function (path, o) { return d.ref(path).update(o); },
         once: function (path) { return d.ref(path).once("value").then(function (snap) { return snap.val(); }); },
         // 서버에서 한 번에 확인하고 차지한다(동시에 같은 코드를 만들어도 한 명만 성공)
-        claim: function (path, make) { return d.ref(path).transaction(make).then(function (r) { return r.committed; }); }
+        claim: function (path, make) { return d.ref(path).transaction(make).then(function (r) { return r.committed; }); },
+        // 탭이 닫히거나 연결이 끊기면 서버가 알아서 online=false 로 바꾼다
+        presence: function (path) {
+          var r = d.ref(path), conn = d.ref(".info/connected");
+          if (fireDB.presOff) fireDB.presOff();
+          var h = conn.on("value", function (snap) { if (snap.val() === true) { r.onDisconnect().set(false); r.set(true); } });
+          fireDB.presOff = function () { conn.off("value", h); r.onDisconnect().cancel(); };
+        }
       };
     } catch (e) { console.warn("Firebase 연결 실패", e); return null; }
   }
@@ -169,8 +191,10 @@
       st.S = b.S;
       st.sheets = ROOM.sheets || {};
       var P0 = ROOM.players || {};
-      if (st.me && (!P0[st.me] || P0[st.me].id !== DEVICE)) { st.me = null; toast("내 자리가 비워졌어요. 다시 골라 주세요"); }
-      if (!st.me) { Object.keys(P0).forEach(function (k) { if (P0[k] && P0[k].id === DEVICE) st.me = k; }); }
+      if (st.me && !isMine(P0[st.me])) { if (enterRoom.seated) toast("내 자리가 비워졌어요. 다시 골라 주세요"); st.me = null; enterRoom.seated = false; }
+      if (!st.me) { Object.keys(P0).forEach(function (k) { if (isMine(P0[k])) st.me = k; }); }
+      if (st.me) enterRoom.seated = true;
+      if (st.me && P0[st.me] && P0[st.me].online === false) DB.presence(rp("players/" + st.me + "/online"));
       save();
       advanceIfReady();
       if (AUTOSEAT && !st.me && ROOM.created && !claimSeat.tried) { claimSeat.tried = true; claimSeat(AUTOSEAT); }
@@ -225,13 +249,15 @@
   function claimSeat(rk) {
     return DB.claim(rp("players"), function (cur) {
       cur = cur || {};
-      if (cur[rk] && cur[rk].id !== DEVICE) return undefined;
-      Object.keys(cur).forEach(function (k) { if (cur[k] && cur[k].id === DEVICE) delete cur[k]; });
-      cur[rk] = { id: DEVICE, at: Date.now() };
+      if (cur[rk] && !isMine(cur[rk]) && !canReclaim(cur[rk])) return undefined; // 다른 사람이 고른 자리는 못 고른다
+      Object.keys(cur).forEach(function (k) { if (isMine(cur[k])) delete cur[k]; });   // 한 사람(탭)은 한 자리만
+      cur[rk] = { id: TAB, dev: DEVICE, at: Date.now(), online: true };
       return cur;
     }).then(function (ok) {
       if (!ok) { toast(seatName(rk) + "은(는) 방금 다른 사람이 골랐어요"); return false; }
-      st.me = rk; if (R[rk]) st.role = rk; save(); rerender(); return true;
+      st.me = rk; if (R[rk]) st.role = rk; save();
+      DB.presence(rp("players/" + rk + "/online"));
+      rerender(); return true;
     });
   }
   // 방에 앉은 캐릭터 모두가 지목했고, 지목 결과(가장 많이 지목된 사람)가 정해졌는가
@@ -1211,7 +1237,7 @@
   function vRoom() {
     var g = roomGuard(); if (g) return g;
     var P = players(), url = joinURL(st.room);
-    var full = seated().length >= 8;
+    var full = seated().length >= 8 && !Object.keys(P).some(function (k) { return canReclaim(P[k]); });
     if (!st.me && full) return topBar() + '<main><div class="lock"><div class="ic">🚪</div><h2 class="ttl">방이 가득 찼어요</h2><p class="lead">이 방은 캐릭터 7명과 GM 1명이 모두 들어와 있어요.<br>자리를 잘못 골랐다면 GM에게 자리를 비워 달라고 해 주세요.</p><button class="btn" data-leave>나가기</button></div></main>';
     var h = topBar() + "<main>";
     h += '<div class="kicker">1 · 방 코드 나누기</div><h2 class="ttl">방 ' + esc(st.room) + "</h2>";
@@ -1219,11 +1245,11 @@
     h += '<div class="card"><div class="code-big">' + esc(st.room) + '</div><div class="qr" id="qr"></div><div class="row" style="justify-content:center"><button class="btn" data-copy="' + esc(st.room) + '">코드 복사</button><button class="btn" data-copy="' + esc(url) + '">링크 복사</button></div></div>';
     h += '<div class="kicker" style="margin-top:22px">2 · 내 캐릭터 고르기</div><h2 class="ttl" style="font-size:22px">나는 누구인가요?</h2>';
     h += '<div class="roles">' + ROLES.map(function (r) {
-      var p = P[r.k], mine = r.k === st.me, other = p && !mine;
+      var p = P[r.k], mine = r.k === st.me, back = !mine && canReclaim(p), other = p && !mine && !back;
       return '<button class="role" style="--rc:' + r.color + (mine ? ";outline:3px solid var(--dusk);outline-offset:2px" : "") + (other ? ";opacity:.45;cursor:not-allowed" : "") + '" data-claim="' + r.k + '"' + (other ? " disabled" : "") + '><img alt="" src="' + roleImg(r.k) + '">' +
-        (mine ? '<span class="badge">나</span>' : other ? '<span class="badge">선택됨</span>' : "") + '<div class="nm"><b>' + esc(r.name) + "</b><span>" + (mine ? "내 캐릭터" : other ? "다른 사람이 골랐어요" : "고르기") + "</span></div></button>";
+        (mine ? '<span class="badge">나</span>' : other ? '<span class="badge">선택됨</span>' : back ? '<span class="badge">이 휴대폰</span>' : "") + '<div class="nm"><b>' + esc(r.name) + "</b><span>" + (mine ? "내 캐릭터" : other ? "다른 사람이 골랐어요" : back ? "다시 앉기" : "고르기") + "</span></div></button>";
     }).join("") + "</div>";
-    var gmMine = st.me === "gm", gmOther = P.gm && !gmMine;
+    var gmMine = st.me === "gm", gmOther = P.gm && !gmMine && !canReclaim(P.gm);
     h += '<button class="big-btn" style="margin-top:10px' + (gmMine ? ";outline:3px solid var(--dusk);outline-offset:2px" : "") + (gmOther ? ";opacity:.45;cursor:not-allowed" : "") + '" data-claim="gm"' + (gmOther ? " disabled" : "") + '><span class="ic">🎙</span><span><b>GM (진행자) ' + (gmMine ? "· 나" : gmOther ? "· 선택됨" : "") + "</b><span>캐릭터 없이 진행만 해요. 지목·결정지는 하지 않고, 자리 비우기와 ‘기다리지 않고 넘기기’를 할 수 있어요. 1명까지.</span></span></button>";
     h += '<p class="small muted" style="margin-top:8px">캐릭터 ' + claimed().length + " / 7명 · GM " + (P.gm ? 1 : 0) + " / 1명 · 이 방은 이 8자리에 앉은 사람만 볼 수 있어요</p>";
     if (gmMine) {
@@ -1415,7 +1441,7 @@
       if (!window.confirm("아직 결정지를 내지 않은 사람이 있어요. 그래도 엔딩북을 열까요?")) return;
       bumpStage(st.S.stage || 0, Math.max(stepIndex("ch1"), st.S.stage || 0));
     } else if (t.hasAttribute("data-leave")) {
-      if (window.confirm("이 기기에서 방을 나갈까요? 내 자리는 비워져요 (방은 그대로 남아요).")) { if (st.me && players()[st.me] && players()[st.me].id === DEVICE) DB.set(rp("players/" + st.me), null); leaveRoom(); location.hash = "#/"; }
+      if (window.confirm("이 기기에서 방을 나갈까요? 내 자리는 비워져요 (방은 그대로 남아요).")) { if (st.me && players()[st.me] && isMine(players()[st.me])) DB.set(rp("players/" + st.me), null); leaveRoom(); location.hash = "#/"; }
     } else if (t.hasAttribute("data-reset")) {
       if (window.confirm("이 기기의 진행 상황과 결정지를 모두 지울까요?")) { st = blank(); save(); vSheet.open = null; location.hash = "#/"; toast("새 판을 시작합니다"); }
     }

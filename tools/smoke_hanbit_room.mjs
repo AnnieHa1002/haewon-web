@@ -46,6 +46,27 @@ const before = await me(pages[1]);
 await pages[1].evaluate(() => document.querySelector('[data-claim=daeun]').removeAttribute('disabled'));
 await pages[1].click('[data-claim=daeun]'); await wait(300);
 ok((await me(pages[1])) === before && (await me(p0)) === 'daeun', '이미 고른 캐릭터는 다른 사람이 못 고름');
+// 같은 휴대폰의 다른 탭: 노아 자리는 이미 골랐으니 못 고른다
+const twin = await ctx.newPage();
+await twin.addInitScript(n => {
+  const g = Storage.prototype.getItem, s = Storage.prototype.setItem;
+  Storage.prototype.getItem = function (k) { return g.call(this, k === 'hanbit.mockdb' ? k : k + '#' + n); };
+  Storage.prototype.setItem = function (k, v) { return s.call(this, k === 'hanbit.mockdb' ? k : k + '#' + n, v); };
+}, 1);
+twin.on('dialog', d => d.accept());
+await twin.goto(base + '#/room'); await wait(300);
+ok(/가득 찼어요/.test(await twin.textContent('main')) && (await me(twin)) === null, '같은 휴대폰 다른 탭은 이미 고른 자리를 못 가져감');
+// 같은 휴대폰에서 노아 탭이 닫혔다면(연결 끊김) → 그 휴대폰의 새 탭에서 '다시 앉기'
+await pages[1].evaluate(() => window.dispatchEvent(new Event('pagehide'))); await wait(300);
+await twin.reload(); await wait(300);
+ok(await twin.$eval('[data-claim=noa]', b => !b.disabled && /다시 앉기/.test(b.textContent)), '닫힌 탭의 자리는 같은 휴대폰에서 다시 앉기');
+ok(await twin.$eval('[data-claim=siwoo]', b => b.disabled), '다른 사람 자리는 여전히 잠김');
+await twin.click('[data-claim=noa]'); await wait(300);
+ok((await me(twin)) === 'noa', '다시 앉음');
+// 원래 탭으로 돌아가기(테스트 계속): 원래 탭이 다시 앉는다
+await twin.evaluate(() => window.dispatchEvent(new Event('pagehide'))); await twin.close(); await wait(200);
+await pages[1].reload(); await wait(300); await pages[1].click('[data-claim=noa]'); await wait(300);
+ok((await me(pages[1])) === 'noa', '원래 탭도 다시 앉기');
 // 9번째 기기 → 가득 참
 await pages[8].goto(base + '#/room'); await wait(300);
 ok(/가득 찼어요/.test(await pages[8].textContent('main')), '9번째 기기는 방에 못 들어감');
