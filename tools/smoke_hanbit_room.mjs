@@ -86,6 +86,11 @@ for (let i = 0; i < 7; i++) { await pages[i].goto(base + '#/vote'); await wait(6
 await gm.goto(base + '#/vote'); await wait(200);
 ok(await gm.$eval('[data-vote=haeun]', b => b.disabled), 'GM은 지목 버튼이 꺼져 있음');
 await wait(300);
+// 서버에서 지목이 빠져도(오류 등) 각자 휴대폰에 기억한 걸로 다시 채워진다
+await p0.evaluate(() => { const d = JSON.parse(localStorage.getItem('hanbit.mockdb')); const r = Object.keys(d.rooms).pop(); delete d.rooms[r].votes.siwoo; localStorage.setItem('hanbit.mockdb', JSON.stringify(d)); window.dispatchEvent(new StorageEvent('storage', { key: 'hanbit.mockdb' })); });
+await wait(500);
+ok(await pages[2].evaluate(() => { const d = JSON.parse(localStorage.getItem('hanbit.mockdb')); const r = Object.keys(d.rooms).pop(); return d.rooms[r].votes.siwoo === 'haeun'; }), '빠진 지목이 휴대폰 기억으로 다시 채워짐');
+ok(!(await pages[2].$('[data-revote]')), '결과가 하나로 정해지면 다시 지목 버튼 없음');
 ok((await S(p0)).acc === 'haeun', '지목 결과 허하은');
 await wait(4000);
 const hv = await Promise.all(pages.slice(0, 8).map(p => p.evaluate(() => location.hash)));
@@ -126,8 +131,9 @@ await pages[5].goto(base + '#/play/lab'); await wait(150);
 // 판정은 아무 폰에서나 → 모두에게
 await pages[4].click('[data-set=lab] >> text=열리지 않았다'); await wait(300);
 ok((await Promise.all(pages.slice(0, 8).map(S))).every(x => x.lab === false), '연구실 판정이 모두에게 반영');
-await gm.click('[data-roomnext]'); await wait(500);
-ok((await S(p0)).stage === 4, 'GM이 눌러도 넘어감');
+ok(!(await gm.$('[data-roomnext]')) && await gm.$eval('[data-set=lab]', b => b.disabled), 'GM은 다음·판정 버튼을 못 누름');
+await pages[4].click('[data-roomnext]'); await wait(500);
+ok((await S(p0)).stage === 4, '플레이어가 누르면 넘어감');
 for (const n of [1, 2, 3, 4, 5]) { await pages[1].click(`[data-set=t${n}] >> text=설명했다`); await wait(50); }
 // 여러 명이 같은 답을 눌러도 지워지지 않는다
 await pages[3].click('[data-set=t1] >> text=설명했다'); await wait(150);

@@ -205,6 +205,9 @@
       if (st.me) enterRoom.seated = true;
       if (st.me && P0[st.me] && P0[st.me].online === false) DB.presence(rp("players/" + st.me + "/online"));
       save();
+      if (isPlayer() && !(ROOM.sheets && ROOM.sheets[st.me])) { try { var sent = JSON.parse(localStorage.getItem(draftKey(st.me) + ".sent") || "null"); if (sent && sent.done) DB.set(rp("sheets/" + st.me), sent); } catch (e) { /* 무시 */ } }
+      // 내 지목이 서버에서 빠졌으면(다시 지목한 게 아니면) 휴대폰에 기억한 걸로 다시 채운다
+      if (isPlayer() && (st.S.stage || 0) < stepIndex("ch1") && !(ROOM.votes && ROOM.votes[st.me])) { var lv = localVote(); if (lv) castVote(lv); }
       advanceIfReady();
       if (AUTOSEAT && !st.me && ROOM.created && !claimSeat.tried) { claimSeat.tried = true; claimSeat(AUTOSEAT); }
       var newStage = st.S.stage || 0;
@@ -289,6 +292,13 @@
     DB.claim(rp("state/stage"), function (v) { return (v || 0) === from ? to : undefined; });
   }
   function votes() { return (ROOM && ROOM.votes) || {}; }
+  function voteRound() { return (ROOM && ROOM.state && ROOM.state.voteRound) || 0; }
+  function myVoteKey() { return "hanbit.vote." + st.room + "." + st.me; }
+  function localVote() { try { var o = JSON.parse(localStorage.getItem(myVoteKey()) || "null"); return o && o.round === voteRound() ? o.v : null; } catch (e) { return null; } }
+  function castVote(v) {
+    try { localStorage.setItem(myVoteKey(), JSON.stringify({ round: voteRound(), v: v })); } catch (e) { /* 무시 */ }
+    return DB.set(rp("votes/" + st.me), v);
+  }
   function inRoom() { return !!(st.room && DB); }
 
   /* ───────── 결과 코드 ───────── */
@@ -724,7 +734,7 @@
   function seg(key, opts, cur) {
     return '<span class="seg">' + opts.map(function (o) {
       var on = cur === o[0];
-      return '<button type="button" data-set="' + key + '" data-v="' + esc(JSON.stringify(o[0])) + '" class="' + (on ? "on " : "") + (o[2] || "") + '">' + esc(o[1]) + "</button>";
+      return '<button type="button" data-set="' + key + '" data-v="' + esc(JSON.stringify(o[0])) + '" class="' + (on ? "on " : "") + (o[2] || "") + '"' + (inRoom() && isGM() ? " disabled" : "") + ">" + esc(o[1]) + "</button>";
     }).join("") + "</span>" + (function () {
       var by = inRoom() && ROOM && ROOM.by && ROOM.by[key];
       return by && cur != null ? ' <span class="small muted">· ' + esc(seatShort(by)) + (by === st.me ? "(나)" : "") + "가 골랐어요</span>" : "";
@@ -792,8 +802,9 @@
         next = '<a class="btn pri" href="#/play/' + STEPS[stage].id + '">지금 읽는 곳으로 →</a>';
       } else {
         next = !st.me ? '<button class="btn pri" disabled>자리를 골라야 넘길 수 있어요</button>' :
+          isGM() ? '<button class="btn pri" disabled>GM은 보기만 해요</button>' :
           '<button class="btn pri" data-roomnext="' + L[i + 1].id + '"' + (canNext ? "" : " disabled") + ">" + esc(label || L[i + 1].t) + " →</button>";
-        who = '<p class="small muted" style="text-align:right;margin:6px 0 0">누가 눌러도 모두의 화면이 함께 넘어가요</p>';
+        who = '<p class="small muted" style="text-align:right;margin:6px 0 0">' + (isGM() ? "플레이어가 넘기면 함께 넘어가요" : "누가 눌러도 모두의 화면이 함께 넘어가요") + "</p>";
       }
     }
     return '<div class="nav">' + prev + next + "</div>" + who;
@@ -989,8 +1000,6 @@
   function draftOf(k) {
     var d = null;
     try { d = JSON.parse(localStorage.getItem(draftKey(k)) || "null"); } catch (e) { d = null; }
-    var remote = ROOM && ROOM.drafts && ROOM.drafts[k];
-    if (remote && (!d || (remote.at || 0) > (d.at || 0))) d = remote;
     return d || {};
   }
   function readSheetForm(f, k) {
@@ -1008,8 +1017,6 @@
     var k = f.getAttribute("data-sheet"), o = readSheetForm(f, k);
     o.at = Date.now();
     try { localStorage.setItem(draftKey(k), JSON.stringify(o)); } catch (e) { /* 무시 */ }
-    clearTimeout(saveDraft.t);
-    if (inRoom()) saveDraft.t = setTimeout(function () { DB.set(rp("drafts/" + k), o); }, 600);
   }
   function vSheet(k) {
     var r = R[k];
@@ -1285,7 +1292,7 @@
         (mine ? '<span class="badge">나</span>' : off ? '<span class="badge">연결 끊김</span>' : other ? '<span class="badge">선택됨</span>' : "") + '<div class="nm"><b>' + esc(r.name) + "</b><span>" + (mine ? "내 캐릭터" : other ? "본인이면 눌러서 다시 접속" : "고르기") + "</span></div></button>";
     }).join("") + "</div>";
     var gmMine = st.me === "gm", gmOther = P.gm && !gmMine;
-    h += '<button class="big-btn" style="margin-top:10px' + (gmMine ? ";outline:3px solid var(--dusk);outline-offset:2px" : "") + (gmOther ? ";opacity:.5" : "") + '" data-claim="gm"><span class="ic">🎙</span><span><b>GM (진행자) ' + (gmMine ? "· 나" : gmOther ? "· 선택됨" : "") + "</b><span>캐릭터 없이 진행만 해요(없어도 돼요). 지목·결정지는 하지 않고, 어느 화면에서든 오른쪽 아래 ‘관리’로 자리 비우기를 할 수 있어요. GM이 없으면 캐릭터 누구나 관리할 수 있어요.</span></span></button>";
+    h += '<button class="big-btn" style="margin-top:10px' + (gmMine ? ";outline:3px solid var(--dusk);outline-offset:2px" : "") + (gmOther ? ";opacity:.5" : "") + '" data-claim="gm"><span class="ic">🎙</span><span><b>GM (진행자) ' + (gmMine ? "· 나" : gmOther ? "· 선택됨" : "") + "</b><span>캐릭터 없이 보기만 해요(없어도 돼요). 지목·결정지·판정·‘다음’은 누르지 않고, 어느 화면에서든 오른쪽 아래 ‘관리’로 자리 비우기만 할 수 있어요. GM이 없으면 캐릭터 누구나 관리할 수 있어요.</span></span></button>";
     h += '<p class="small muted" style="margin-top:8px">캐릭터 ' + claimed().length + " / 7명 · GM " + (P.gm ? 1 : 0) + " / 1명 · 이 방은 이 8자리에 앉은 사람만 볼 수 있어요</p>";
     var nextHref = isGM() ? "#/vote" : "#/vote";
     h += '<div class="nav"><button class="btn ghost" data-leave>방 나가기</button>' + (st.me ? '<a class="btn pri" href="' + nextHref + '">' + (isGM() ? "지목 진행 보기 →" : "지목하러 가기 →") + "</a>" : '<button class="btn pri" disabled>자리를 골라 주세요</button>') + "</div>";
@@ -1307,7 +1314,7 @@
     })();
     if (!st.me) { setTimeout(function () { location.hash = "#/room"; }, 0); return ""; }
     var gm = isGM();
-    var V = votes(), my = V[st.me], who = claimed(), done = who.filter(function (k) { return V[k]; }).length;
+    var V = votes(), my = V[st.me] || localVote(), who = claimed(), done = who.filter(function (k) { return V[k]; }).length;
     var all = who.length > 0 && done === who.length, T = tally();
     var h = topBar() + "<main>";
     h += '<div class="kicker">3 · 최후 토론 뒤</div><h2 class="ttl">범인 지목</h2>';
@@ -1323,7 +1330,7 @@
       if (T.top.length === 1) h += "<h3>가장 많이 지목된 사람 · " + esc(nameOf(T.top[0])) + " (" + T.max + "표)</h3>";
       else h += "<h3>동점이에요 (" + T.top.map(nameOf).join(", ") + ")</h3><p class=\"small\">다시 지목하거나, 이야기로 정한 사람을 눌러 주세요.</p>";
       h += '<div class="row">' + (T.top.length > 1 ? T.top.map(function (k) { return '<button class="btn' + (st.S.acc === k ? " pri" : "") + '" data-set="acc" data-v="' + esc(JSON.stringify(k)) + '">' + esc(nameOf(k)) + "</button>"; }).join("") : "") +
-        '<button class="btn ghost" data-revote>다시 지목하기</button></div></div>';
+        (T.top.length > 1 && isPlayer() ? '<button class="btn ghost" data-revote>다시 지목하기</button>' : "") + "</div></div>";
     }
     var ready = !!st.S.acc && all;
     // 모두 지목하고 결과가 정해지면, 결과를 잠깐 보여 준 뒤 모두 자동으로 결정지로 넘어간다
@@ -1429,6 +1436,7 @@
   app.addEventListener("click", function (ev) {
     var t = ev.target.closest("[data-set],[data-next],[data-open],[data-peekid],[data-copy],[data-reset],[data-close],[data-create],[data-claim],[data-vote],[data-revote],[data-start],[data-leave],[data-roomnext],[data-release],[data-admin]");
     if (!t) return;
+    if (inRoom() && isGM() && (t.hasAttribute("data-set") || t.hasAttribute("data-roomnext") || t.hasAttribute("data-vote") || t.hasAttribute("data-revote"))) return; // GM은 보기만
     if (t.hasAttribute("data-set")) {
       var k = t.getAttribute("data-set"), val = JSON.parse(t.getAttribute("data-v"));
       if (st.S[k] === val) return; // 이미 그 답이면 아무것도 안 한다 (여러 명이 같이 눌러도 그대로)
@@ -1474,9 +1482,10 @@
       var pnl = document.getElementById("adminpanel"); if (pnl) pnl.hidden = !pnl.hidden;
     } else if (t.hasAttribute("data-vote")) {
       if (!isPlayer()) return;
-      DB.set(rp("votes/" + st.me), t.getAttribute("data-vote"));
+      castVote(t.getAttribute("data-vote"));
     } else if (t.hasAttribute("data-revote")) {
-      DB.update(rp(""), { votes: null, "state/acc": null });
+      if (!isPlayer() || !window.confirm("모두의 지목을 지우고 다시 지목할까요?")) return;
+      DB.update(rp(""), { votes: null, "state/acc": null, "state/voteRound": voteRound() + 1 });
     } else if (t.hasAttribute("data-start")) {
       if (!isAdmin()) return;
       if (!voteDone()) { toast("모두 지목하고 결과가 정해져야 엔딩북을 열 수 있어요"); return; }
@@ -1501,9 +1510,8 @@
       Object.keys(o).forEach(function (q) { if (typeof o[q] === "string") o[q] = o[q].trim(); });
       o.done = true;
       st.sheets[k] = o;
-      clearTimeout(saveDraft.t);
-      try { localStorage.removeItem(draftKey(k)); } catch (e) { /* 무시 */ }
-      if (inRoom()) { DB.set(rp("sheets/" + k), o); DB.set(rp("drafts/" + k), null); }
+      try { localStorage.removeItem(draftKey(k)); localStorage.setItem(draftKey(k) + ".sent", JSON.stringify(o)); } catch (e) { /* 무시 */ }
+      if (inRoom()) DB.set(rp("sheets/" + k), o);
       syncSheets(); vSheet.open = null;
       if (inRoom()) { toast("결정지를 냈어요"); location.hash = "#/wait"; }
       else { toast(R[k].name + "의 결정지를 가렸어요. 다음 사람에게 넘기세요"); location.hash = "#/play/sheets"; }
