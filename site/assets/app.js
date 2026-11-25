@@ -335,13 +335,11 @@
     { r: 'S7', label: '도원 사내망', ic: 'DW', bg: '#2b4c7e', img: 'img/brand/dowon_color.png', lock: function () { return !sess('S7'); } }
   ];
   // 송은혜의 휴대폰(#/S2)과 이다음의 휴대폰(#/S3)은 허브에 두지 않는다. 카드의 QR로만 들어간다.
-  // 허브는 진행 카드 D-1(4 휴대폰)의 QR로 연다: 맨 위에 '내 휴대폰' 네 대, 주소창, 그 아래 사이트
+  // 허브는 진행 카드 D-1(4 휴대폰)의 QR로 연다: 주소창과 사이트. 인물별 휴대폰은 각자 다른 주소(설정지)로만 들어간다
   function hub() {
     document.title = '홈';
     var h = '<div class="hub"><div class="hub-clock"><b>' + hm(NOW) + '</b><span>' + kdate(NOW) + '</span></div>' +
-      '<div class="hub-me"><div class="hub-sec">내 휴대폰</div><div class="hub-phones">' + Object.keys(PHONES).map(function (k) {
-        return '<a href="#/' + k + '"><span>📱</span>' + esc(PHONES[k].who) + '</a>';
-      }).join('') + '</div></div>' + addrBar('') + '<div class="hub-grid">';
+      addrBar('') + '<div class="hub-grid">';
     APPS.forEach(function (a) {
       h += '<a class="app" href="#/' + a.r + '"><span class="app-ic' + (a.img ? ' logo' + (a.dark ? ' dark' : '') : '') + '" style="background:' + (a.img ? (a.dark ? a.bg : '#fff') : a.bg) + '">' + (a.img ? '<img src="' + a.img + '" alt="">' : a.ic) +
         (a.lock && a.lock() ? '<i class="app-lock">🔒</i>' : '') + '</span><span class="app-l">' + a.label + '</span></a>';
@@ -960,8 +958,10 @@
       '<input name="pw" type="password" autocomplete="off" ' + (wait ? 'disabled placeholder="' + wait + '초 후에 다시 시도하세요"' : 'placeholder="비밀번호"') + '><button class="btn"' + (wait ? ' disabled' : '') + '>확인</button><p class="login-err" hidden></p></form>';
   }
 
-  // ── 4 휴대폰 (S12~S15): 진행 카드 D-1의 허브 QR → 내 휴대폰 ─────
+  // ── 4 휴대폰 (S12~S15): 인물마다 다른 주소(#/haneul 등) + 네 자리 번호 ─────
+  // 주소와 번호는 그 인물의 설정지 「지금, 여기」에만 둔다. 번호는 data/extra/logins.csv (빌드에서 해시만 남김)
   // 즐겨찾기(자동 로그인) · 앱 · 주소창. 앱 목록은 시트 게시판·메시지 ID를 따른다
+  var PHONE_SLUG = { haneul: 'S12', byeolkkot: 'S13', oegolsu: 'S14', gaudi: 'S15' };
   var PHONES = {
     S12: { who: '하늘바라기', wall: 'flowers', fav: ['S6', 'S5'], apps: [['msg6', '금방울당', 'bell'], ['b/구매 내역', '구매 내역', 'buy'], ['b/달력', '달력', 'cal'], ['b/사진첩', '사진첩', 'photo'], ['b/통화 기록', '통화 기록', 'call']] },
     S13: { who: '별꽃', wall: 'dusk', fav: ['S1', 'S5'], apps: [['b/메모장', '메모장', 'memo'], ['b/통화 기록', '통화 기록', 'call'], ['mail', '메일', 'mail'], ['doran', '도란', 'doran']] },
@@ -1040,9 +1040,16 @@
     var list = D.messages.filter(function (m) { return /^S15-ER/.test(m.id); });
     return appBar(dev, '해원대학병원 보호자 상담') + chatHTML(list, 'seo_mail', 'doran er');
   }
+  function phoneLock(dev) {
+    var wait = lockedFor(dev);
+    return statusBar('19:16') + '<div class="home ' + PHONES[dev].wall + ' p-lock"><div class="pl-clock">19:16</div><div class="pl-date">7월 17일 목요일</div>' +
+      '<form class="vault pl-form" data-vault="' + dev + '"><p>잠금 해제 번호 네 자리</p><input name="pw" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" ' +
+      (wait ? 'disabled placeholder="' + wait + '초 후에 다시"' : 'placeholder="••••"') + '><button class="btn"' + (wait ? ' disabled' : '') + '>열기</button><p class="login-err" hidden></p></form></div>';
+  }
   function phonePage(dev, parts) {
     var ph = PHONES[dev], app = parts[1], h;
     var title = ph.who + '의 휴대폰';
+    if (!isOpen(dev)) return phone('p-me p-' + dev, phoneLock(dev), title);
     if (!app) return phone('p-me p-' + dev, phoneHome(dev), title);
     if (app === 'b') {
       var board = parts[2], id = parts[3], kind = (ph.apps.find(function (a) { return a[0] === 'b/' + board; }) || [])[2];
@@ -1112,7 +1119,8 @@
   function route() {
     closeSheet();
     var r = parse(), parts = r.parts, q = r.q, site = parts[0], out;
-    if (site === 'S3' || PHONES[site]) curPhone = site;
+    if (PHONE_SLUG[site]) { location.replace('#/' + PHONE_SLUG[site]); return; }
+    if (site === 'S3' || (PHONES[site] && isOpen(site))) curPhone = site;
     else if (!site) curPhone = '';
     // 휴대폰에서 연 사이트는 그 휴대폰 주인 계정으로 자동 로그인 (즐겨찾기·주소창 모두)
     if (curPhone && site !== curPhone) {
@@ -1177,10 +1185,10 @@
     if (f.dataset.vault) {
       e.preventDefault();
       var dev = f.dataset.vault, v = f.pw.value.replace(/[\s.,·]/g, '');
-      if (unlockAttempt(dev, v)) { route(); return; }
+      if (unlockAttempt(dev, v)) { if (PHONES[dev]) curPhone = dev; route(); return; }
       var w = lockedFor(dev);
       if (w) { route(); toast(w + '초 동안 입력할 수 없습니다.'); return; }
-      var er3 = f.querySelector('.login-err'); er3.hidden = false; er3.textContent = '비밀번호가 맞지 않습니다.'; f.pw.value = '';
+      var er3 = f.querySelector('.login-err'); er3.hidden = false; er3.textContent = PHONES[dev] ? '번호가 맞지 않습니다.' : '비밀번호가 맞지 않습니다.'; f.pw.value = '';
       return;
     }
     if (f.classList.contains('addr')) { e.preventDefault(); addrGo(f.q.value); return; }

@@ -158,12 +158,17 @@ def build():
         if m:
             accounts[m.group(1)] = {"s": site, "h": hashes(m.group(1), m.group(2))}
             continue
+        m = re.match(r"^(S1[2-5]) PIN (\d{4})$", acct)  # 4의 인물별 휴대폰 잠금 (data/extra/logins.csv)
+        if m:
+            devices[m.group(1)] = {"k": "pin", "h": secret(m.group(1), m.group(2))}
+            continue
         if acct.startswith("S3 보안 폴더"):  # 이다음 휴대폰 보안 폴더: 띄어쓰기·문장부호는 앱에서 지우고 비교
             m = re.search(r"입력값\s*(\S+)", r["비밀번호를 아는 경로"])
             if m:
                 devices["S3F"] = {"k": "word", "h": secret("S3F", m.group(1))}
-    if "S3F" not in devices:
-        sys.exit("로그인 탭에서 S3 보안 폴더 비밀번호를 찾지 못했습니다")
+    for need in ("S3F", "S12", "S13", "S14", "S15"):
+        if need not in devices:
+            sys.exit(f"로그인 탭에서 {need} 잠금 정보를 찾지 못했습니다")
 
     # 휴대폰 화면에서 즐겨찾기로 열면 자동 로그인되는 계정
     #  S3(이다음 휴대폰): 로그인 탭 'S3 … 자동 로그인' 줄 · S12~S15: 사이트 탭 '주요 화면'의 "(S1, wiro_cha 자동 로그인)"

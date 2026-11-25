@@ -563,12 +563,8 @@ body.b-S11 { background: #ece6da; }
 .bub .b-img { display: block; width: 100%; max-width: 220px; border-radius: 10px; margin: 2px 0 6px; }
 
 /* ── 4 휴대폰 (S12~S15) · 주소창 · 보안 폴더 · S16 ── */
-.hub-me { margin: -14px 0 18px; }
-.hub-sec, .home-sec { font-size: 12px; letter-spacing: .08em; opacity: .75; margin: 0 2px 8px; }
+.home-sec { font-size: 12px; letter-spacing: .08em; opacity: .75; margin: 0 2px 8px; }
 .home-sec { color: #fff; text-shadow: 0 1px 3px rgba(0, 0, 0, .5); margin: 26px 0 12px; }
-.hub-phones { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-.hub-phones a { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px; border-radius: 14px; background: rgba(255, 255, 255, .14); font-size: 12.5px; }
-.hub-phones span { font-size: 24px; }
 .addr { display: flex; align-items: center; gap: 8px; margin: 0 0 22px; padding: 9px 14px; border-radius: 99px; background: rgba(255, 255, 255, .92); color: #333; box-shadow: 0 2px 8px rgba(0, 0, 0, .15); }
 .addr span { opacity: .55; }
 .addr input { flex: 1; min-width: 0; border: 0; background: transparent; font-size: 14px; color: #222; outline: none; }
@@ -631,3 +627,11 @@ body.b-S11 { background: #ece6da; }
 .s16-ph div { font-size: 12px; color: #999; }
 .s16-main .post-x { padding: 16px; }
 .s16-f { text-align: center; font-size: 11px; color: #999; padding: 16px; }
+.p-lock { align-items: center; text-align: center; color: #fff; text-shadow: 0 1px 4px rgba(0, 0, 0, .35); }
+.pl-clock { font-size: 64px; font-weight: 200; line-height: 1; margin-top: 10px; }
+.pl-date { font-size: 14px; opacity: .85; margin-top: 6px; }
+.pl-form { margin-top: auto; width: 100%; max-width: 280px; padding: 20px 0 40px; }
+.pl-form p { font-size: 14px; }
+.pl-form input { letter-spacing: .6em; font-size: 22px; background: rgba(255, 255, 255, .9); border: 0; }
+.pl-form .btn { width: 100%; }
+.pl-form .login-err { color: #fff; background: rgba(200, 40, 50, .75); border-radius: 6px; padding: 4px 8px; text-shadow: none; }

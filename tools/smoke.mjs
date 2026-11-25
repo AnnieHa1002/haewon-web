@@ -26,6 +26,10 @@ const routes = [
   ['#/S14', 's14'], ['#/S14/doran/next_stop', 's14-chat'], ['#/S14/doran/group', 's14-group'], ['#/S15/mail/trash', 's15-trash'], ['#/S15/er', 's15-er'],
   ['#/S16', 's16'], ['#/find?q=망향', 'find'],
 ];
+await go('#/haneul', 's12-lock');
+for (const [slug, pin] of [['haneul', '0717'], ['byeolkkot', '5050'], ['oegolsu', '0402'], ['gaudi', '1998']]) {
+  await page.goto(url + '#/' + slug); await page.waitForTimeout(80); await page.fill('.pl-form input', pin); await page.click('.pl-form .btn'); await page.waitForTimeout(80);
+}
 for (const [h, n] of routes) await go(h, n);
 // 로그인·잠금 해제 흐름
 await page.goto(url + '#/S7'); await page.fill('input[name=id]', 'DW21-0347'); await page.fill('input[name=pw]', 'sojin0347'); await page.click('form.login-box .btn'); await page.waitForTimeout(150);
