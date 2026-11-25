@@ -3,8 +3,6 @@
   'use strict';
 
   // ── 설정 ────────────────────────────────────────────────
-  // 제비 폰 케이스 안쪽 사진(패턴 단서)을 화면에도 보여 줄지. 실물 단서로 확정되면 false로.
-  var SHOW_CASE_HINT = true;
   // 잘못 입력 몇 번이면 잠깐 막을지
   var LOCK_TRIES = 5, LOCK_SECONDS = 30;
   var PAGE = 15;
@@ -22,7 +20,7 @@
   var PHOTO = window.HW_PHOTOS || {};
   // 프로필 사진 (제작 에셋). 없는 계정은 글자로만 보인다
   var AVATAR = {
-    next_stop: 'img/avatar/room702.png', kicho_gongsa: 'img/avatar/kicho_gongsa.png', late_letter: 'img/avatar/late_letter.png',
+    next_stop: 'img/avatar/next_stop.png', kicho_gongsa: 'img/avatar/kicho_gongsa.png', late_letter: 'img/avatar/late_letter.png',
     nare_nowhere: 'img/avatar/nare_nowhere.png', nare_teacher: 'img/avatar/nare_nowhere.png',
     wiro_cha: 'img/avatar/wiro.png', wiro_c: 'img/avatar/wiro.png',
     dadokim_sms: 'img/brand/dadokim_color.png', geumbangul_sms: 'img/brand/geumbangul_color.png',
@@ -135,7 +133,7 @@
     var c = p.c;
     switch (c.t) {
       case 'pub': return { k: 'show', body: p.x };
-      case 'dev': case 'vault': return isOpen(c.d) ? { k: 'show', body: p.x } : { k: 'draft' };
+      case 'vault': return isOpen(c.d) ? { k: 'show', body: p.x } : { k: 'draft' };
       case 'acct':
         if (asOwner(c.a)) return { k: 'show', body: p.x, mine: true, label: DRAFT_RE.test(p.t) ? '' : '비밀글' };
         return DRAFT_RE.test(p.t) ? { k: 'draft' } : { k: 'secret' };
@@ -844,7 +842,7 @@
 
   // 기기별 연락처 표시 이름 (저장 이름)
   var CONTACT = {
-    S2: { seo_jeongui_doran: 'seo_jeongui_doran', late_letter: '나', next_stop: '기사님' },
+    S2: { late_letter: '나', next_stop: '기사님' },
     S3: { late_letter: '제비', sojin_doran: '소진' },
     S13: { nare_nowhere: '나래' },
     S14: { next_stop: '다음이 ♥' }
@@ -885,16 +883,6 @@
   function photoView(p) { return '<div class="d-photo">' + rich(p.x, p.id) + '<div class="d-meta">' + esc(p.t) + ' · ' + when(p.d) + '</div></div>'; }
   function noteView(p) { return '<div class="d-note"><h2>' + esc(p.t) + '</h2><div class="d-meta">' + when(p.d) + '</div>' + rich(p.x, p.id) + '</div>'; }
 
-  // 패턴 잠금 (3×3, 왼쪽 위부터 1~9)
-  function patternLock(dev) {
-    return '<div class="pat" data-dev="' + dev + '"><svg viewBox="0 0 300 300"><polyline class="pat-line" points=""/>' +
-      [0, 1, 2, 3, 4, 5, 6, 7, 8].map(function (i) { return '<circle class="pat-dot" data-n="' + (i + 1) + '" cx="' + (50 + (i % 3) * 100) + '" cy="' + (50 + Math.floor(i / 3) * 100) + '" r="11"/>'; }).join('') + '</svg></div>';
-  }
-  function pinLock(dev, n) {
-    var keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'];
-    return '<div class="pinpad" data-dev="' + dev + '" data-n="' + n + '"><div class="pin-dots">' + new Array(n + 1).join('<i></i>') + '</div><div class="pin-keys">' +
-      keys.map(function (k) { return k ? '<button data-k="' + k + '">' + k + '</button>' : '<span></span>'; }).join('') + '</div></div>';
-  }
   function lockedFor(dev) {
     var f = st.fail[dev];
     if (f && f.until && Date.now() < f.until) return Math.ceil((f.until - Date.now()) / 1000);
@@ -915,7 +903,7 @@
   // ── S2 송은혜의 휴대폰 ────────────────────────────────────
   // 진행 카드 D에서 보관함 꾸러미의 '제비의 휴대폰' 카드 QR로 들어온다. 잠금 없음
   function caseHint() {
-    return SHOW_CASE_HINT ? '<details class="case"><summary>케이스 안쪽에 접힌 사진이 끼워져 있다</summary><div class="case-ph"><div class="case-front" aria-label="바다 사진 출력물"></div><div class="case-back">기사님이 보내 준 바다.<br>봄에 간대요.</div></div></details>' : '';
+    return '<details class="case"><summary>케이스 안쪽에 접힌 사진이 끼워져 있다</summary><div class="case-ph"><div class="case-front" aria-label="바다 사진 출력물"></div><div class="case-back">기사님이 보내 준 바다.<br>봄에 간대요.</div></div></details>';
   }
   function s2(parts) {
     var app = parts[1], id = parts[2], h;
@@ -942,7 +930,7 @@
         '<a href="' + href('S3', 'doran') + '"><i class="ic doran"><img src="img/icon/doran.png" alt=""></i>도란</a><a href="' + href('S3', 'memo') + '"><i class="ic memo"><img src="img/icon/memo.png" alt=""></i>메모</a>' +
         '<a href="' + href('S3', 'rec') + '"><i class="ic rec"><img src="img/icon/rec.png" alt=""></i>녹음</a><a href="' + href('S3', 'note') + '"><i class="ic photo"><img src="img/icon/photo.png" alt=""></i>수첩 사진</a>' +
         '<a href="' + href('S3', 'vault') + '"><i class="ic vault">' + (isOpen('S3F') ? '🔓' : '🔒') + '</i>보안 폴더</a>' +
-        '<a href="#" data-act="auto" data-dev="S3" data-site="S1"><i class="ic web s1"><img src="img/brand/namunjari_white.png" alt=""></i>남은자리</a><a href="#" data-act="auto" data-dev="S3" data-site="S10"><i class="ic web s10">☾</i>새벽의 방</a></div></div>';
+        '<a href="#" data-act="auto" data-dev="S3" data-site="S1"><i class="ic web s1"><img src="img/brand/namunjari_white.png" alt=""></i>남은자리</a><a href="#" data-act="auto" data-dev="S3" data-site="S10"><i class="ic web s10"><img src="img/brand/saebyeok_white.png" alt=""></i>새벽의 방</a></div></div>';
       return phone('p-s3', statusBar('19:16') + h + crack, '이다음의 휴대폰');
     }
     if (app === 'doran') h = id ? appBar('S3', cname('S3', id), href('S3', 'doran')) + chatHTML(devThreads('S3').find(function (t) { return t.who === id; }).list, OWNER.S3, 'doran s3c') : appBar('S3', '도란') + threadList('S3', 'doran');
@@ -978,17 +966,18 @@
     S12: { who: '하늘바라기', wall: 'flowers', fav: ['S6', 'S5'], apps: [['msg6', '금방울당', 'bell'], ['b/구매 내역', '구매 내역', 'buy'], ['b/달력', '달력', 'cal'], ['b/사진첩', '사진첩', 'photo'], ['b/통화 기록', '통화 기록', 'call']] },
     S13: { who: '별꽃', wall: 'dusk', fav: ['S1', 'S5'], apps: [['b/메모장', '메모장', 'memo'], ['b/통화 기록', '통화 기록', 'call'], ['mail', '메일', 'mail'], ['doran', '도란', 'doran']] },
     S14: { who: '외골수', wall: 'couple', fav: ['S7', 'S1'], apps: [['doran', '도란', 'doran'], ['b/메모', '메모', 'memo']] },
-    S15: { who: '가우디', wall: 'plain', fav: ['S1', 'S5'], apps: [['mail', '메일', 'mail'], ['er', '병원 상담', 'er'], ['doran', '도란', 'doran']] }
+    S15: { who: '가우디', wall: 'plain', fav: ['S1', 'S5'], apps: [['mail', '메일', 'mail'], ['er', '병원 상담', 'er']] }
   };
   var FAV = {
     S1: ['남은자리', '<img src="img/brand/namunjari_white.png" alt="">', '#56635a'], S5: ['해원일보', '報', '#163a6b'],
     S6: ['금방울당', '<img src="img/brand/geumbangul_color.png" alt="">', '#a50f0f'], S7: ['도원 사내망', '<img src="img/brand/dowon_color.png" alt="">', '#fff']
   };
-  var GLYPH = { bell: '🔔', buy: '🧾', cal: '📅', call: '📞', mail: '✉', er: '✚', memo: '', photo: '', doran: '' };
+  var GLYPH = { bell: '🔔', buy: '🧾', cal: '📅', mail: '✉' };
+  var ICON_IMG = { memo: 'img/icon/memo.png', photo: 'img/icon/photo.png', doran: 'img/icon/doran.png', call: 'img/icon/phone.png', er: 'img/brand/hospital_color.png' };
   function phoneHome(dev) {
     var ph = PHONES[dev];
     var apps = ph.apps.map(function (a) {
-      var ic = a[2] === 'memo' || a[2] === 'photo' || a[2] === 'doran' ? '<i class="ic ' + a[2] + '"><img src="img/icon/' + (a[2] === 'memo' ? 'memo' : a[2] === 'photo' ? 'photo' : 'doran') + '.png" alt=""></i>' : '<i class="ic g-' + a[2] + '">' + GLYPH[a[2]] + '</i>';
+      var ic = ICON_IMG[a[2]] ? '<i class="ic ' + a[2] + ' g-' + a[2] + '"><img src="' + ICON_IMG[a[2]] + '" alt=""></i>' : '<i class="ic g-' + a[2] + '">' + GLYPH[a[2]] + '</i>';
       var to = a[0] === 'msg6' ? '#" data-act="auto" data-dev="' + dev + '" data-site="S6" data-to="msg' : href.apply(null, [dev].concat(a[0].split('/')));
       return '<a href="' + to + '">' + ic + esc(a[1]) + '</a>';
     }).join('');
@@ -1005,7 +994,6 @@
     return { tag: head[1], subj: head[2] || '(제목 없음)', body: m.x.slice(head[0].length), trash: /휴지통/.test(head[1]), unread: /읽지 않음/.test(head[1]) };
   }
   function mailApp(dev, id, folder) {
-    var me = { S13: 'wiro_mail', S15: 'seo_mail' }[dev];
     var all = D.messages.filter(function (m) { return m.s === dev && /-MAIL-/.test(m.id); }).sort(function (a, b) { return a.d < b.d ? 1 : -1; });
     if (id) {
       var m = all.find(function (x) { return x.id === id; }), mo = mailOf(m);
@@ -1016,7 +1004,7 @@
     return appBar(dev, '메일') + tabs + (list.length ? '<ul class="d-notes d-mails">' + list.map(function (m) {
       var mo = mailOf(m);
       return '<li' + (mo.unread ? ' class="unread"' : '') + '><a href="' + href(dev, 'mail', 'm', m.id) + '"><b>' + esc(nick(m.f)) + '</b><p>' + esc(mo.subj) + '</p><em>' + ymd(m.d) + '</em></a></li>';
-    }).join('') + '</ul>' : '<p class="d-empty">' + (trash ? '휴지통이 비어 있습니다.' : '받은 메일이 없습니다.') + '</p>') + (me ? '' : '');
+    }).join('') + '</ul>' : '<p class="d-empty">' + (trash ? '휴지통이 비어 있습니다.' : '받은 메일이 없습니다.') + '</p>');
   }
   // 통화 기록: 본문 줄마다 한 칸
   function callApp(dev, board) {
@@ -1025,13 +1013,13 @@
       return '<li><b>' + esc(p.t) + '</b><p>' + esc(p.x).replace(/\n/g, '<br>') + '</p><em>' + ymd(p.d) + '</em></li>';
     }).join('') + '</ul>';
   }
-  // 도란: 별꽃은 나래와의 방(한컷 DM과 같은 대화), 외골수는 다음이와의 방(이다음 휴대폰과 같은 대화를 소진 쪽에서) + 공장 단톡
+  // 도란: 별꽃은 나래와의 방(한컷 DM과 같은 대화), 외골수는 다음이와의 방(이다음 휴대폰과 같은 대화를 소진 쪽에서) + 공장 단톡.
+  // 가우디 도란(seo_jeongui_doran)은 시트에 남은 메시지가 없어 앱을 두지 않는다
   function phoneChats(dev) {
     if (dev === 'S13') return { me: 'wiro_c', rooms: [{ id: 'nare_nowhere', list: D.messages.filter(function (m) { return /^S4-DM-WIRO/.test(m.id); }) }] };
     if (dev === 'S14') return { me: 'sojin_doran', rooms: [
       { id: 'next_stop', pin: 1, list: D.messages.filter(function (m) { return m.s === 'S3' && (m.f === 'sojin_doran' || m.to === 'sojin_doran'); }) },
       { id: 'group', name: '생산2팀', group: 1, list: D.messages.filter(function (m) { return /^S14-CHAT/.test(m.id); }) }] };
-    if (dev === 'S15') return { me: 'seo_jeongui_doran', rooms: [] };
     return { me: '', rooms: [] };
   }
   function phoneDoran(dev, id) {
@@ -1132,8 +1120,6 @@
       if (ap && st.sess[site] !== ap[1]) { st.sess[site] = ap[1]; save(); }
     }
     if (!site) out = hub();
-    else if (site === 'locker') { location.replace('#/S2'); return; } // 예전 보관함 QR
-    else if (site === 'WIRO') { location.replace(href('S4', 'msg')); return; } // 별꽃 폰 대화는 나래 한컷 DM으로 옮겨졌다
     else if (site === 'S2') out = s2(parts);
     else if (site === 'S3') out = s3(parts);
     else if (PHONES[site]) out = phonePage(site, parts);
@@ -1159,7 +1145,6 @@
     app.innerHTML = out.html + (curPhone && site !== curPhone ? '<a class="pill" href="#/' + curPhone + '" aria-label="휴대폰으로">‹ 휴대폰</a>' : '');
     document.title = out.title ? out.title : (SITE[site] ? SITE[site].name : '홈');
     window.scrollTo(0, 0);
-    bindLocks();
   }
   function searchPage(site, q) {
     var hits = searchHits(site, q.q || '');
@@ -1239,56 +1224,6 @@
     } else if (act === 'share-close') { e.preventDefault(); closeSheet();
     } else if (act === 'play') { e.preventDefault(); toast('파일을 재생할 수 없습니다. (손상된 파일)'); }
   });
-
-  // 잠금 화면 입력
-  function bindLocks() {
-    var pat = document.querySelector('.pat');
-    if (pat) bindPattern(pat);
-    var pin = document.querySelector('.pinpad');
-    if (pin) bindPin(pin);
-  }
-  function fail(el, dev) {
-    el.classList.add('shake');
-    setTimeout(function () { el.classList.remove('shake'); route(); }, 450);
-    var w = lockedFor(dev); if (w) toast(w + '초 동안 입력할 수 없습니다.');
-  }
-  function bindPin(el) {
-    var dev = el.dataset.dev, n = +el.dataset.n, val = '';
-    var dots = el.querySelectorAll('.pin-dots i');
-    function paint() { dots.forEach(function (d, i) { d.classList.toggle('on', i < val.length); }); }
-    el.querySelector('.pin-keys').addEventListener('click', function (e) {
-      var b = e.target.closest('button'); if (!b || lockedFor(dev)) return;
-      if (b.dataset.k === '⌫') val = val.slice(0, -1); else if (val.length < n) val += b.dataset.k;
-      paint();
-      if (val.length === n) {
-        if (unlockAttempt(dev, val)) { route(); } else { val = ''; fail(el, dev); }
-      }
-    });
-  }
-  function bindPattern(el) {
-    var dev = el.dataset.dev, svg = el.querySelector('svg'), line = el.querySelector('.pat-line');
-    var dots = Array.prototype.slice.call(el.querySelectorAll('.pat-dot')), seq = [], drawing = false, cur = null;
-    function pt(e) { var r = svg.getBoundingClientRect(); return { x: (e.clientX - r.left) * 300 / r.width, y: (e.clientY - r.top) * 300 / r.height }; }
-    function hit(p) {
-      dots.forEach(function (d) {
-        var n = +d.dataset.n, cx = +d.getAttribute('cx'), cy = +d.getAttribute('cy');
-        if (seq.indexOf(n) < 0 && Math.hypot(p.x - cx, p.y - cy) < 36) { seq.push(n); d.classList.add('on'); if (navigator.vibrate) try { navigator.vibrate(8); } catch (x) { } }
-      });
-    }
-    function draw() {
-      var pts = seq.map(function (n) { var d = dots[n - 1]; return d.getAttribute('cx') + ',' + d.getAttribute('cy'); });
-      if (drawing && cur) pts.push(cur.x + ',' + cur.y);
-      line.setAttribute('points', pts.join(' '));
-    }
-    svg.addEventListener('pointerdown', function (e) { if (lockedFor(dev)) return; drawing = true; seq = []; dots.forEach(function (d) { d.classList.remove('on'); }); svg.setPointerCapture(e.pointerId); cur = pt(e); hit(cur); draw(); e.preventDefault(); });
-    svg.addEventListener('pointermove', function (e) { if (!drawing) return; cur = pt(e); hit(cur); draw(); });
-    function end() {
-      if (!drawing) return; drawing = false; cur = null; draw();
-      if (seq.length < 2) { seq = []; dots.forEach(function (d) { d.classList.remove('on'); }); draw(); return; }
-      if (unlockAttempt(dev, seq.join('-'))) route(); else { el.classList.add('bad'); fail(el, dev); }
-    }
-    svg.addEventListener('pointerup', end); svg.addEventListener('pointercancel', end);
-  }
 
   window.addEventListener('hashchange', route);
   route();
