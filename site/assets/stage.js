@@ -7,45 +7,51 @@
   // card: 이 구간을 여는 진행 카드. hold: 안내를 누를 때까지 띄워 둔다. arm: 화면을 두 번 누르면 하나, 둘, 셋.
   // turns: 이 구간을 n분씩 나눠 차례를 센다. pulse: 심장 박동
   var PHASES = [
-    { bgm: 'open', act: '프롤로그', what: '공통 대본을 함께 읽습니다', min: 5, smoke: 1, stick: 'black',
+    { bgm: 'open', act: '준비', what: '설정지를 고르고 명찰을 답니다', min: 5, smoke: 1,
+      snd: { rain: .45, thunder: .2, drone: .08, root: 55 },
+      notice: ['시작', '준비', '설정지는 겉표지 한 줄만 보고 고른 뒤 안표지를 확인하고 명찰을 답니다.\n다섯 번째 의자는 비워 두고 제비의 인물 카드를 올려 둡니다.'] },
+    { bgm: 'open', act: '공통 대본 ①', what: '첫 번째·두 번째 세션', sub: '마음 나누기 · 아픔 태우기', min: 20, smoke: 1, stick: 'black',
       snd: { rain: .5, thunder: .3, drone: .1, root: 55 },
-      notice: ['시작', '프롤로그', '공통 대본을 펴고 첫 장부터 함께 소리 내어 읽습니다.\n지문은 가우디가 읽습니다.'] },
-    { bgm: 'open', act: '1막', what: '대본을 이어 읽습니다', min: 15, smoke: 1,
-      snd: { rain: .45, thunder: .25, drone: .12, root: 55 },
-      notice: ['1막', '대본을 이어 읽습니다', '지문은 외골수가 읽습니다.\n대본이 끝나면 진행 카드 A를 뒤집으세요.'] },
-    { bgm: 'read', act: '2막', what: '설정지를 혼자 읽습니다', min: 10, smoke: .9, card: 'A',
+      notice: ['공통 대본 ①', '첫 번째 세션: 마음 나누기', '공통 대본을 펴고 함께 소리 내어 읽습니다.\n지문은 외골수, 제비의 말은 하늘바라기가 읽습니다.\n두 세션 사이에는 설정지를 펴지 않습니다.'] },
+    { bgm: 'read', act: '회상의 시간', what: '설정지를 혼자 읽습니다', min: 10, smoke: .9, card: 'A',
       snd: { rain: .3, thunder: .1, drone: .12, root: 55 },
-      notice: ['진행 카드 A · 별꽃', '“자, 숨을 한 번 고르고요.\n이제 한 분씩 이야기를 나눠 볼까요.”', '각자 인물 카드를 내놓고 본명과 직업을 밝힙니다.\n설정지를 다음 STOP까지 10분 동안 읽습니다.'] },
-    { bgm: 'talk', act: '2막', what: '토론', sub: '이 불은 무엇인가. 저 여자는 누구인가.', min: 20, smoke: .85,
+      notice: ['진행 카드 A · 별꽃', '“자, 숨을 한 번 고르고요.\n방금 있었던 일을, 한 분씩 천천히 떠올려 볼까요.”', '각자 인물 카드를 내놓으며 본명과 직업을 밝힙니다.\n10분 동안 설정지 「회상의 시간」을 읽습니다.'] },
+    { bgm: 'talk', act: '회상의 시간', what: '토론', min: 15, smoke: .85,
       snd: { rain: .55, thunder: .35, drone: .26, root: 55 },
-      notice: ['2막', '토론을 시작합니다', '20분'] },
-    { bgm: 'read', act: '3막', what: '설정지를 혼자 읽습니다', min: 10, smoke: .55, card: 'B',
+      notice: ['회상의 시간', '토론을 시작합니다', '15분. 끝나면 진행 카드 B를 뒤집으세요.'] },
+    { bgm: 'probe', act: '들여다보기', what: '공통 대본 ② · 천 가방', sub: '제비는 누구이고 왜 이 모임에 왔나', min: 15, smoke: .7, card: 'B',
+      snd: { rain: .4, thunder: .15, drone: .2, root: 52 },
+      notice: ['진행 카드 B · 하늘바라기', '“그 여자 가방, 저대로 두면 안 돼요.”', '공통 대본 ② 「세 번째 세션: 들여다보기」를 함께 읽고,\n대본이 펼치라고 하면 천 가방 꾸러미를 원탁 가운데에 풉니다.\n15분 동안 가방 속 물건으로 제비가 누구이고 왜 왔는지 이야기합니다.'] },
+    { bgm: 'read', act: '떠오르는 기억', what: '설정지를 혼자 읽습니다', min: 10, smoke: .55, card: 'C',
       snd: { rain: .35, thunder: .15, drone: .14, root: 49 },
-      notice: ['진행 카드 B · 별꽃', '“조금 더 깊이 들어가 보겠습니다.\n힘드시면 언제든 ‘잠시 쉬어요’라고 말씀하세요.”', '설정지를 다음 STOP까지 10분 동안 읽습니다.'] },
-    { bgm: 'deep', act: '3막', what: '토론', sub: '누가 언제부터 오기로 했나. 불은 왜 꺼지지 않았나.', min: 20, smoke: .5,
+      notice: ['진행 카드 C · 별꽃', '“쉬는 시간 이야기는 아직 아무도 안 하셨네요.\n조금 더 깊이 들어가 보겠습니다. 힘드시면 언제든 ‘잠시 쉬어요’라고 말씀하세요.”', '10분 동안 설정지 「떠오르는 기억」을 읽습니다.'] },
+    { bgm: 'deep', act: '떠오르는 기억', what: '토론', min: 15, smoke: .5,
       snd: { rain: .75, thunder: .5, drone: .3, root: 49 },
-      notice: ['3막', '토론을 시작합니다', '20분'] },
-    { bgm: 'probe', act: '4막', what: '조사', sub: '공개 단서 · 소지품 카드 · 사이트', min: 20, smoke: .3, card: 'C',
+      notice: ['떠오르는 기억', '토론을 시작합니다', '15분. 끝나면 공통 대본 ③을 함께 읽습니다.'] },
+    { bgm: 'read', act: '공통 대본 ③', what: '마지막 세션: 깨어나기', min: 3, smoke: .35,
+      snd: { rain: .6, thunder: .2, drone: .16, root: 46.25 },
+      notice: ['공통 대본 ③', '마지막 세션: 깨어나기', '공통 대본 ③을 함께 읽습니다. 지문은 외골수가 읽습니다.\n다 읽으면 진행 카드 D를 뒤집으세요.'] },
+    { bgm: 'probe', act: '지금, 여기', what: '조사', sub: '소지품 카드 · 보관함 꾸러미 · 휴대폰', min: 25, smoke: .3, card: 'D',
       snd: { rain: .4, thunder: .15, drone: .22, root: 46.25 },
-      notice: ['진행 카드 C · 가우디', '“경찰을 부르기 전에, 이 방에 있는 것부터 확인합시다.\n손대기 전에 눈으로 먼저.”', '설정지 4막을 지금부터 열람합니다. 4막 첫머리에 각자 직접 가서 본 것은 모두 사실입니다.\n휴대폰을 돌려받습니다. 제비의 휴대폰 카드(남겨진 자리의 물건)는 제비 자리에 놓습니다.\n진행 카드 C-1(4막 휴대폰)을 뒤집고, 공개 단서 묶음과 소지품 카드를 함께 펼쳐 조사합니다. 20분'] },
-    { bgm: 'deep', act: '4막', what: '마지막 토론', sub: '다 함께 이야기합니다', min: 20, smoke: .2, card: 'D',
+      notice: ['진행 카드 D · 가우디', '“신고는 했습니다. 30분입니다.\n그 전에 이 방에 있는 것부터 확인합시다. 손대기 전에 눈으로 먼저.”', '설정지 「지금, 여기」를 읽고, 첫 쪽에 끼워 둔 소지품 카드 2장을 꺼냅니다.\n보관함 꾸러미를 풀어 제비의 휴대폰 카드를 원탁 가운데에 펼칩니다.\n진행 카드 D-1(4 휴대폰)을 바로 뒤집고 각자 휴대폰으로 QR에 들어가 조사합니다. 25분'] },
+    { bgm: 'deep', act: '마지막 토론', what: '한 사람씩 1분, 그다음 묻고 답하기', min: 15, smoke: .2, card: 'E',
       snd: { rain: .5, thunder: .25, drone: .26, root: 46.25 },
-      notice: ['진행 카드 D · 외골수', '“경찰 오기 전에 끝내요. 누가 했는지.”', '마지막 토론 20분'] },
-    { bgm: 'final', act: '4막', what: '최종 추리', min: 4, smoke: .14, card: 'E', turns: 1,
+      notice: ['진행 카드 E · 외골수', '“경찰 오기 전에 끝내요. 누가 했는지.”', '한 사람씩 1분, 누가 했다고 보는지와 가져온 기록 하나를 말합니다.\n남은 시간은 서로 묻고 답합니다. 15분'] },
+    { bgm: 'final', act: '최종 추리', what: '한 사람씩 1분', min: 4, smoke: .14, card: 'F', turns: 1,
       snd: { rain: .3, thunder: .1, drone: .26, root: 46.25 },
-      notice: ['진행 카드 E · 하늘바라기', '“하늘이 다 보고 계세요.\n이제 각자 마음 가는 대로 하면 돼요.”', '한 사람씩 1분 최종 추리. 1분마다 방울이 울립니다.\n그동안 설정지 마지막 장에서 A·B 중 하나를 정해 둡니다.'] },
-    { bgm: 'final', act: '4막', what: '투표', sub: '화면을 두 번 누르면 하나, 둘, 셋', min: 1, smoke: .1, pulse: true, arm: 'vote', hold: true,
+      notice: ['진행 카드 F · 하늘바라기', '“하늘이 다 보고 계세요.\n이제 각자 마음 가는 대로 하면 돼요.”', '한 사람씩 1분 최종 추리. 1분마다 방울이 울립니다.\n그동안 설정지 마지막 장에서 A·B 중 하나를 정해 둡니다.'] },
+    { bgm: 'final', act: '투표', what: '하나, 둘, 셋', sub: '화면을 두 번 누르면 하나, 둘, 셋', min: 1, smoke: .1, pulse: true, arm: 'vote', hold: true,
       snd: { rain: .25, thunder: .05, drone: .3, root: 46.25 },
-      notice: ['4막', '하나, 둘, 셋에 동시에', '모두 동시에 범인을 손가락으로 가리키고 마지막 선택을 합니다. 기권은 주먹을 쥡니다.\n가장 많이 지목된 사람이 둘 이상이면 네 사람 모두 그 사람들 가운데서만 한 번 더 (마지막 선택은 그대로). 준비되면 화면을 두 번 누르세요.'] },
+      notice: ['투표', '하나, 둘, 셋에 동시에', '모두 동시에 범인을 손가락으로 가리키고 마지막 선택을 합니다. 자기 자신은 가리킬 수 없습니다.\n제비가 스스로 목숨을 끊었다고 생각하면 하늘을 가리킵니다. 기권은 주먹을 쥡니다.\n준비되면 화면을 두 번 누르세요.'] },
     { bgm: 'end', act: '엔딩', what: '엔딩북을 읽습니다', min: 10, smoke: 0,
       snd: { rain: .16, thunder: 0, drone: .18, root: 65.4, major: true },
-      notice: ['엔딩', '엔딩북', '가장 많이 지목된 사람이 1·2부를 읽습니다. 다시 가리켜도 표가 같거나 모두 기권했다면 \'그 밖의 경우\'를 읽습니다.\n3부 개인 엔딩은 각자 읽습니다.'] }
+      notice: ['엔딩', '엔딩북', '진상 해설과 지목 결과는 가장 많이 지목된 사람이 읽습니다.\n다시 가리켜도 표가 같았거나, 모두 기권했거나, 하늘이 가장 많았다면 별꽃(차위로)이 읽습니다.'] }
   ];
   var TOTAL = PHASES.reduce(function (n, p) { return n + p.min * 60; }, 0);
   var NOTICE_MS = 14000;
 
   // ── 상태 (새로고침해도 이어진다) ─────────────────────────
-  var KEY = 'hw4-stage-3'; // 진행표가 바뀌면 이름을 바꿔 옛 기록과 섞이지 않게
+  var KEY = 'hw4-stage-4'; // 진행표가 바뀌면 이름을 바꿔 옛 기록과 섞이지 않게
   var S = { i: 0, t0: 0, pausedAt: null, started: false, done: false, armed: null, vol: .7, muted: false, mix: { rain: 1, thunder: 1, drone: 1, bell: 1, bgm: 1 } };
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { } }
   function load() { try { var x = JSON.parse(localStorage.getItem(KEY) || 'null'); if (x) { var m = Object.assign({}, S.mix, x.mix || {}); S = Object.assign(S, x); S.mix = m; } } catch (e) { } }
@@ -102,10 +108,10 @@
   function setVolume() { if (A) A.master.gain.setTargetAtTime(S.muted ? 0 : S.vol, A.ctx.currentTime, .4); }
   // ── 배경 음악 (무료 음원, site/audio/). 구간마다 p.bgm 곡으로 천천히 바뀐다 ──
   var BGM = {
-    open: 'audio/isolated.mp3',     // 프롤로그·1막
+    open: 'audio/isolated.mp3',     // 준비·공통 대본 ①
     read: 'audio/sopor.mp3',        // 설정지 읽기
-    talk: 'audio/cylinder-five.mp3', // 2막 토론
-    deep: 'audio/hide-secrets.mp3', // 3막 토론·마지막 토론
+    talk: 'audio/cylinder-five.mp3', // 회상의 시간 토론
+    deep: 'audio/hide-secrets.mp3', // 떠오르는 기억·마지막 토론
     probe: 'audio/gagool.mp3',      // 조사
     final: 'audio/devastation.mp3', // 최종 추리·투표
     end: 'audio/denouement.mp3'     // 엔딩
@@ -231,7 +237,7 @@
 
   // 하나, 둘, 셋 — 카드 움직이기와 지목을 동시에 (진행 카드 E)
   var AFTER = {
-    vote: '손가락을 그대로 두세요.\n\n가장 많이 지목된 사람이\n엔딩북 1·2부를 읽습니다.\n동표면 네 사람 모두 그 사람들 가운데서만 한 번 더\n(화면 두 번 누르기 · 마지막 선택은 그대로).\n그래도 같거나 모두 기권했다면\n엔딩북의 ‘그 밖의 경우’를 읽습니다.'
+    vote: '손가락을 그대로 두세요.\n\n가장 많은 손가락이 모인 곳(사람이나 하늘)이\n둘 이상이면 네 사람 모두 그 가운데서만 한 번 더\n(화면 두 번 누르기 · 내놓거나 건넨 물건과 뒤집은 카드는 그대로).\n그래도 같거나 모두 기권했다면\n엔딩북의 ‘그 밖의 경우’를 읽습니다.'
   };
   function countdown(kind) {
     hideNotice(); if (kind !== 'vote') S.armed = null; save(); // 투표는 동표 재투표를 위해 다시 셀 수 있게 둔다
@@ -337,7 +343,7 @@
     g.lineCap = 'round';
     g.strokeStyle = '#4a2a1e'; g.lineWidth = 1.6; g.beginPath(); g.moveTo(b.x, b.y - 2); g.lineTo(b.x, b.y - 16); g.stroke();
     if (burning) {
-      // 프롤로그에 피우는 것은 금방울당의 검은 향 '망향' (금빛 알갱이가 박혀 있다)
+      // 공통 대본 ①에 피우는 것은 금방울당의 검은 향 '망향' (금빛 알갱이가 박혀 있다)
       var black = S.started && !S.done && phase().stick === 'black';
       g.strokeStyle = black ? '#1d1a18' : '#7a3b26'; g.lineWidth = 3.2; g.beginPath(); g.moveTo(b.x, b.y - 14); g.lineTo(tp.x, tp.y + 5); g.stroke();
       if (black) {

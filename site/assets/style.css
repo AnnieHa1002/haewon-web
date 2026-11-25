@@ -601,3 +601,73 @@ body.b-S11 { background: #ece6da; }
 .s11-f { padding: 22px 16px 30px; text-align: center; font-size: 11.5px; color: #a39a87; }
 /* 메신저 말풍선 속 사진 */
 .bub .b-img { display: block; width: 100%; max-width: 220px; border-radius: 10px; margin: 2px 0 6px; }
+
+/* ── 4 휴대폰 (S12~S15) · 주소창 · 보안 폴더 · S16 ── */
+.hub-me { margin: -14px 0 18px; }
+.hub-sec, .home-sec { font-size: 12px; letter-spacing: .08em; opacity: .75; margin: 0 2px 8px; }
+.home-sec { color: #fff; text-shadow: 0 1px 3px rgba(0, 0, 0, .5); margin: 26px 0 12px; }
+.hub-phones { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.hub-phones a { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px; border-radius: 14px; background: rgba(255, 255, 255, .14); font-size: 12.5px; }
+.hub-phones span { font-size: 24px; }
+.addr { display: flex; align-items: center; gap: 8px; margin: 0 0 22px; padding: 9px 14px; border-radius: 99px; background: rgba(255, 255, 255, .92); color: #333; box-shadow: 0 2px 8px rgba(0, 0, 0, .15); }
+.addr span { opacity: .55; }
+.addr input { flex: 1; min-width: 0; border: 0; background: transparent; font-size: 14px; color: #222; outline: none; }
+.home .addr { margin: 0 0 26px; }
+.home.dusk { background: linear-gradient(170deg, #3b4a6b, #6e5a7e 55%, #c98b7a); }
+.home.couple { background: radial-gradient(circle at 30% 25%, #ffd6e0 0 9%, transparent 10%), radial-gradient(circle at 70% 30%, #ffe8b0 0 7%, transparent 8%), linear-gradient(170deg, #f3a6b8, #b98bd8 60%, #6d6fb8); }
+.home.plain { background: linear-gradient(170deg, #5c6168, #33373d); }
+.home.sea-photo { background: linear-gradient(rgba(0, 0, 0, .2), rgba(0, 0, 0, .05) 40%, rgba(0, 0, 0, .4)), url(../img/S2-WALL.jpg) center / cover; }
+.home .case { color: #fff; background: rgba(0, 0, 0, .28); margin-top: auto; }
+.dday { text-align: center; color: #fff; text-shadow: 0 1px 3px rgba(0, 0, 0, .4); margin: -10px 0 18px; font-size: 14px; }
+.dday b { display: block; font-size: 30px; font-weight: 300; }
+.ic.g-bell { background: #a50f0f; }
+.ic.g-buy { background: #fff; }
+.ic.g-cal { background: #fff; }
+.ic.g-call { background: #34c759; }
+.ic.g-mail { background: #3d7be0; }
+.ic.g-er { background: #fff; color: #e0393e; }
+.ic.vault { background: #2f3a4a; }
+.ic.fav { font-size: 20px; }
+.ic.fav.logo img { width: 74%; height: 74%; }
+.d-sec { padding: 14px 16px 4px; font-size: 12px; color: #999; letter-spacing: .06em; }
+.d-tabs { display: flex; border-bottom: 1px solid #eee; }
+.d-tabs a { flex: 1; text-align: center; padding: 10px; font-size: 14px; color: #888; }
+.d-tabs a.on { color: #111; font-weight: 700; box-shadow: inset 0 -2px #3d7be0; }
+.d-mails li.unread b::before { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #3d7be0; margin-right: 6px; vertical-align: middle; }
+.d-mail { padding: 16px; }
+.d-mail h2 { font-size: 18px; margin: 0 0 6px; }
+.d-mail-x { margin-top: 14px; font-size: 14.5px; line-height: 1.75; }
+.d-calls li { padding: 12px 16px; border-bottom: 1px solid #f2f2f2; }
+.d-calls b { font-size: 15px; }
+.d-calls p { margin: 2px 0; font-size: 13.5px; color: #555; }
+.d-calls em { font-size: 11px; color: #bbb; font-style: normal; }
+.d-threads li.pinned { background: #fff5f8; }
+.unread-n { display: inline-block; margin-left: 6px; min-width: 18px; padding: 0 5px; border-radius: 9px; background: #e9504c; color: #fff; font-size: 11px; font-style: normal; text-align: center; }
+.vault { padding: 40px 28px; text-align: center; }
+.vault-ic { font-size: 40px; }
+.vault input { display: block; width: 100%; margin: 14px 0 10px; padding: 11px 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; text-align: center; }
+.vault .login-err { color: #c33; font-size: 13px; }
+.skin-find { min-height: 100vh; background: #f4f5f7; }
+.find { padding: 16px; }
+.find .addr { margin-bottom: 10px; }
+.find section { background: #fff; border-radius: 10px; margin: 12px 0; overflow: hidden; }
+.find h3 { margin: 0; padding: 10px 14px; font-size: 14px; border-bottom: 1px solid #eee; }
+.find li a { display: block; padding: 10px 14px; border-bottom: 1px solid #f3f3f3; }
+.find li b { font-size: 14.5px; }
+.find li p { margin: 2px 0; font-size: 13px; color: #666; }
+.find li em { font-size: 11px; color: #aaa; font-style: normal; }
+.skin-S16 { min-height: 100vh; background: #f1f3ea; color: #222; }
+.s16-h { background: #2f7d32; color: #fff; padding: 18px 16px 14px; }
+.s16-h b { display: block; font-size: 19px; }
+.s16-h span { font-size: 12px; opacity: .8; }
+.s16-nav { display: flex; gap: 14px; padding: 9px 16px; background: #fff; border-bottom: 1px solid #ddd; font-size: 14px; }
+.s16-nav a.on { color: #2f7d32; font-weight: 700; }
+.s16-main { background: #fff; margin: 10px 0; }
+.s16-list li a { display: block; padding: 11px 16px; border-bottom: 1px solid #eee; }
+.s16-list b { font-size: 15px; }
+.s16-list em { display: block; font-size: 12px; color: #999; font-style: normal; margin-top: 2px; }
+.s16-ph { padding: 16px; border-bottom: 1px solid #eee; }
+.s16-ph h1 { font-size: 18px; margin: 0 0 6px; }
+.s16-ph div { font-size: 12px; color: #999; }
+.s16-main .post-x { padding: 16px; }
+.s16-f { text-align: center; font-size: 11px; color: #999; padding: 16px; }

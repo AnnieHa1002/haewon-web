@@ -21,7 +21,10 @@ const routes = [
   ['#/S5', 's5'], ['#/S5/p/S5-SOC-001', 's5-1999'], ['#/S5/search?q=천명타워', 's5-search'],
   ['#/S9', 's9'], ['#/S9/b/천명건설 라운지', 's9-lounge'], ['#/S9/b/샘선전자 라운지', 's9-ss'], ['#/S9/p/S9-CM-001', 's9-post'], ['#/S10', 's10'], ['#/S10/p/S10-TALK-001', 's10-post'], ['#/S11', 's11'], ['#/S11/b/일상', 's11-day'], ['#/S11/p/S11-OLD-003', 's11-lock'],
   ['#/S6', 's6'], ['#/S6/b/상품', 's6-shop'], ['#/S6/p/S6-SHOP-001', 's6-post'], ['#/S8', 's8'], ['#/S8/b/고객의 소리', 's8-voc'], ['#/S8/p/S8-VOC-001', 's8-post'],
-  ['#/S7', 's7-gate'], ['#/S4', 's4'], ['#/S4/p/S4-FEED-001', 's4-post'], ['#/S4/msg', 's4-dm'], ['#/S2', 's2-lock'], ['#/S3', 's3-lock'],
+  ['#/S7', 's7-gate'], ['#/S4', 's4'], ['#/S4/p/S4-FEED-001', 's4-post'], ['#/S4/msg', 's4-dm'], ['#/S2', 's2-home'], ['#/S3', 's3-home'], ['#/S3/vault', 's3-vault'],
+  ['#/S12', 's12'], ['#/S12/b/구매 내역', 's12-buy'], ['#/S13', 's13'], ['#/S13/mail', 's13-mail'], ['#/S13/doran/nare_nowhere', 's13-doran'],
+  ['#/S14', 's14'], ['#/S14/doran/next_stop', 's14-chat'], ['#/S14/doran/group', 's14-group'], ['#/S15/mail/trash', 's15-trash'], ['#/S15/er', 's15-er'],
+  ['#/S16', 's16'], ['#/find?q=망향', 'find'],
 ];
 for (const [h, n] of routes) await go(h, n);
 // 로그인·잠금 해제 흐름
@@ -31,32 +34,26 @@ await go('#/S7/b/배차 기록', 's7-car');
 await page.goto(url + '#/S1/login'); await page.fill('input[name=id]', 'baram_dad'); await page.fill('input[name=pw]', '1998baram'); await page.click('form.login-box .btn'); await page.waitForTimeout(150);
 await page.screenshot({ path: `${out}/s1-me.png` });
 await go('#/S1/p/S1-SANJAE-029', 's1-scrap');
-await page.goto(url + '#/S3');
-for (const k of '0402') await page.click(`.pin-keys button[data-k="${k}"]`);
-await page.waitForTimeout(150); await page.screenshot({ path: `${out}/s3-home.png` });
 await go('#/S3/doran/sojin_doran', 's3-chat'); await go('#/S3/rec', 's3-rec');
-await page.goto(url + '#/S2'); await page.waitForTimeout(100);
-const box = await page.locator('.pat svg').boundingBox();
-const P = n => ({ x: box.x + (50 + ((n - 1) % 3) * 100) * box.width / 300, y: box.y + (50 + Math.floor((n - 1) / 3) * 100) * box.height / 300 });
-await page.mouse.move(P(1).x, P(1).y); await page.mouse.down();
-for (const n of [2, 3, 5, 7]) await page.mouse.move(P(n).x, P(n).y, { steps: 6 });
-await page.mouse.up(); await page.waitForTimeout(150);
-await page.screenshot({ path: `${out}/s2-home.png` });
-await go('#/S2/doran/room702', 's2-chat'); await go('#/S2/memo', 's2-memo'); await go('#/S2/photo', 's2-photo');
-await page.goto(url + '#/S4/login'); await page.fill('input[name=id]', 'nare_nowhere'); await page.fill('input[name=pw]', '19881024'); await page.click('form.login-box .btn'); await page.waitForTimeout(150);
+await page.goto(url + '#/S3/vault'); await page.fill('.vault input', '봄,바다'); await page.click('.vault .btn'); await page.waitForTimeout(150);
+await page.screenshot({ path: `${out}/s3-vault-open.png` });
+await go('#/S2/doran/next_stop', 's2-chat'); await go('#/S2/memo', 's2-memo'); await go('#/S2/photo', 's2-photo');
+await page.goto(url + '#/S12'); await page.fill('.addr input', '금방울당 신도'); await page.press('.addr input', 'Enter'); await page.waitForTimeout(200);
+await page.screenshot({ path: `${out}/s6-room.png` });
+await page.goto(url + '#/S4/login'); await page.fill('input[name=id]', 'nare_nowhere'); await page.fill('input[name=pw]', '19880924'); await page.click('form.login-box .btn'); await page.waitForTimeout(150);
 await go('#/S4/msg', 's4-dm-in');
 // 진행 화면
 const stage = 'file://' + path.resolve('site/stage.html');
 await page.goto(stage); await page.click('#go'); await page.waitForTimeout(1500);
 await page.screenshot({ path: `${out}/stage-1.png` });
 await page.click('#hud', { force: true }).catch(() => {});
-const jump = (i, ago) => page.evaluate(([i, ago]) => { const s = JSON.parse(localStorage.getItem('hw4-stage-3')); s.i = i; s.t0 = Date.now() - ago * 60000; s.armed = i === 9 ? 'vote' : null; s.turn = 0; localStorage.setItem('hw4-stage-3', JSON.stringify(s)); }, [i, ago]);
-await jump(6, 0.2); await page.goto(stage); await page.click('#resume'); await page.waitForTimeout(800);
+const jump = (i, ago) => page.evaluate(([i, ago]) => { const s = JSON.parse(localStorage.getItem('hw4-stage-4')); s.i = i; s.t0 = Date.now() - ago * 60000; s.armed = i === 11 ? 'vote' : null; s.turn = 0; localStorage.setItem('hw4-stage-4', JSON.stringify(s)); }, [i, ago]);
+await jump(8, 0.2); await page.goto(stage); await page.click('#resume'); await page.waitForTimeout(800);
 await page.screenshot({ path: `${out}/stage-probe.png` });
-await jump(8, 2.5); await page.goto(stage); await page.click('#resume'); await page.waitForTimeout(800);
+await jump(10, 2.5); await page.goto(stage); await page.click('#resume'); await page.waitForTimeout(800);
 await page.screenshot({ path: `${out}/stage-final.png` });
 // 투표: 두 번 누르면 하나, 둘, 셋 → 카드와 지목을 동시에
-await jump(9, 0.2); await page.goto(stage); await page.click('#resume'); await page.waitForTimeout(800);
+await jump(11, 0.2); await page.goto(stage); await page.click('#resume'); await page.waitForTimeout(800);
 await page.screenshot({ path: `${out}/stage-4.png` });
 await page.mouse.dblclick(200, 200); await page.waitForTimeout(4500);
 await page.screenshot({ path: `${out}/stage-vote.png` });

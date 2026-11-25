@@ -43,23 +43,25 @@ def secret(key, value):
     return cyrb53(f"{SALT}:{key}:{value.strip().lower()}")
 
 
-DEVICE_COND = {
-    "S2 잠금 해제": "S2",
-    "S3 자동로그인(외골수)": "S3",
-}
-
-
 def cond(raw):
-    """공개 조건 문자열 → {t: ...}"""
+    """공개 조건 문자열 → {t: ...}
+
+    휴대폰 화면 안에서만 보이는 기록(제비·이다음 휴대폰, 4의 인물별 휴대폰 S12~S15, 주소창으로만 여는 S16)은
+    휴대폰 화면이 사이트별로 직접 골라 보여 주므로 pub로 둔다. 이다음 휴대폰의 보안 폴더만 따로 잠근다.
+    """
     c = raw.strip()
     if not c or c == "공개":
         return {"t": "pub"}
-    m = re.match(r"로그인 필요:\s*(.+)$", c)
+    m = re.match(r"공개\s*\(검색:\s*(.+)\)$", c)  # 뉴스 검색으로 찾게 둔 기사: 낱말을 검색어에 더한다
     if m:
-        v = m.group(1).strip()
-        if v in DEVICE_COND:
-            return {"t": "dev", "d": DEVICE_COND[v]}
-        return {"t": "acct", "a": v}
+        return {"t": "pub", "kw": [w.strip() for w in re.split(r"[·,]", m.group(1)) if w.strip()]}
+    if c.startswith("S3 보안 폴더"):
+        return {"t": "vault", "d": "S3F"}
+    if re.match(r"^(S2 휴대폰 카드|외골수 소지품 카드|S1[2-6]\b)", c):
+        return {"t": "pub"}
+    m = re.match(r"로그인 필요:\s*([\w-]+)", c)
+    if m:
+        return {"t": "acct", "a": m.group(1)}
     m = re.match(r"삭제됨\(원문은 (\S+) 로그인 시\)", c)
     if m:
         return {"t": "delorig", "a": m.group(1)}
@@ -92,8 +94,27 @@ def build():
             continue
         users[r["아이디"]] = {"n": r["닉네임"], "j": r["가입일"], "s": r["사이트"].split(",")[0].strip()}
 
+    # 공개 조건이 빈 글: 로그인 탭 '열리면 보이는 것'에 글ID가 적혀 있으면 그 잠금을, 아니면 같은 게시판에 가장 많은 조건을 따른다
+    post_rows = rows("posts")
+    by_board = {}
+    for r in post_rows:
+        if r["공개 조건"]:
+            by_board.setdefault((r["사이트"], r["게시판"]), []).append(r["공개 조건"])
+    named = {}
+    for r in rows("logins"):
+        for pid in re.findall(r"S\d+-[A-Z]+-\d+", r["열리면 보이는 것"]):
+            if r["계정"].startswith("S3 보안 폴더"):
+                named[pid] = "S3 보안 폴더"
+    for r in post_rows:
+        if not r["공개 조건"]:
+            if r["글ID"] in named:
+                r["공개 조건"] = named[r["글ID"]]
+            else:
+                lst = by_board.get((r["사이트"], r["게시판"]), [])
+                r["공개 조건"] = max(set(lst), key=lst.count) if lst else "공개"
+
     posts = []
-    for r in rows("posts"):
+    for r in post_rows:
         posts.append({
             "id": r["글ID"], "s": r["사이트"], "b": r["게시판"], "a": r["작성자 아이디"],
             "d": r["일시"], "t": r["제목"], "x": r["본문"],
@@ -127,7 +148,7 @@ def build():
     accounts = {}
     for r in rows("users"):
         pw = r["비밀번호"]
-        if pw and not pw.startswith(("(", "S2", "패턴", "PIN")):
+        if pw and not r["아이디"].startswith("DEVICE_") and not pw.startswith(("(", "S2", "패턴", "PIN", "잠금")):
             for s in r["사이트"].split(","):
                 accounts[r["아이디"]] = {"s": s.strip(), "h": hashes(r["아이디"], pw)}
     devices = {}
@@ -137,20 +158,22 @@ def build():
         if m:
             accounts[m.group(1)] = {"s": site, "h": hashes(m.group(1), m.group(2))}
             continue
-        m = re.match(r"^S2 잠금 패턴 ([\d-]+)", acct)
-        if m:
-            devices["S2"] = {"k": "pattern", "h": secret("S2", m.group(1))}
-            continue
-        m = re.match(r"^S3 PIN (\d+)", acct)
-        if m:
-            devices["S3"] = {"k": "pin", "h": secret("S3", m.group(1)), "n": len(m.group(1))}
-            continue
-    # S3를 열면 자동으로 로그인되는 이다음 계정
-    autologin = {"S3": [["S1", "room702"], ["S10", "dawn_702"]]}
+        if acct.startswith("S3 보안 폴더"):  # 이다음 휴대폰 보안 폴더: 띄어쓰기·문장부호는 앱에서 지우고 비교
+            m = re.search(r"입력값\s*(\S+)", r["비밀번호를 아는 경로"])
+            if m:
+                devices["S3F"] = {"k": "word", "h": secret("S3F", m.group(1))}
+    if "S3F" not in devices:
+        sys.exit("로그인 탭에서 S3 보안 폴더 비밀번호를 찾지 못했습니다")
 
-    for need in ("S2", "S3"):
-        if need not in devices:
-            sys.exit(f"로그인 탭에서 {need} 잠금 정보를 찾지 못했습니다")
+    # 휴대폰 화면에서 즐겨찾기로 열면 자동 로그인되는 계정
+    #  S3(이다음 휴대폰): 로그인 탭 'S3 … 자동 로그인' 줄 · S12~S15: 사이트 탭 '주요 화면'의 "(S1, wiro_cha 자동 로그인)"
+    autologin = {}
+    for r in rows("logins"):
+        if re.search(r"S3.*자동 로그인", r["비밀번호를 아는 경로"]):
+            autologin.setdefault("S3", []).append([r["사이트"], r["계정"].split("/")[0].strip()])
+    for r in rows("sites"):
+        for site, acct in re.findall(r"\((S\d+),\s*([\w-]+) 자동 로그인\)", r["주요 화면"] + " " + r["여는 조건"]):
+            autologin.setdefault(r["사이트ID"], []).append([site, acct])
 
     bundle = {
         "now": NOW, "sites": sites, "boards": boards, "users": users, "posts": posts,
