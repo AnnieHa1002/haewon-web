@@ -2,7 +2,7 @@
 
 ## 제작 에셋 (드라이브 '이미지 에셋' 폴더)
 
-`img/S2-PHOTO-001~016.jpg`, `S12-PHOTO-001·002`, `S17-NEWS-001`, `S2-DORAN-014`, `S3-MEMO-015`, `S6-ROOM-002`, `S11-DAY-001`, `S6-SHOP-001·003~016·018·020`(상품 사진에 배경을 합성), `S5-SOC-006`, `S1-NOTICE-010`(다정한 이별 포스터), `S5-OPN-021`(차위로 인터뷰 사진, S1-FREE-034에도 씀), `S3-NOTE-001~011`, `S4-FEED-003~016`, `img/brand/*` (로고), `img/avatar/*` (프로필), `img/icon/*` (휴대폰 아이콘)은 직접 만든 에셋이다.
+`img/S2-PHOTO-001~016.jpg`, `S12-PHOTO-001·002`, `S17-NEWS-001`, `S15-WALL.svg`(바름교 도면 배경), `S2-DORAN-014`, `S3-MEMO-015`, `S6-ROOM-002`, `S11-DAY-001`, `S6-SHOP-001·003~016·018·020`(상품 사진에 배경을 합성), `S5-SOC-006`, `S1-NOTICE-010`(다정한 이별 포스터), `S5-OPN-021`(차위로 인터뷰 사진, S1-FREE-034에도 씀), `S3-NOTE-001~011`, `S4-FEED-003~016`, `img/brand/*` (로고), `img/avatar/*` (프로필), `img/icon/*` (휴대폰 아이콘)은 직접 만든 에셋이다.
 
 ## Unsplash
 
@@ -67,3 +67,6 @@ Wikimedia Commons에 올라온 Free Music Archive 음원. 모노 mp3로 다시 �
 | audio/gagool.mp3 | Gagool | Kevin MacLeod | [File:Kevin MacLeod - Gagool.ogg](https://commons.wikimedia.org/wiki/File:Kevin_MacLeod_-_Gagool.ogg) | CC BY 3.0 |
 | audio/devastation.mp3 | Devastation and Revenge | Kevin MacLeod | [File:Kevin MacLeod - Devastation and Revenge.ogg](https://commons.wikimedia.org/wiki/File:Kevin_MacLeod_-_Devastation_and_Revenge.ogg) | CC BY 3.0 |
 | audio/denouement.mp3 | Denouement | Kai Engel | [File:Kai Engel - 09 - Denouement.ogg](https://commons.wikimedia.org/wiki/File:Kai_Engel_-_09_-_Denouement.ogg) | CC BY 4.0 |
+| img/S12-WALL.jpg | 하늘바라기 휴대폰 배경 (별이 뜬 밤하늘) | 별이 뜬 밤하늘과 산 능선 | https://images.unsplash.com/photo-1507400492013-162706c8c05e |
+| img/S13-WALL.jpg | 별꽃 휴대폰 배경 (해바라기의 집) | 해바라기 한 송이 | https://images.unsplash.com/photo-1470509037663-253afd7f0f51 |
+| img/S14-WALL.jpg | 외골수 휴대폰 배경 (우산 하나) | 비 오는 밤거리의 검은 우산 | https://images.unsplash.com/photo-1519692933481-e162a57d6721 |

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice">
+<defs>
+<pattern id="g" width="13" height="13" patternUnits="userSpaceOnUse"><path d="M13 0H0V13" fill="none" stroke="#3d6ea3" stroke-width=".5"/></pattern>
+<pattern id="G" width="65" height="65" patternUnits="userSpaceOnUse"><path d="M65 0H0V65" fill="none" stroke="#5b8cc2" stroke-width=".9"/></pattern>
+<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#173a63"/><stop offset="1" stop-color="#0f2744"/></linearGradient>
+</defs>
+<rect width="390" height="844" fill="url(#bg)"/><rect width="390" height="844" fill="url(#g)" opacity=".55"/><rect width="390" height="844" fill="url(#G)" opacity=".6"/>
+<g fill="none" stroke="#dbe8f7" stroke-width="1.6" stroke-linecap="round" opacity=".88">
+<path d="M20 560H370"/><path d="M20 568H370"/>
+<path d="M45 640Q195 420 345 640"/><path d="M60 640Q195 446 330 640" stroke-width="1"/>
+<path d="M45 640V700M345 640V700M30 700H360" stroke-width="1.2"/>
+<g stroke-width="1"><path d="M87 560V587M120 560V535M153 560V512M195 560V506M237 560V512M270 560V535M303 560V587"/></g>
+<path d="M20 720C80 714 120 728 195 720S310 714 370 722" stroke-width=".9" stroke-dasharray="4 5"/>
+</g>
+<g fill="#dbe8f7" font-family="monospace" opacity=".75">
+<text x="20" y="770" font-size="11">BAREUM BRIDGE · S=1:200</text>
+<text x="20" y="788" font-size="9">ARCH SPAN 300 · RISE 120 · DESIGN 2006</text>
+<text x="300" y="788" font-size="9">— 바름교</text>
+</g>
+</svg>

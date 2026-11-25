@@ -831,18 +831,20 @@
   function appBar(dev, title, back) {
     return '<div class="d-bar">' + (back ? '<a href="' + back + '">‹</a>' : '<a href="#/' + dev + '">‹</a>') + '<b>' + esc(title) + '</b><span></span></div>';
   }
+  // 앱 경로가 'b/메모장'처럼 '/'를 품으면 나눠서 붙인다 (통째로 인코딩하면 '%2F'가 되어 라우터가 못 알아본다)
+  function appHref(dev, app, id) { return href.apply(null, [dev].concat(app.split('/'), id ? [id] : [])); }
   function devPosts(dev, board) { return D.posts.filter(function (p) { return p.s === dev && p.b === board && p.c.t !== 'vault'; }); }
   function notesList(dev, board, app, list) {
     list = (list || devPosts(dev, board)).sort(function (a, b) { return a.d < b.d ? 1 : -1; });
     return '<ul class="d-notes">' + list.map(function (p) {
-      return '<li><a href="' + href(dev, app, p.id) + '"><b>' + esc(p.t) + '</b><p>' + esc(excerpt(p.x, 40)) + '</p><em>' + ymd(p.d) + '</em></a></li>';
+      return '<li><a href="' + appHref(dev, app, p.id) + '"><b>' + esc(p.t) + '</b><p>' + esc(excerpt(p.x, 40)) + '</p><em>' + ymd(p.d) + '</em></a></li>';
     }).join('') + '</ul>';
   }
   function gallery(dev, board, app) {
     var list = devPosts(dev, board).sort(function (a, b) { return a.d < b.d ? 1 : -1; });
     return '<div class="d-gal">' + list.map(function (p) {
       var bg = PHOTO[p.id] ? '#333 url(&quot;' + esc(PHOTO[p.id]) + '&quot;) center/cover' : 'linear-gradient(150deg,' + tint(p.id, 18, 72) + ',' + tint(p.id + 'g', 22, 52) + ')';
-      return '<a href="' + href(dev, app, p.id) + '" style="background:' + bg + '"><span>' + esc(p.t) + '</span></a>';
+      return '<a href="' + appHref(dev, app, p.id) + '" style="background:' + bg + '"><span>' + esc(p.t) + '</span></a>';
     }).join('') + '</div>';
   }
   function photoView(p) { return '<div class="d-photo">' + rich(p.x, p.id) + '<div class="d-meta">' + esc(p.t) + ' · ' + when(p.d) + '</div></div>'; }
@@ -930,10 +932,10 @@
   // 즐겨찾기(자동 로그인) · 앱 · 주소창. 앱 목록은 시트 게시판·메시지 ID를 따른다
   var PHONE_SLUG = { haneul: 'S12', byeolkkot: 'S13', oegolsu: 'S14', gaudi: 'S15' };
   var PHONES = {
-    S12: { who: '하늘바라기', wall: 'flowers', fav: ['S6', 'S5'], apps: [['msg6', '금방울당', 'bell'], ['b/구매 내역', '구매 내역', 'buy'], ['b/달력', '달력', 'cal'], ['b/사진첩', '사진첩', 'photo'], ['b/통화 기록', '통화 기록', 'call']] },
-    S13: { who: '별꽃', wall: 'dusk', fav: ['S1', 'S5'], apps: [['b/메모장', '메모장', 'memo'], ['b/통화 기록', '통화 기록', 'call'], ['mail', '메일', 'mail'], ['doran', '도란', 'doran']] },
-    S14: { who: '외골수', wall: 'couple', fav: ['S7', 'S1'], apps: [['doran', '도란', 'doran'], ['b/메모', '메모', 'memo']] },
-    S15: { who: '가우디', wall: 'plain', fav: ['S1', 'S5'], apps: [['mail', '메일', 'mail'], ['er', '병원 상담', 'er']] }
+    S12: { who: '하늘바라기', wall: 'w-star', fav: ['S6', 'S5'], apps: [['msg6', '금방울당', 'bell'], ['b/구매 내역', '구매 내역', 'buy'], ['b/달력', '달력', 'cal'], ['b/사진첩', '사진첩', 'photo'], ['b/통화 기록', '통화 기록', 'call']] },
+    S13: { who: '별꽃', wall: 'w-sun', fav: ['S1', 'S5'], apps: [['b/메모장', '메모장', 'memo'], ['b/통화 기록', '통화 기록', 'call'], ['mail', '메일', 'mail'], ['doran', '도란', 'doran']] },
+    S14: { who: '외골수', wall: 'w-umb', fav: ['S7', 'S1'], apps: [['doran', '도란', 'doran'], ['b/메모', '메모', 'memo']] },
+    S15: { who: '가우디', wall: 'w-bp', fav: ['S1', 'S5'], apps: [['mail', '메일', 'mail'], ['er', '병원 상담', 'er']] }
   };
   var FAV = {
     S1: ['남은자리', '<img src="img/brand/namunjari_white.png" alt="">', '#56635a'], S5: ['해원일보', '報', '#163a6b'],
@@ -960,18 +962,58 @@
     var head = m.x.match(/^\(([^)]*)\)\s*제목:\s*([^\n]*)\n*/) || ['', '', ''];
     return { tag: head[1], subj: head[2] || '(제목 없음)', body: m.x.slice(head[0].length), trash: /휴지통/.test(head[1]), unread: /읽지 않음/.test(head[1]) };
   }
+  function mailRead(id) { return !!(st.mread && st.mread[id]); }
+  function mailAv(id, big) {
+    var n = nick(id) || id;
+    return '<span class="m-av' + (big ? ' big' : '') + '" style="background:' + tint(id, 42, 52) + '">' + esc(n.replace(/^[(（]/, '').slice(0, 1)) + '</span>';
+  }
+  function mailDate(d) {
+    var y = d.slice(0, 4), m = +d.slice(5, 7), dd = +d.slice(8, 10);
+    return y === NOW.slice(0, 4) ? m + '월 ' + dd + '일' : y + '. ' + m + '. ' + dd + '.';
+  }
+  // 본문 → 문단 + '[첨부 n] …' 줄은 첨부 카드로
+  function mailBody(x) {
+    var att = [], paras = [];
+    x.split('\n').forEach(function (l) {
+      var m = l.match(/^\[첨부\s*(\d+)\]\s*(.*)$/);
+      if (m) att.push(m); else paras.push(l);
+    });
+    var body = paras.join('\n').trim().split(/\n{2,}/).map(function (pp) { return '<p>' + esc(pp).replace(/\n/g, '<br>') + '</p>'; }).join('');
+    var cards = att.length ? '<div class="m-att"><div class="m-att-h">📎 첨부 ' + att.length + '개</div>' + att.map(function (m) {
+      var t = m[2], k = t.indexOf(':'), head = k > 0 ? t.slice(0, k) : '첨부 ' + m[1], rest = k > 0 ? t.slice(k + 1).trim() : t;
+      var ic = /사진/.test(head) ? '🖼' : /메모/.test(head) ? '✍' : '📄';
+      return '<div class="m-file"><i>' + ic + '</i><div><b>' + esc(head) + '</b><p>' + esc(rest) + '</p></div></div>';
+    }).join('') + '</div>' : '';
+    return body + cards;
+  }
   function mailApp(dev, id, folder) {
     var all = D.messages.filter(function (m) { return m.s === dev && /-MAIL-/.test(m.id); }).sort(function (a, b) { return a.d < b.d ? 1 : -1; });
     if (id) {
       var m = all.find(function (x) { return x.id === id; }), mo = mailOf(m);
-      return appBar(dev, mo.trash ? '휴지통' : '받은 메일함', href(dev, 'mail', mo.trash ? 'trash' : '')) + '<div class="d-mail"><h2>' + esc(mo.subj) + '</h2><div class="d-meta">' + esc(nick(m.f)) + ' → ' + esc(nick(m.to)) + ' · ' + when(m.d) + '</div><div class="d-mail-x">' + esc(mo.body).replace(/\n/g, '<br>') + '</div></div>';
+      if (!mailRead(id)) { st.mread = st.mread || {}; st.mread[id] = 1; save(); }
+      var back = href(dev, 'mail', mo.trash ? 'trash' : 'inbox');
+      return '<div class="d-bar m-bar"><a href="' + back + '">‹</a><b></b><span class="m-tools">' + (mo.trash ? '<i title="복원">↺</i>' : '') + '<i title="삭제">🗑</i></span></div>' +
+        '<article class="m-view"><h2>' + esc(mo.subj) + '</h2>' +
+        '<div class="m-labels">' + (mo.trash ? '<span class="m-lb trash">휴지통</span>' : '<span class="m-lb">받은 메일함</span>') + '</div>' +
+        '<div class="m-from">' + mailAv(m.f, 1) + '<div><b>' + esc(nick(m.f)) + '</b><small>받는 사람: ' + esc(nick(m.to)) + '</small></div><time>' + mailDate(m.d) + '<br>' + m.d.slice(11, 16) + '</time></div>' +
+        '<div class="m-body">' + mailBody(mo.body) + '</div>' +
+        '<div class="m-reply"><span>↩ 답장</span><span>↪ 전달</span></div></article>';
     }
-    var trash = folder === 'trash', list = all.filter(function (m) { return mailOf(m).trash === trash; });
-    var tabs = '<div class="d-tabs"><a href="' + href(dev, 'mail') + '"' + (trash ? '' : ' class="on"') + '>받은 메일함</a><a href="' + href(dev, 'mail', 'trash') + '"' + (trash ? ' class="on"' : '') + '>휴지통 ' + all.filter(function (m) { return mailOf(m).trash; }).length + '</a></div>';
-    return appBar(dev, '메일') + tabs + (list.length ? '<ul class="d-notes d-mails">' + list.map(function (m) {
-      var mo = mailOf(m);
-      return '<li' + (mo.unread ? ' class="unread"' : '') + '><a href="' + href(dev, 'mail', 'm', m.id) + '"><b>' + esc(nick(m.f)) + '</b><p>' + esc(mo.subj) + '</p><em>' + ymd(m.d) + '</em></a></li>';
-    }).join('') + '</ul>' : '<p class="d-empty">' + (trash ? '휴지통이 비어 있습니다.' : '받은 메일이 없습니다.') + '</p>');
+    var trash = folder === 'trash';
+    var list = all.filter(function (m) { return mailOf(m).trash === trash; });
+    var unreadIn = all.filter(function (m) { var o = mailOf(m); return !o.trash && o.unread && !mailRead(m.id); }).length;
+    var trashN = all.filter(function (m) { return mailOf(m).trash; }).length;
+    var tabs = '<div class="m-folders"><a href="' + href(dev, 'mail', 'inbox') + '"' + (trash ? '' : ' class="on"') + '>📥 받은 메일함' + (unreadIn ? ' <em>' + unreadIn + '</em>' : '') + '</a>' +
+      '<a href="' + href(dev, 'mail', 'trash') + '"' + (trash ? ' class="on"' : '') + '>🗑 휴지통' + (trashN ? ' <small>' + trashN + '</small>' : '') + '</a></div>';
+    var note = trash && list.length ? '<p class="m-note">휴지통을 비운 적이 없습니다 · 메일 ' + list.length + '통</p>' : '';
+    var rows = list.map(function (m) {
+      var mo = mailOf(m), un = mo.unread && !mailRead(m.id), att = /\[첨부/.test(mo.body);
+      return '<li' + (un ? ' class="unread"' : '') + '><a href="' + href(dev, 'mail', 'm', m.id) + '">' + mailAv(m.f) +
+        '<div class="m-row"><div class="m-top"><b>' + esc(nick(m.f)) + '</b><time>' + mailDate(m.d) + '</time></div>' +
+        '<div class="m-subj">' + esc(mo.subj) + (att ? ' <span class="m-clip">📎</span>' : '') + '</div><p>' + esc(excerpt(mo.body, 60)) + '</p></div></a></li>';
+    }).join('');
+    return appBar(dev, '메일') + tabs + note + (list.length ? '<ul class="m-list">' + rows + '</ul>' :
+      '<div class="m-empty"><i>' + (trash ? '🗑' : '📭') + '</i><b>' + (trash ? '휴지통이 비어 있습니다' : '받은 메일함이 비어 있습니다') + '</b><p>' + (trash ? '' : '새 메일이 오면 여기에 표시됩니다.') + '</p></div>');
   }
   // 통화 기록: 본문 줄마다 한 칸
   function callApp(dev, board) {

@@ -360,7 +360,6 @@ body.b-dev { background: #2a2c31; }
 .phone { min-height: 100vh; color: #111; background: #f6f6f7; position: relative; overflow: hidden; }
 .sbar { display: flex; justify-content: space-between; padding: 6px 18px 4px; font-size: 12px; font-weight: 600; position: relative; z-index: 3; }
 .phone .home ~ .sbar { color: #fff; }
-.flowers { background: radial-gradient(circle at 25% 30%, #f6c6d0 0 8%, transparent 9%), radial-gradient(circle at 70% 22%, #f9e4a8 0 6%, transparent 7%), radial-gradient(circle at 60% 70%, #f2b6c4 0 10%, transparent 11%), radial-gradient(circle at 20% 80%, #d7e8b5 0 7%, transparent 8%), linear-gradient(170deg, #7d8e6a, #4b5a45 70%, #2e372b); }
 .sea { background: linear-gradient(180deg, #8fb4cf 0%, #6f98b8 38%, #3e6f93 40%, #24506f 70%, #173245 100%); }
 .plain { background: linear-gradient(180deg, #232631, #12141a); }
 .home { min-height: 100vh; padding: 60px 24px; margin-top: -26px; display: flex; flex-direction: column; }
@@ -548,9 +547,6 @@ body.b-S11 { background: #ece6da; }
 .addr span { opacity: .55; }
 .addr input { flex: 1; min-width: 0; border: 0; background: transparent; font-size: 14px; color: #222; outline: none; }
 .home .addr { margin: 0 0 26px; }
-.home.dusk { background: linear-gradient(170deg, #3b4a6b, #6e5a7e 55%, #c98b7a); }
-.home.couple { background: radial-gradient(circle at 30% 25%, #ffd6e0 0 9%, transparent 10%), radial-gradient(circle at 70% 30%, #ffe8b0 0 7%, transparent 8%), linear-gradient(170deg, #f3a6b8, #b98bd8 60%, #6d6fb8); }
-.home.plain { background: linear-gradient(170deg, #5c6168, #33373d); }
 .home.sea-photo { background: linear-gradient(rgba(0, 0, 0, .2), rgba(0, 0, 0, .05) 40%, rgba(0, 0, 0, .4)), url(../img/S2-WALL.jpg) center / cover; }
 .home .case { color: #fff; background: rgba(0, 0, 0, .28); margin-top: auto; }
 .dday { text-align: center; color: #fff; text-shadow: 0 1px 3px rgba(0, 0, 0, .4); margin: -10px 0 18px; font-size: 14px; }
@@ -635,3 +631,56 @@ body.b-S11 { background: #ece6da; }
 .s17-ph div { font-size: 12px; color: #999; }
 .s17-main .post-x { padding: 16px; }
 .s17-f { text-align: center; font-size: 11px; color: #8a94a3; padding: 18px 16px; background: #f3f5f8; }
+
+/* 4 휴대폰 배경화면: 하늘바라기 별이 뜬 밤하늘 · 별꽃 해바라기 · 외골수 비 오는 밤의 우산 · 가우디 바름교 도면 */
+.home.w-star { background: linear-gradient(rgba(0,0,0,.05), rgba(0,0,0,.35)), url(../img/S12-WALL.jpg) center / cover; }
+.home.w-sun { background: linear-gradient(rgba(0,0,0,.28), rgba(0,0,0,.05) 35%, rgba(0,0,0,.35)), url(../img/S13-WALL.jpg) center 30% / cover; }
+.home.w-umb { background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.05) 40%, rgba(0,0,0,.45)), url(../img/S14-WALL.jpg) center / cover; }
+.home.w-bp { background: #132f52 url(../img/S15-WALL.svg) center bottom / cover; }
+
+/* 메일 앱 */
+.m-folders { display: flex; gap: 8px; padding: 10px 14px; border-bottom: 1px solid #eef0f3; background: #fff; }
+.m-folders a { flex: 1; text-align: center; padding: 8px 6px; border-radius: 18px; font-size: 13.5px; color: #555; background: #f3f5f8; }
+.m-folders a.on { background: #e3ecfb; color: #1a56c4; font-weight: 700; }
+.m-folders em { font-style: normal; font-size: 11px; color: #fff; background: #1a56c4; border-radius: 9px; padding: 1px 6px; margin-left: 2px; }
+.m-folders small { font-size: 11.5px; color: #888; margin-left: 2px; }
+.m-note { margin: 0; padding: 8px 16px; font-size: 12px; color: #8a6d1d; background: #fff8e5; border-bottom: 1px solid #f3e6bf; }
+.m-list li a { display: flex; gap: 12px; padding: 13px 16px; border-bottom: 1px solid #f1f2f4; align-items: flex-start; }
+.m-av { flex: none; width: 38px; height: 38px; border-radius: 50%; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 15px; }
+.m-av.big { width: 42px; height: 42px; font-size: 17px; }
+.m-row { flex: 1; min-width: 0; }
+.m-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.m-top b { font-size: 14.5px; font-weight: 500; color: #333; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.m-top time { flex: none; font-size: 11.5px; color: #999; }
+.m-subj { font-size: 14px; color: #444; margin-top: 1px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.m-row p { margin: 2px 0 0; font-size: 12.5px; color: #999; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.45; }
+.m-list li.unread .m-top b, .m-list li.unread .m-subj { font-weight: 700; color: #111; }
+.m-list li.unread .m-top time { color: #1a56c4; font-weight: 700; }
+.m-list li.unread a { background: #f7faff; }
+.m-clip { font-size: 12px; }
+.m-empty { text-align: center; padding: 70px 20px; color: #999; }
+.m-empty i { display: block; font-style: normal; font-size: 44px; margin-bottom: 10px; }
+.m-empty b { display: block; color: #666; font-size: 15px; }
+.m-empty p { font-size: 12.5px; margin: 4px 0 0; }
+.m-bar .m-tools { display: flex; gap: 16px; justify-content: flex-end; color: #777; }
+.m-bar .m-tools i { font-style: normal; font-size: 16px; }
+.m-view { padding: 6px 18px 30px; }
+.m-view h2 { font-size: 20px; line-height: 1.35; margin: 8px 0 8px; }
+.m-labels { margin-bottom: 14px; }
+.m-lb { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 4px; background: #eef1f5; color: #666; }
+.m-lb.trash { background: #fde9e7; color: #b3412f; }
+.m-from { display: flex; gap: 10px; align-items: center; padding-bottom: 14px; border-bottom: 1px solid #f0f1f3; }
+.m-from > div { flex: 1; min-width: 0; }
+.m-from b { display: block; font-size: 15px; }
+.m-from small { font-size: 12px; color: #999; }
+.m-from time { font-size: 11.5px; color: #999; text-align: right; line-height: 1.4; }
+.m-body { padding-top: 16px; font-size: 15px; line-height: 1.8; color: #222; }
+.m-body p { margin: 0 0 1em; }
+.m-att { margin-top: 18px; border-top: 1px dashed #e3e6ea; padding-top: 12px; }
+.m-att-h { font-size: 12.5px; color: #777; margin-bottom: 8px; }
+.m-file { display: flex; gap: 10px; padding: 10px 12px; border: 1px solid #e6e9ee; border-radius: 10px; margin-bottom: 8px; background: #fafbfc; }
+.m-file i { font-style: normal; font-size: 20px; line-height: 1.3; }
+.m-file b { display: block; font-size: 13px; color: #1a56c4; }
+.m-file p { margin: 2px 0 0; font-size: 13.5px; line-height: 1.6; color: #333; }
+.m-reply { display: flex; gap: 10px; margin-top: 22px; }
+.m-reply span { flex: 1; text-align: center; padding: 10px; border: 1px solid #dde1e7; border-radius: 22px; font-size: 13.5px; color: #555; }
