@@ -204,25 +204,7 @@ body.b-S9 { background: #f2f3f5; }
 /* ── S10 새벽의 방 : 다크·저채도 ── */
 body.b-S10 { background: #0e1015; }
 .skin-S10 { background: #14161c !important; color: #b9bec9; }
-.s10-109 { position: sticky; top: 0; z-index: 10; background: #2a2620; color: #e6cf9c; padding: 8px 14px; font-size: 12.5px; border-bottom: 1px solid #3c352a; }
-.s10-109 b { display: block; font-size: 14px; color: #f3dfb0; }
-.s10-109 span { opacity: .85; }
-.s10-h { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px 8px; }
-.s10-logo { font-size: 18px; color: #d4d8e0; letter-spacing: .05em; }
-.s10-logo::before { content: "☾ "; color: #7d8aa8; }
-.s10-acct { font-size: 12px; color: #7d8496; }
-.s10-tabs { font-size: 13.5px; border-bottom: 1px solid #23262f; }
-.s10-tabs a { color: #6d7384; }
-.s10-tabs a.on { color: #cfd4de; box-shadow: inset 0 -2px 0 #56607a; }
 .skin-S10 .bdesc { background: #181b22; color: #6d7384; border-color: #23262f; }
-.s10-r a, .s10-r.del { display: block; padding: 12px 16px; border-bottom: 1px solid #1f222a; }
-.s10-r.del { color: #535868; font-size: 13px; display: flex; justify-content: space-between; }
-.s10-r.del em { font-style: normal; font-size: 11px; }
-.s10-t { color: #c3c8d2; font-size: 14.5px; }
-.s10-t b { color: #7d8aa8; font-size: 12px; font-weight: 400; }
-.s10-m { font-size: 11.5px; color: #5d6373; margin-top: 2px; }
-.s10-ph { padding: 16px; border-bottom: 1px solid #23262f; }
-.s10-ph h1 { font-size: 17px; color: #d4d8e0; font-weight: 500; }
 .skin-S10 .post-x { color: #b9bec9; line-height: 1.8; }
 .skin-S10 .cms { border-color: #0e1015; }
 .skin-S10 .cm { border-color: #1f222a; }
@@ -235,8 +217,6 @@ body.b-S10 { background: #0e1015; }
 .skin-S10 .pager b { background: #3a4152; }
 .skin-S10 .th-list li a, .skin-S10 .me-list li a, .skin-S10 .pg-h, .skin-S10 .me-box { border-color: #1f222a; }
 .skin-S10 .note.sent { background: #1c2029; }
-.s10-ad { background: #191c23 !important; border-color: #2a2e38 !important; color: #9aa1b0 !important; }
-.s10-f { padding: 18px; font-size: 11px; text-align: center; color: #4d5260; }
 
 /* ── S6 금방울당 : 2000년대 점집 홈페이지 ── */
 body.b-S6 { background: #5a0000 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ctext x='8' y='28' font-size='20' fill='%23700000'%3E%E5%8D%8D%3C/text%3E%3C/svg%3E"); }
@@ -393,7 +373,6 @@ body.b-dev { background: #2a2c31; }
 .ic.photo { background: linear-gradient(135deg, #f5a3b5, #f3d27a, #8dd3c7); }
 .ic.rec { background: #e9504c; }
 .ic.web.s1 { background: #56635a; font-size: 18px; }
-.ic.web.s10 { background: #1d2230; }
 .d-app { background: #fff; min-height: calc(100vh - 26px); }
 .d-bar { position: sticky; top: 0; z-index: 4; display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; padding: 8px 6px; background: rgba(255, 255, 255, .96); border-bottom: 1px solid #eee; text-align: center; }
 .d-bar a { font-size: 26px; line-height: 1; color: #2bb39a; }
@@ -635,3 +614,24 @@ body.b-S11 { background: #ece6da; }
 .pl-form input { letter-spacing: .6em; font-size: 22px; background: rgba(255, 255, 255, .9); border: 0; }
 .pl-form .btn { width: 100%; }
 .pl-form .login-err { color: #fff; background: rgba(200, 40, 50, .75); border-radius: 6px; padding: 4px 8px; text-shadow: none; }
+
+/* S17 도원화학 홈페이지 */
+.s17-h { background: #fff; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; border-bottom: 1px solid #e3e8ef; }
+.s17-h img { height: 28px; display: block; }
+.s17-h span { font-size: 12px; color: #2b4c7e; }
+.s17-tabs { background: #2b4c7e; }
+.s17-tabs a { color: #dfe7f3; }
+.s17-tabs a.on { color: #fff; font-weight: 700; border-bottom-color: #fff; }
+.s17-main { background: #fff; min-height: 50vh; }
+.s17-hero { background: linear-gradient(135deg, #2b4c7e, #4f7fb8); color: #fff; padding: 28px 16px; }
+.s17-hero b { display: block; font-size: 20px; }
+.s17-hero span { font-size: 13px; opacity: .85; }
+.s17-list li a { display: block; padding: 13px 16px; border-bottom: 1px solid #eef1f5; }
+.s17-list em, .s17-ph em { display: block; font-style: normal; font-size: 11px; color: #2b4c7e; font-weight: 700; }
+.s17-list b { display: block; font-size: 15px; margin: 2px 0; }
+.s17-list span { font-size: 12px; color: #999; }
+.s17-ph { padding: 18px 16px 12px; border-bottom: 1px solid #eef1f5; }
+.s17-ph h1 { font-size: 19px; margin: 4px 0 6px; }
+.s17-ph div { font-size: 12px; color: #999; }
+.s17-main .post-x { padding: 16px; }
+.s17-f { text-align: center; font-size: 11px; color: #8a94a3; padding: 18px 16px; background: #f3f5f8; }

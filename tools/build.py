@@ -57,7 +57,7 @@ def cond(raw):
         return {"t": "pub", "kw": [w.strip() for w in re.split(r"[·,]", m.group(1)) if w.strip()]}
     if c.startswith("S3 보안 폴더"):
         return {"t": "vault", "d": "S3F"}
-    if re.match(r"^(S2 휴대폰 카드|외골수 소지품 카드|S1[2-6]\b)", c):
+    if re.match(r"^(S2 휴대폰 카드|외골수 소지품 카드|S1[2-7]\b)", c):
         return {"t": "pub"}
     m = re.match(r"로그인 필요:\s*([\w-]+)", c)
     if m:

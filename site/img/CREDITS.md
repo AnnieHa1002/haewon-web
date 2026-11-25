@@ -2,7 +2,7 @@
 
 ## 제작 에셋 (드라이브 '이미지 에셋' 폴더)
 
-`img/S2-PHOTO-001~004·006·007·009~016.jpg`(005·008 재작업 중), `S2-DORAN-014`, `S3-MEMO-015`, `S6-ROOM-002`, `S11-DAY-001`, `S6-SHOP-001·003~016·018·020`(상품 사진에 배경을 합성), `S5-SOC-006`, `S1-NOTICE-010`(다정한 이별 포스터), `S5-OPN-021`(차위로 인터뷰 사진, S1-FREE-034에도 씀), `S3-NOTE-001~011`, `S4-FEED-003~016`, `img/brand/*` (로고), `img/avatar/*` (프로필), `img/icon/*` (휴대폰 아이콘)은 직접 만든 에셋이다.
+`img/S2-PHOTO-001~016.jpg`, `S12-PHOTO-001·002`, `S2-DORAN-014`, `S3-MEMO-015`, `S6-ROOM-002`, `S11-DAY-001`, `S6-SHOP-001·003~016·018·020`(상품 사진에 배경을 합성), `S5-SOC-006`, `S1-NOTICE-010`(다정한 이별 포스터), `S5-OPN-021`(차위로 인터뷰 사진, S1-FREE-034에도 씀), `S3-NOTE-001~011`, `S4-FEED-003~016`, `img/brand/*` (로고), `img/avatar/*` (프로필), `img/icon/*` (휴대폰 아이콘)은 직접 만든 에셋이다.
 
 ## Unsplash
 
@@ -20,28 +20,11 @@ Unsplash 라이선스(https://unsplash.com/license)로 받은 사진. 상업적 
 | img/S4-FEED-021.jpg | S4-FEED-021 | 카페 창가 | https://images.unsplash.com/photo-1445116572660-236099ec97a0 |
 | img/S4-FEED-022.jpg | S4-FEED-022 | 빗방울 맺힌 창문 | https://images.unsplash.com/photo-1515694346937-94d85e41e6f0 |
 | img/S4-FEED-024.jpg | S4-FEED-024 | 벚꽃 | https://images.unsplash.com/photo-1522383225653-ed111181a951 |
-| img/S1-FREE-017.jpg | S1-FREE-017 | 비빔밥 | https://images.unsplash.com/photo-1590301157890-4810ed352733 |
-| img/S1-DEBATE-013.jpg | S1-DEBATE-013 | 꽃집 | https://images.unsplash.com/photo-1487070183336-b863922373d4 |
-| img/S1-FREE-019.jpg | S1-FREE-019 | 빗방울 | https://images.unsplash.com/photo-1428592953211-077101b2021b |
-| img/S1-FREE-023.jpg | S1-FREE-023 | 시장 채소 | https://images.unsplash.com/photo-1488459716781-31db52582fe9 |
-| img/S1-TOWER-020.jpg | S1-TOWER-020 | 벚꽃 | https://images.unsplash.com/photo-1462275646964-a0e3386b89fa |
 | img/S5-SOC-014.jpg | S5-SOC-014 | 번개 | https://images.unsplash.com/photo-1429552077091-836152271555 |
-| img/S5-SOC-020.jpg | S5-SOC-020 | 벚나무 길 | https://images.unsplash.com/photo-1493589976221-c2357c31ad77 |
-| img/S5-SOC-024.jpg | S5-SOC-024 | 기차역 | https://images.unsplash.com/photo-1532105956626-9569c03602f6 |
-| img/S5-OPN-013.jpg | S5-OPN-013 | 국수 | https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43 |
-| img/S5-OPN-020.jpg | S5-OPN-020 | 국수 | https://images.unsplash.com/photo-1617093727343-374698b1b08d |
-| img/S6-SHOP-008.jpg | S6-SHOP-008 | 초 | https://images.unsplash.com/photo-1605651202774-7d573fd3f12d |
 | img/S7-NOTI-016.jpg | S7-NOTI-016 | 억새 | https://images.unsplash.com/photo-1469122312224-c5846569feb1 |
-| img/S8-PRESS-017.jpg | S8-PRESS-017 | 공사 현장 | https://images.unsplash.com/photo-1541888946425-d81bb19240f5 |
-| img/S8-PRESS-018.jpg | S8-PRESS-018 | 야구장 | https://images.unsplash.com/photo-1471295253337-3ceaaedca402 |
-| img/S8-PRESS-019.jpg | S8-PRESS-019 | 아파트 | https://images.unsplash.com/photo-1545324418-cc1a3fa10c00 |
-| img/S9-LG-005.jpg | S9-LG-005 | 야구 | https://images.unsplash.com/photo-1508344928928-7165b67de128 |
-| img/S10-TALK-030.jpg | S10-TALK-030 | 비 오는 거리의 우산 | https://images.unsplash.com/photo-1519692933481-e162a57d6721 |
 | img/avatar/baram_dad.jpg | 바름아빠 프로필 | 도면 위 손 (잘라 씀) | https://images.unsplash.com/photo-1503387762-592deb58ef4e |
 | img/avatar/haneul_mideum.jpg | 하늘바라기 프로필 | 구름 사이 빛 | https://images.unsplash.com/photo-1419833173245-f59e1b93f9ee |
 | img/avatar/eunhye_song.jpg | 늦은 편지 프로필 | 만년필 글씨 | https://images.unsplash.com/photo-1455390582262-044cdead277a |
-| img/S6-SHOP-017.jpg | S6-SHOP-017 | 나무 숟가락 위 굵은 소금 | https://images.unsplash.com/photo-1518110925495-5fe2fda0442c |
-| img/S6-SHOP-019.jpg | S6-SHOP-019 | 쌀알 | https://images.unsplash.com/photo-1586201375761-83865001e31c |
 | img/avatar/letter_star.jpg | letter_star 프로필 | 별이 뜬 밤하늘 | https://images.unsplash.com/photo-1419242902214-272b3f66ee7a |
 | img/avatar/rain_sound.jpg | rain_sound 프로필 | 빗방울 맺힌 창 | https://images.unsplash.com/photo-1515694346937-94d85e41e6f0 |
 | img/avatar/nyang_jipsa.jpg | nyang_jipsa 프로필 | 고양이 | https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba |
@@ -49,7 +32,6 @@ Unsplash 라이선스(https://unsplash.com/license)로 받은 사진. 상업적 
 | img/avatar/haebaragi_kim.jpg | haebaragi_kim 프로필 | 해바라기 | https://images.unsplash.com/photo-1470509037663-253afd7f0f51 |
 | img/avatar/go3.jpg | go3 프로필 | 쌓인 책 | https://images.unsplash.com/photo-1497633762265-9d179a990aa6 |
 | img/avatar/lotus.jpg | lotus 프로필 | 연꽃 | https://images.unsplash.com/photo-1474557157379-8aa74a6ef541 |
-| img/avatar/saebyeok_admin.jpg | saebyeok_admin 프로필 | 보름달 | https://images.unsplash.com/photo-1532693322450-2cb5c511067d |
 | img/avatar/forget_now.jpg | forget_now 프로필 | 바다 수평선 | https://images.unsplash.com/photo-1507525428034-b723cf961d3e |
 | img/avatar/yoonha_mom.jpg | yoonha_mom 프로필 | 벚꽃 | https://images.unsplash.com/photo-1522383225653-ed111181a951 |
 | img/avatar/alone_rice.jpg | alone_rice 프로필 | 밥 한 공기 | https://images.unsplash.com/photo-1516684732162-798a0062be99 |
@@ -66,16 +48,11 @@ Unsplash 라이선스(https://unsplash.com/license)로 받은 사진. 상업적 
 | img/S2-PHOTO-001.jpg | S2-PHOTO-001 | 제작 이미지 (생성, 인물 초상과 맞춤) | 자체 제작 |
 | img/S2-PHOTO-002.jpg | S2-PHOTO-002 | 제작 이미지 (생성, 인물 초상과 맞춤) | 자체 제작 |
 | img/S4-FEED-023.jpg | S4-FEED-023 | 붕어빵 | 제작자가 채팅으로 준 사진 |
-| img/S1-SANJAE-019.jpg | S1-SANJAE-019 | 순대국밥 | 제작자가 채팅으로 준 사진 |
 
 ## Wikimedia Commons (작가 표기 필요)
 
 | 파일 | 쓰인 글 | 원본 | 작가 | 라이선스 |
 | --- | --- | --- | --- | --- |
-| img/S9-CM-037.jpg | S9-CM-037 | [File:Dwaeji-gukbap 2.jpg](https://commons.wikimedia.org/wiki/File:Dwaeji-gukbap_2.jpg) | chomjong | CC BY 2.0 |
-| img/S9-SS-005.jpg | S9-SS-005 | [File:Malatang2025.jpg](https://commons.wikimedia.org/wiki/File:Malatang2025.jpg) | Lukas010109 | CC0 |
-| img/S1-FREE-011.jpg | S1-FREE-011 | [File:Gajami-miyeok-guk 1.jpg](https://commons.wikimedia.org/wiki/File:Gajami-miyeok-guk_1.jpg) | 대경라이프 | CC BY-SA 4.0 |
-| img/S9-DW-028.jpg | S9-DW-028 | [File:Cherry Blossom (151178929).jpeg](https://commons.wikimedia.org/wiki/File:Cherry_Blossom_(151178929).jpeg) | Dongil Kim | CC BY 3.0 |
 
 # 음악 출처 (진행 화면 배경 음악, `site/audio/`)
 

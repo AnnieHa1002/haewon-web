@@ -33,7 +33,6 @@
     haebaragi_kim: 'img/avatar/haebaragi_kim.jpg',
     go3: 'img/avatar/go3.jpg',
     lotus: 'img/avatar/lotus.jpg',
-    saebyeok_admin: 'img/avatar/saebyeok_admin.jpg',
     forget_now: 'img/avatar/forget_now.jpg',
     yoonha_mom: 'img/avatar/yoonha_mom.jpg',
     alone_rice: 'img/avatar/alone_rice.jpg',
@@ -195,7 +194,7 @@
     if (halted) return '<div class="ad ad-halt ' + (cls || '') + '"><span>광고 송출 중단</span></div>';
     var link = adLink(ad);
     return '<a class="ad ' + (cls || '') + '" ' + (link ? 'href="' + link + '"' : 'data-ext="1"') + '>' +
-      '<span class="ad-badge">' + (ad.s === 'S10' ? '공익' : ad.pos.indexOf('스폰서') >= 0 ? 'Sponsored' : 'AD') + '</span>' +
+      '<span class="ad-badge">' + (/정신건강|보건/.test(ad.who) ? '공익' : ad.pos.indexOf('스폰서') >= 0 ? 'Sponsored' : 'AD') + '</span>' +
       '<b class="ad-who">' + esc(ad.who) + '</b><span class="ad-x">' + esc(ad.x) + '</span></a>';
   }
   // pos: top|mid|bottom|login, d: 그 화면의 시점
@@ -330,7 +329,6 @@
     { r: 'S8', label: '천명그룹', ic: '天', bg: '#0b4fa8', img: 'img/brand/cheonmyeong_mark.png' },
     { r: 'S4', label: '한컷', ic: '◎', bg: 'linear-gradient(135deg,#f7b267,#e05780 60%,#7b5ce0)', img: 'img/brand/hancut_mark.png' },
     { r: 'S6', label: '금방울당', ic: '🔔', bg: '#a50f0f', img: 'img/brand/geumbangul_color.png', dark: true },
-    { r: 'S10', label: '새벽의 방', ic: '☾', bg: '#1d2230', img: 'img/brand/saebyeok_white.png', dark: true },
     { r: 'S11', label: '하루글', ic: '✎', bg: '#8a9a6e', img: 'img/brand/harugl_color.png' },
     { r: 'S7', label: '도원 사내망', ic: 'DW', bg: '#2b4c7e', img: 'img/brand/dowon_color.png', lock: function () { return !sess('S7'); } }
   ];
@@ -470,9 +468,9 @@
 
   // ── S9 사원증 ──────────────────────────────────────────
   // 회사 목록. 게시판이 곧 회사 라운지다. '더보기'는 끝없이 불러오기만 한다.
-  // 즐겨찾기 = 사건과 관련된 두 회사. 나머지 라운지는 data/extra 의 배경용 회사
+  // 즐겨찾기 = 사건과 관련된 두 회사
   var S9_FAV = ['천명건설', '도원화학'];
-  var S9_SIZE = { '천명건설': [1388, '건설'], '도원화학': [1102, '화학'], '샘선전자': [41203, '전자'], '케이에스하이닉스': [18362, '반도체'], '알쥐': [15917, '전자·화학'] };
+  var S9_SIZE = { '천명건설': [1388, '건설'], '도원화학': [1102, '화학'] };
   function s9Co(board) { return board.replace(/\s*라운지$/, ''); }
   function s9Shell(co, body, title) {
     var h = '<header class="s9-h">' + (co ? '<a class="s9-back" href="#/S9">‹</a>' : '') + '<a class="s9-logo" href="#/S9">사원증</a><a class="s9-s" href="' + href('S9', 'search') + '">⌕</a></header>';
@@ -522,38 +520,6 @@
     return s9Shell(s9Co(p.b), h, p.t);
   }
   SK.S9 = { list: s9List, post: s9Post, shell: s9Shell, search: s9Search, company: s9Offline };
-
-  // ── S10 새벽의 방 ──────────────────────────────────────
-  function s10Shell(active, body, title) {
-    var me = sess('S10');
-    var top = adsFor('S10', 'top', NOW, '')[0];
-    var h = '<div class="s10-109">' + (top ? '<b>' + esc(top.ad.x) + '</b>' : '') + '<span>자살예방 상담전화 109 · 정신건강 위기상담 1577-0199 · 청소년 1388</span></div>' +
-      '<header class="s10-h"><a class="s10-logo" href="#/S10">새벽의 방</a><a class="s10-acct" href="' + href('S10', me ? 'me' : 'login') + '">' + (me ? esc(nick(me)) : '로그인') + '</a></header><nav class="tabs s10-tabs">';
-    D.boards.S10.forEach(function (b) { h += '<a href="' + href('S10', 'b', b.name) + '"' + (active === b.name ? ' class="on"' : '') + '>' + esc(b.name) + '</a>'; });
-    h += '<a href="' + href('S10', 'msg') + '"' + (active === 'msg' ? ' class="on"' : '') + '>쪽지</a></nav>';
-    return { html: h + '<main class="s10-main">' + body + '</main>' + adSlot('S10', 'bottom', NOW, '', 's10-ad') + '<footer class="s10-f">새벽의 방은 회원 후원으로 돌아가는 개인 운영 게시판입니다.<br>방법·수단·장소를 묻거나 알리는 글, 함께하자는 글은 즉시 삭제합니다.</footer>', title: title || '새벽의 방' };
-  }
-  function s10Row(o) {
-    var p = o.p, s = o.s, cc = commentCount(p, s);
-    if (s.k === 'del') return '<li class="s10-r del"><span>운영 원칙에 따라 삭제된 게시물입니다.</span><em>' + short(p.d) + '</em></li>';
-    return '<li class="s10-r' + (s.k !== 'show' ? ' dim' : '') + '"><a href="' + href('S10', 'p', p.id) + '"><div class="s10-t">' + (s.k === 'secret' ? '🔒 ' : '') + esc(titleOf(p, s)) + (s.label ? ' <span class="lbl">' + s.label + '</span>' : '') + (cc ? ' <b>' + cc + '</b>' : '') + '</div>' +
-      '<div class="s10-m">' + esc(nick(p.a)) + ' · ' + short(p.d) + ' ' + hm(p.d) + '</div></a></li>';
-  }
-  function s10List(board, q) {
-    board = board || '털어놓기';
-    var page = +q.p || 1, all = sitePosts('S10', board);
-    return s10Shell(board, '<p class="bdesc">' + esc((D.boards.S10.find(function (b) { return b.name === board; }) || {}).desc || '') + '</p><ul class="s10-list">' + slice(all, page).map(s10Row).join('') + '</ul>' + pager(all.length, page, href('S10', 'b', board), {}));
-  }
-  function s10Post(p) {
-    var s = postState(p), body;
-    if (s.k === 'secret') body = lockBox('S10', '비밀글입니다. 작성자만 볼 수 있습니다.');
-    else if (s.k === 'del') body = '<div class="blind">운영 원칙에 따라 삭제된 게시물입니다.<small>운영자가 작성자에게 쪽지를 보냈습니다.</small></div>';
-    else if (s.k === 'blind') body = '<div class="blind">' + BLIND_MSG + '</div>';
-    else body = '<article class="post-x">' + rich(s.body, p.id) + '</article>';
-    var h = '<div class="s10-ph"><h1>' + esc(titleOf(p, s)) + '</h1><div class="s10-m">' + esc(nick(p.a)) + ' · ' + when(p.d) + '</div></div>' + body + (s.k === 'secret' ? '' : commentsHTML(p, { label: '답장' }));
-    return s10Shell(p.b, h, p.t);
-  }
-  SK.S10 = { list: s10List, post: s10Post, shell: s10Shell };
 
   // ── S11 하루글 · 늦은 편지 (송은혜의 블로그) ─────────────
   // 허브의 '하루글'은 블로그 주소를 넣는 화면에서 시작한다. 주소(eunhye_song)는 남은자리 댓글에만 나온다.
@@ -751,10 +717,11 @@
     S1: function (b, t) { return s1Shell('msg', b, t); }, S5: function (b, t) { return s5Shell('', b, null, t); },
     S6: function (b, t) { return s6Shell('msg', b, t); }, S7: function (b, t) { return s7Shell('me', b, t); },
     S8: function (b, t) { return s8Shell('', b, t); }, S9: function (b, t) { return s9Shell('', b, t); },
-    S10: function (b, t) { return s10Shell('msg', b, t); }, S4: function (b, t) { return s4Shell(b, t, 'msg'); },
-    S11: function (b, t) { return s11Shell('', b, t); }, S16: function (b, t) { return s16Shell('', b, t); }
+    S4: function (b, t) { return s4Shell(b, t, 'msg'); },
+    S11: function (b, t) { return s11Shell('', b, t); }, S16: function (b, t) { return s16Shell('', b, t); },
+    S17: function (b, t) { return s17Shell('', b, t); }
   };
-  var MSG_NAME = { S1: '쪽지함', S6: '회원 메시지함', S10: '쪽지', S4: 'DM' };
+  var MSG_NAME = { S1: '쪽지함', S6: '회원 메시지함', S4: 'DM' };
   function loginPage(site, q) {
     if (site === 'S7') return s7Gate();
     var foot = site === 'S4' ? '<p class="hint">한컷 계정 아이디로 로그인하세요.</p>' : '';
@@ -928,7 +895,7 @@
         '<a href="' + href('S3', 'doran') + '"><i class="ic doran"><img src="img/icon/doran.png" alt=""></i>도란</a><a href="' + href('S3', 'memo') + '"><i class="ic memo"><img src="img/icon/memo.png" alt=""></i>메모</a>' +
         '<a href="' + href('S3', 'rec') + '"><i class="ic rec"><img src="img/icon/rec.png" alt=""></i>녹음</a><a href="' + href('S3', 'note') + '"><i class="ic photo"><img src="img/icon/photo.png" alt=""></i>수첩 사진</a>' +
         '<a href="' + href('S3', 'vault') + '"><i class="ic vault">' + (isOpen('S3F') ? '🔓' : '🔒') + '</i>보안 폴더</a>' +
-        '<a href="#" data-act="auto" data-dev="S3" data-site="S1"><i class="ic web s1"><img src="img/brand/namunjari_white.png" alt=""></i>남은자리</a><a href="#" data-act="auto" data-dev="S3" data-site="S10"><i class="ic web s10"><img src="img/brand/saebyeok_white.png" alt=""></i>새벽의 방</a></div></div>';
+        '<a href="#" data-act="auto" data-dev="S3" data-site="S1"><i class="ic web s1"><img src="img/brand/namunjari_white.png" alt=""></i>남은자리</a></div></div>';
       return phone('p-s3', statusBar('19:16') + h + crack, '이다음의 휴대폰');
     }
     if (app === 'doran') h = id ? appBar('S3', cname('S3', id), href('S3', 'doran')) + chatHTML(devThreads('S3').find(function (t) { return t.who === id; }).list, OWNER.S3, 'doran s3c') : appBar('S3', '도란') + threadList('S3', 'doran');
@@ -1067,10 +1034,10 @@
   var ADDR = [
     [/금방울당\s*신도|신도\s*사랑방/, '#/S6/b/' + encodeURIComponent('신도 사랑방')],
     [/은행동\s*시장|상인회|한일\s*상회/, '#/S16'],
-    [/남은\s*자리|namunjari/, '#/S1'], [/해원\s*일보|뉴스|신문/, '#/S5'], [/금방울/, '#/S6'], [/사내망|도원\s*화학|dowon/, '#/S7'],
-    [/천명\s*그룹|천명건설|천명개발/, '#/S8'], [/사원증/, '#/S9'], [/새벽의\s*방/, '#/S10'], [/하루글|늦은\s*편지/, '#/S11'], [/한컷|nare_nowhere/, '#/S4']
+    [/남은\s*자리|namunjari/, '#/S1'], [/해원\s*일보|뉴스|신문/, '#/S5'], [/금방울/, '#/S6'], [/사내망|e-?office/, '#/S7'], [/도원\s*화학|dowon|dw\s*-?\s*[37]|세척액|세정제/, '#/S17'],
+    [/천명\s*그룹|천명건설|천명개발/, '#/S8'], [/사원증/, '#/S9'], [/하루글|늦은\s*편지/, '#/S11'], [/한컷|nare_nowhere/, '#/S4']
   ];
-  var FIND_SITES = ['S1', 'S5', 'S6', 'S8', 'S9', 'S10', 'S4', 'S11', 'S16', 'S7'];
+  var FIND_SITES = ['S1', 'S5', 'S6', 'S8', 'S9', 'S4', 'S11', 'S16', 'S17', 'S7'];
   function addrBar(dev, q) {
     return '<form class="addr" data-addr="' + (dev || '') + '"><span>⌕</span><input name="q" type="search" value="' + esc(q || '') + '" placeholder="사이트 이름이나 낱말 검색" enterkeyhint="go" autocomplete="off"></form>';
   }
@@ -1108,6 +1075,23 @@
     return s16Shell('', '<div class="s16-ph"><h1>' + esc(p.t) + '</h1><div>' + esc(nick(p.a)) + ' · ' + when(p.d) + ' · 조회 ' + num(p.v) + '</div></div><article class="post-x">' + rich(p.x, p.id) + '</article>' + commentsHTML(p, { label: '댓글' }), p.t);
   }
   SK.S16 = { list: s16List, post: s16Post, shell: s16Shell };
+
+  // ── S17 도원화학 공식 홈페이지 (주소창으로만 들어가는 바깥 사이트) ─────
+  function s17Shell(active, body, title) {
+    var h = '<header class="s17-h"><a href="#/S17"><img src="img/brand/dowon_color.png" alt="도원화학"></a><span>깨끗한 화학, 안전한 내일</span></header><nav class="tabs s17-tabs">';
+    D.boards.S17.forEach(function (b) { h += '<a href="' + href('S17', 'b', b.name) + '"' + (active === b.name ? ' class="on"' : '') + '>' + esc(b.name) + '</a>'; });
+    return { html: h + '</nav><main class="s17-main">' + body + '</main><footer class="s17-f">도원화학㈜ · 해원시 해원공단로 77<br>© DOWON CHEMICAL. All rights reserved.</footer>', title: title || '도원화학' };
+  }
+  function s17List(board) {
+    var all = sitePosts('S17', board || '');
+    return s17Shell(board || '', (board ? '' : '<div class="s17-hero"><b>1997년부터 해원과 함께</b><span>공정용 세척액 · 다목적 세정제</span></div>') + '<ul class="s17-list">' + all.map(function (o) {
+      return '<li><a href="' + href('S17', 'p', o.p.id) + '"><em>' + esc(o.p.b) + '</em><b>' + esc(o.p.t) + '</b><span>' + ymd(o.p.d) + '</span></a></li>';
+    }).join('') + '</ul>');
+  }
+  function s17Post(p) {
+    return s17Shell(p.b, '<div class="s17-ph"><em>' + esc(p.b) + '</em><h1>' + esc(p.t) + '</h1><div>' + ymd(p.d) + '</div></div><article class="post-x">' + rich(p.x, p.id) + '</article>', p.t);
+  }
+  SK.S17 = { list: s17List, post: s17Post, shell: s17Shell };
 
   // ── 라우터 ─────────────────────────────────────────────
   function parse() {
@@ -1160,7 +1144,7 @@
       return '<li class="s1-row"><a href="' + href(site, 'p', o.p.id) + '"><div class="s1-t">' + esc(titleOf(o.p, o.s)) + '</div><div class="s1-m">' + esc(o.p.b) + ' · ' + esc(nick(o.p.a)) + ' · ' + short(o.p.d) + '</div></a></li>';
     }).join('');
     var body = searchForm(site, q.q, '제목·내용·닉네임') + (q.q ? '<p class="hits">‘' + esc(q.q) + '’ 검색 결과 ' + hits.length + '건</p>' : '') + '<ul class="s1-list">' + rows + '</ul>';
-    return site === 'S1' ? s1Shell('', body, '검색') : site === 'S10' ? s10Shell('', body, '검색') : site === 'S6' ? s6Shell('', body, '검색') : SHELL_OF[site](body, '검색');
+    return site === 'S1' ? s1Shell('', body, '검색') : site === 'S6' ? s6Shell('', body, '검색') : SHELL_OF[site](body, '검색');
   }
 
   // ── 이벤트 ─────────────────────────────────────────────
