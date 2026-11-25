@@ -67,3 +67,7 @@ button { font: inherit; }
 #total { bottom: calc(5vh + 70px); }
 #bar button { white-space: nowrap; }
 @media (max-width: 420px) { #bar { gap: 2px; } #bar button { padding: 8px 7px; min-width: 34px; font-size: 13px; } }
+#panel a.lnk { flex: 1; display: block; text-align: center; padding: 11px 6px; border: 1px solid #33363f; background: #191b21; color: var(--ink); border-radius: 8px; font-size: 14px; text-decoration: none; }
+#panel .wipe { margin: 6px 0 12px; padding: 10px 12px; border: 1px solid #23252c; border-radius: 10px; font-size: 13px; color: var(--dim); }
+#panel .wipe summary { cursor: pointer; color: var(--ink); }
+#panel .wipe img { display: block; width: 180px; margin: 8px auto 0; background: #fff; border-radius: 6px; }

@@ -28,6 +28,7 @@ TARGETS = [
     ("s8", "S8", "S8 천명그룹"),
     ("s9", "S9", "S9 사원증"),
     ("s11", "S11", "S11 하루글 (블로그 주소 입력 화면)"),
+    ("reset", "reset", "기록 지우기 — **진행 화면 메뉴에 있음. 다음 팀 전에 기기마다 찍기**"),
 ]
 
 out = os.path.join(ROOT, "qr")
@@ -36,6 +37,8 @@ rows = []
 for name, route, label in TARGETS:
     url = BASE + (route if route.endswith(".html") else "#/" + route if route else "")
     segno.make(url, error="m").save(os.path.join(out, name + ".svg"), scale=6, border=2)
+    if name == "reset":  # 진행 화면 메뉴에 띄운다
+        segno.make(url, error="m").save(os.path.join(ROOT, "site", "img", "qr-reset.svg"), scale=6, border=2)
     rows.append((label, url, f"qr/{name}.svg"))
 
 table = ["| 사이트 | QR | 주소 |", "| --- | --- | --- |"]

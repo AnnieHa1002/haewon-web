@@ -132,6 +132,7 @@ def build():
     messages = [{
         "id": r["메시지ID"], "s": r["사이트"], "f": r["보낸 사람"], "to": r["받는 사람"],
         "d": r["일시"], "x": r["본문"], "c": cond(r["공개 조건"]),
+        **({"fail": 1} if "전송 실패" in r["공개 조건"] else {}),
     } for r in rows("messages")]
     messages.sort(key=lambda m: (m["d"], m["id"]))
 

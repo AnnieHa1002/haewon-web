@@ -1,6 +1,8 @@
 /* 꺼지지 않는 이름 · 4막 사이트 — 해시 라우팅 SPA. 서버·네트워크 없이 file://에서도 돈다. */
 (function () {
   'use strict';
+  window.__hwErr = [];
+  window.addEventListener('error', function (e) { window.__hwErr.push(String(e.message || e)); });
 
   // ── 설정 ────────────────────────────────────────────────
   // 잘못 입력 몇 번이면 잠깐 막을지
@@ -798,7 +800,7 @@
       else if (/^\[해원일보 링크\]/.test(x)) inner = '<span class="b-link">해원일보 · 기사 링크</span>' + esc(x.replace(/^\[해원일보 링크\]\s*/, ''));
       else if (/^\(받은 메시지/.test(x)) inner = '<span class="b-fw">' + esc(x.match(/^\(([^)]*)\)/)[1]) + '</span>' + esc(x.replace(/^\([^)]*\)\s*/, ''));
       else inner = esc(x).replace(/\n/g, '<br>');
-      h += '<div class="msg ' + (mine ? 'me' : 'you') + '">' + (!mine && names ? '<div class="who">' + esc(names(m.f)) + '</div>' : '') + '<div class="row"><div class="bub">' + inner + '</div><em>' + ampm(m.d) + '</em></div></div>';
+      h += '<div class="msg ' + (mine ? 'me' : 'you') + (m.fail ? ' fail' : '') + '">' + (!mine && names ? '<div class="who">' + esc(names(m.f)) + '</div>' : '') + '<div class="row">' + (m.fail ? '<i class="b-x">!</i>' : '') + '<div class="bub">' + inner + '</div><em>' + ampm(m.d) + '</em></div>' + (m.fail ? '<div class="b-failnote">전송 실패 · 차단된 번호</div>' : '') + '</div>';
     });
     return h + '</div>';
   }
@@ -934,8 +936,8 @@
   var PHONES = {
     S12: { who: '하늘바라기', wall: 'w-star', fav: ['S6', 'S5'], apps: [['msg6', '금방울당', 'bell'], ['b/구매 내역', '구매 내역', 'buy'], ['b/달력', '달력', 'cal'], ['b/사진첩', '사진첩', 'photo'], ['b/통화 기록', '통화 기록', 'call']] },
     S13: { who: '별꽃', wall: 'w-sun', fav: ['S1', 'S5'], apps: [['b/메모장', '메모장', 'memo'], ['b/통화 기록', '통화 기록', 'call'], ['mail', '메일', 'mail'], ['doran', '도란', 'doran']] },
-    S14: { who: '외골수', wall: 'w-umb', fav: ['S7', 'S1'], apps: [['doran', '도란', 'doran'], ['b/메모', '메모', 'memo']] },
-    S15: { who: '가우디', wall: 'w-bp', fav: ['S1', 'S5'], apps: [['mail', '메일', 'mail'], ['er', '병원 상담', 'er']] }
+    S14: { who: '외골수', wall: 'w-umb', fav: ['S7', 'S1'], apps: [['doran', '도란', 'doran'], ['b/메모', '메모', 'memo'], ['b/사진첩', '사진첩', 'photo']] },
+    S15: { who: '가우디', wall: 'w-bp', fav: ['S1', 'S5'], apps: [['mail', '메일', 'mail'], ['er', '병원 상담', 'er'], ['b/사진첩', '사진첩', 'photo']] }
   };
   var FAV = {
     S1: ['남은자리', '<img src="img/brand/namunjari_white.png" alt="">', '#56635a'], S5: ['해원일보', '報', '#163a6b'],
@@ -972,7 +974,15 @@
     return y === NOW.slice(0, 4) ? m + '월 ' + dd + '일' : y + '. ' + m + '. ' + dd + '.';
   }
   // 본문 → 문단 + '[첨부 n] …' 줄은 첨부 카드로
-  function mailBody(x) {
+  // 나중에 열리는 첨부: 메시지 탭의 '<메일ID>-A<n>' 줄. 별꽃 휴대폰을 처음 연 지 15분이 지나야 내려받기가 끝난다
+  var LATE_ATT_MS = 15 * 60 * 1000;
+  function lateAtt(mailId, n) {
+    var a = D.messages.find(function (m) { return m.id === mailId + '-A' + n; });
+    if (!a) return null;
+    var t0 = st.first && st.first[mailId.slice(0, 3)], left = t0 ? LATE_ATT_MS - (Date.now() - t0) : LATE_ATT_MS;
+    return { ready: left <= 0, pct: Math.max(1, Math.min(99, Math.round(100 - left / LATE_ATT_MS * 100))), x: a.x.replace(/^\([^)]*\)\s*/, '') };
+  }
+  function mailBody(x, mailId) {
     var att = [], paras = [];
     x.split('\n').forEach(function (l) {
       var m = l.match(/^\[첨부\s*(\d+)\]\s*(.*)$/);
@@ -980,14 +990,17 @@
     });
     var body = paras.join('\n').trim().split(/\n{2,}/).map(function (pp) { return '<p>' + esc(pp).replace(/\n/g, '<br>') + '</p>'; }).join('');
     var cards = att.length ? '<div class="m-att"><div class="m-att-h">📎 첨부 ' + att.length + '개</div>' + att.map(function (m) {
-      var t = m[2], k = t.indexOf(':'), head = k > 0 ? t.slice(0, k) : '첨부 ' + m[1], rest = k > 0 ? t.slice(k + 1).trim() : t;
+      var t = m[2], late = /내려받는 중/.test(t) && mailId ? lateAtt(mailId, m[1]) : null;
+      if (late && late.ready) t = late.x;
+      var k = t.indexOf(':'), head = k > 0 ? t.slice(0, k) : t.replace(/\s*\(.*$/, ''), rest = k > 0 ? t.slice(k + 1).trim() : '';
       var ic = /사진/.test(head) ? '🖼' : /메모/.test(head) ? '✍' : '📄';
+      if (late && !late.ready) return '<div class="m-file dl" data-late="' + mailId + '"><i>⏳</i><div><b>' + esc(head) + '</b><p>용량이 커서 내려받는 중… <span class="m-pct">' + late.pct + '%</span></p><div class="m-prog"><span style="width:' + late.pct + '%"></span></div></div></div>';
       return '<div class="m-file"><i>' + ic + '</i><div><b>' + esc(head) + '</b><p>' + esc(rest) + '</p></div></div>';
     }).join('') + '</div>' : '';
     return body + cards;
   }
   function mailApp(dev, id, folder) {
-    var all = D.messages.filter(function (m) { return m.s === dev && /-MAIL-/.test(m.id); }).sort(function (a, b) { return a.d < b.d ? 1 : -1; });
+    var all = D.messages.filter(function (m) { return m.s === dev && /-MAIL-\d+$/.test(m.id); }).sort(function (a, b) { return a.d < b.d ? 1 : -1; });
     if (id) {
       var m = all.find(function (x) { return x.id === id; }), mo = mailOf(m);
       if (!mailRead(id)) { st.mread = st.mread || {}; st.mread[id] = 1; save(); }
@@ -996,7 +1009,7 @@
         '<article class="m-view"><h2>' + esc(mo.subj) + '</h2>' +
         '<div class="m-labels">' + (mo.trash ? '<span class="m-lb trash">휴지통</span>' : '<span class="m-lb">받은 메일함</span>') + '</div>' +
         '<div class="m-from">' + mailAv(m.f, 1) + '<div><b>' + esc(nick(m.f)) + '</b><small>받는 사람: ' + esc(nick(m.to)) + '</small></div><time>' + mailDate(m.d) + '<br>' + m.d.slice(11, 16) + '</time></div>' +
-        '<div class="m-body">' + mailBody(mo.body) + '</div>' +
+        '<div class="m-body">' + mailBody(mo.body, m.id) + '</div>' +
         '<div class="m-reply"><span>↩ 답장</span><span>↪ 전달</span></div></article>';
     }
     var trash = folder === 'trash';
@@ -1059,6 +1072,7 @@
     var ph = PHONES[dev], app = parts[1], h;
     var title = ph.who + '의 휴대폰';
     if (!isOpen(dev)) return phone('p-me p-' + dev, phoneLock(dev), title);
+    if (!st.first || !st.first[dev]) { st.first = st.first || {}; st.first[dev] = Date.now(); save(); }
     if (!app) return phone('p-me p-' + dev, phoneHome(dev), title);
     if (app === 'b') {
       var board = parts[2], id = parts[3], kind = (ph.apps.find(function (a) { return a[0] === 'b/' + board; }) || [])[2];
@@ -1081,7 +1095,7 @@
   ];
   var FIND_SITES = ['S1', 'S5', 'S6', 'S8', 'S9', 'S4', 'S11', 'S16', 'S17', 'S7'];
   function addrBar(dev, q) {
-    return '<form class="addr" data-addr="' + (dev || '') + '"><span>⌕</span><input name="q" type="search" value="' + esc(q || '') + '" placeholder="사이트 이름이나 낱말 검색" enterkeyhint="go" autocomplete="off"></form>';
+    return '<form class="addr" data-addr="' + (dev || '') + '"><span>⌕</span><input name="q" type="search" value="' + esc(q || '') + '" placeholder="사이트 이름이나 낱말 (예: 해원일보)" enterkeyhint="go" autocomplete="off"></form>';
   }
   function addrGo(text) {
     var t = text.trim(); if (!t) return;
@@ -1089,18 +1103,68 @@
     location.hash = hit ? hit[1] : '#/find' + qs({ q: t });
   }
   function findPage(q) {
-    var t = (q.q || '').trim(), groups = [], total = 0;
+    var t = (q.q || '').trim(), only = q.s || '', groups = [], total = 0;
     FIND_SITES.forEach(function (sid) {
       if (sid === 'S7' && !sess('S7')) return; // 사내망은 로그인한 사번만
-      var hits = searchHits(sid, t).slice(0, 5);
-      if (hits.length) { groups.push({ s: sid, hits: hits }); total += hits.length; }
+      if (only && sid !== only) return;
+      var all = searchHits(sid, t);
+      if (all.length) { groups.push({ s: sid, hits: only ? all : all.slice(0, 5), n: all.length }); total += all.length; }
     });
-    var h = '<div class="find">' + addrBar(curPhone, t) + '<p class="hits">‘' + esc(t) + '’ 검색 결과 ' + total + '건</p>' + groups.map(function (g) {
-      return '<section><h3><a href="#/' + g.s + '">' + esc(SITE[g.s].name) + '</a></h3><ul>' + g.hits.map(function (o) {
+    var h = '<div class="find">' + addrBar(curPhone, t) + (only ? '<p class="hits"><a href="#/find' + qs({ q: t }) + '">‹ 모든 사이트</a> · ' + esc(SITE[only].name) + '에서 ‘' + esc(t) + '’ ' + total + '건</p>' : '<p class="hits">‘' + esc(t) + '’ 검색 결과 ' + total + '건</p>') + groups.map(function (g) {
+      return '<section><h3><a href="#/' + g.s + '">' + esc(SITE[g.s].name) + '</a>' + (only ? '' : ' <small>' + g.n + '건</small>') + '</h3><ul>' + g.hits.map(function (o) {
         return '<li><a href="' + href(g.s, 'p', o.p.id) + '"><b>' + esc(titleOf(o.p, o.s)) + '</b><p>' + esc(o.s.k === 'show' ? excerpt(o.s.body, 70) : '') + '</p><em>' + esc(o.p.b) + ' · ' + ymd(o.p.d) + '</em></a></li>';
-      }).join('') + '</ul></section>';
-    }).join('') + (total ? '' : '<p class="d-empty">찾는 결과가 없습니다. 사이트 이름(예: 해원일보, 금방울당)을 넣어 보세요.</p>') + '</div>';
+      }).join('') + '</ul>' + (!only && g.n > g.hits.length ? '<a class="find-more" href="#/find' + qs({ q: t, s: g.s }) + '">' + esc(SITE[g.s].name) + ' 결과 ' + (g.n - g.hits.length) + '건 더 보기 ›</a>' : '') + '</section>';
+    }).join('') + (total ? '' : '<p class="d-empty">찾는 결과가 없습니다. 사이트 이름(예: 해원일보)을 넣어 보세요.</p>') + '</div>';
     return { html: h, title: '검색', skin: 'find' };
+  }
+
+  // ── 진행자 점검 (#/check): QR로 여는 화면이 모두 열리는지, 사진이 모두 뜨는지. 비밀번호는 두지 않는다 ─────
+  var CHECK = [['허브', ''], ['S1 남은자리', 'S1'], ['S2 제비의 휴대폰', 'S2'], ['S3 이다음의 휴대폰', 'S3'], ['하늘바라기의 휴대폰', 'haneul'], ['별꽃의 휴대폰', 'byeolkkot'],
+    ['외골수의 휴대폰', 'oegolsu'], ['가우디의 휴대폰', 'gaudi'], ['S4 한컷', 'S4'], ['S5 해원일보', 'S5'], ['S6 금방울당', 'S6'], ['S7 도원화학 사내망', 'S7'], ['S8 천명그룹', 'S8'],
+    ['S9 사원증', 'S9'], ['S11 하루글', 'S11'], ['S16 은행동 시장 상인회 (주소창)', 'S16'], ['S17 도원화학 (주소창)', 'S17']];
+  function checkPage() {
+    var h = '<div class="chk"><h1>사이트 점검</h1><p>게임 전에 이 기기에서 한 번 돌려 보세요. QR로 여는 화면이 모두 열리는지, 사진이 모두 뜨는지 확인합니다.</p>' +
+      '<button class="btn" data-act="check-run">점검 시작</button><ul class="chk-list">' + CHECK.map(function (c, i) {
+        return '<li data-i="' + i + '"><span class="chk-st">·</span><a href="#/' + c[1] + '" target="_blank" rel="noopener">' + esc(c[0]) + '</a><em>#/' + esc(c[1]) + '</em></li>';
+      }).join('') + '<li data-i="img"><span class="chk-st">·</span><b>사진 ' + Object.keys(PHOTO).length + '장 · 배경 · 로고</b><em></em></li></ul>' +
+      '<p class="chk-n">글 ' + D.posts.length + ' · 댓글 ' + Object.keys(D.comments).reduce(function (n, k) { return n + D.comments[k].length; }, 0) + ' · 메시지 ' + D.messages.length + '</p>' +
+      '<p class="chk-n">이 기기 기록 지우기는 <a href="#/reset">#/reset</a></p><iframe class="chk-frame" title="점검" hidden></iframe></div>';
+    return { html: h, title: '사이트 점검', skin: 'chk' };
+  }
+  function runCheck() {
+    var fr = document.querySelector('.chk-frame'), i = 0;
+    function mark(key, ok, note) {
+      var li = document.querySelector('.chk-list li[data-i="' + key + '"]'); if (!li) return;
+      li.className = ok ? 'ok' : 'bad'; li.querySelector('.chk-st').textContent = ok ? '✓' : '✕'; if (note != null) li.querySelector('em').textContent = note;
+    }
+    function next() {
+      if (i >= CHECK.length) return checkImages();
+      var c = CHECK[i], key = i++;
+      fr.onload = function () {
+        setTimeout(function () {
+          var w = fr.contentWindow, app = w.document.getElementById('app'), err = (w.__hwErr || []);
+          mark(key, !!app && app.innerHTML.length > 200 && !err.length, err.length ? err[0] : null); next();
+        }, 500);
+      };
+      fr.src = 'index.html?chk=' + Date.now() + '#/' + c[1];
+    }
+    next();
+  }
+  function checkImages() {
+    var urls = Object.keys(PHOTO).map(function (k) { return PHOTO[k]; }).concat(['img/S2-WALL.jpg', 'img/S12-WALL.jpg', 'img/S13-WALL.jpg', 'img/S14-WALL.jpg', 'img/S15-WALL.svg', 'img/brand/dowon_color.png', 'img/brand/namunjari_white.png']);
+    var left = urls.length, bad = [];
+    urls.forEach(function (u) {
+      var im = new Image();
+      im.onload = im.onerror = function (ev) { if (ev.type === 'error') bad.push(u.replace('img/', '')); if (--left === 0) {
+        var li = document.querySelector('.chk-list li[data-i="img"]');
+        li.className = bad.length ? 'bad' : 'ok'; li.querySelector('.chk-st').textContent = bad.length ? '✕' : '✓';
+        li.querySelector('em').textContent = bad.length ? '안 뜨는 사진: ' + bad.join(', ') : urls.length + '개 모두 뜸';
+      } };
+      im.src = u;
+    });
+  }
+  function resetPage() {
+    return { html: '<div class="chk"><h1>이 기기 기록 지우기</h1><p>다음 팀이 이 기기를 쓰기 전에 누르세요. 로그인, 휴대폰 잠금 해제, 보안 폴더, 읽은 메일 기록이 모두 지워집니다.</p><button class="btn warn" data-act="reset-go">기록 지우기</button></div>', title: '기록 지우기', skin: 'chk' };
   }
 
   // ── S16 은행동 시장 상인회 (주소창으로만 들어가는 바깥 사이트) ─────
@@ -1158,6 +1222,8 @@
     else if (site === 'S3') out = s3(parts);
     else if (PHONES[site]) out = phonePage(site, parts);
     else if (site === 'find') out = findPage(q);
+    else if (site === 'check') out = checkPage();
+    else if (site === 'reset') out = resetPage();
     else if (SK[site]) {
       var sk = SK[site], what = parts[1];
       if (sk.gate && sk.gate() && what !== 'login') out = s7Gate();
@@ -1179,6 +1245,15 @@
     app.innerHTML = out.html + (curPhone && site !== curPhone ? '<a class="pill" href="#/' + curPhone + '" aria-label="휴대폰으로">‹ 휴대폰</a>' : '');
     document.title = out.title ? out.title : (SITE[site] ? SITE[site].name : '홈');
     window.scrollTo(0, 0);
+    // 메신저 대화방은 실제 앱처럼 가장 최근 메시지에서 연다
+    if (out.skin === 'dev' && app.querySelector('.chat')) window.scrollTo(0, document.documentElement.scrollHeight);
+    clearInterval(route.dl);
+    if (app.querySelector('[data-late]')) route.dl = setInterval(function () {
+      var el = document.querySelector('[data-late]'); if (!el) return clearInterval(route.dl);
+      var l = lateAtt(el.dataset.late, 4) || { ready: true };
+      if (l.ready) { clearInterval(route.dl); var y = window.scrollY; route(); window.scrollTo(0, y); }
+      else { el.querySelector('.m-pct').textContent = l.pct + '%'; el.querySelector('.m-prog span').style.width = l.pct + '%'; }
+    }, 5000);
   }
   function searchPage(site, q) {
     var hits = searchHits(site, q.q || '');
@@ -1232,8 +1307,10 @@
     var act = a.dataset.act;
     if (act === 'logout') { e.preventDefault(); delete st.sess[a.dataset.site]; save(); location.hash = '#/' + a.dataset.site; route(); }
     else if (act === 'reset') {
-      if (confirm('이 기기의 로그인과 잠금 해제 기록을 모두 지울까요? (다음 게임 전에 누르세요)')) { st = mem = { sess: {}, open: {}, fail: {}, like: {} }; save(); route(); toast('기록을 지웠습니다.'); }
+      if (confirm('이 기기의 로그인과 잠금 해제 기록을 모두 지울까요? (다음 게임 전에 누르세요)')) wipe();
 
+    } else if (act === 'reset-go') { e.preventDefault(); wipe(); location.hash = '#/';
+    } else if (act === 'check-run') { e.preventDefault(); a.disabled = true; runCheck();
     } else if (act === 'auto') {
       e.preventDefault();
       // 휴대폰 즐겨찾기: 그 휴대폰 주인 계정으로 자동 로그인하고 연다
@@ -1259,6 +1336,18 @@
     } else if (act === 'play') { e.preventDefault(); toast('파일을 재생할 수 없습니다. (손상된 파일)'); }
   });
 
+  function wipe() { st = mem = { sess: {}, open: {}, fail: {}, like: {} }; save(); curPhone = ''; route(); toast('기록을 지웠습니다.'); }
+
   window.addEventListener('hashchange', route);
   route();
+
+  // 오프라인: 한 번 연 화면과 사진은 기기에 저장해 두고, 인터넷이 끊겨도 연다 (https에서만)
+  if ('serviceWorker' in navigator && location.protocol === 'https:' && !/chk=/.test(location.search)) {
+    navigator.serviceWorker.register('sw.js').then(function () {
+      // 사진은 화면이 한가할 때 한 장씩 미리 받아 둔다
+      var list = Object.keys(PHOTO).map(function (k) { return PHOTO[k]; }).concat(['img/S12-WALL.jpg', 'img/S13-WALL.jpg', 'img/S14-WALL.jpg', 'img/S15-WALL.svg', 'img/S2-WALL.jpg']);
+      var idle = window.requestIdleCallback || function (f) { return setTimeout(f, 400); };
+      (function warm() { var u = list.shift(); if (!u) return; fetch(u).catch(function () {}).then(function () { idle(warm); }); })();
+    }).catch(function () {});
+  }
 })();

@@ -684,3 +684,33 @@ body.b-S11 { background: #ece6da; }
 .m-file p { margin: 2px 0 0; font-size: 13.5px; line-height: 1.6; color: #333; }
 .m-reply { display: flex; gap: 10px; margin-top: 22px; }
 .m-reply span { flex: 1; text-align: center; padding: 10px; border: 1px solid #dde1e7; border-radius: 22px; font-size: 13.5px; color: #555; }
+
+/* 검색 더 보기 */
+.find h3 small { font-size: 12px; color: #999; font-weight: 400; margin-left: 4px; }
+.find-more { display: block; padding: 10px 16px; font-size: 13px; color: #3d7be0; }
+.find .hits a { color: #3d7be0; }
+
+/* 진행자 점검 · 기록 지우기 */
+.skin-chk { background: #f6f7f9; min-height: 100vh; }
+.chk { max-width: 560px; margin: 0 auto; padding: 22px 16px 40px; }
+.chk h1 { font-size: 22px; margin: 0 0 8px; }
+.chk > p { font-size: 14px; color: #555; line-height: 1.6; }
+.chk .btn { margin: 10px 0 14px; }
+.chk .btn.warn { background: #c0392b; }
+.chk-list li { display: flex; gap: 10px; align-items: center; padding: 10px 12px; background: #fff; border: 1px solid #e6e8ec; border-radius: 10px; margin-bottom: 6px; font-size: 14px; }
+.chk-list li em { margin-left: auto; font-style: normal; font-size: 11.5px; color: #999; text-align: right; }
+.chk-st { width: 20px; text-align: center; font-weight: 700; color: #bbb; }
+.chk-list li.ok .chk-st { color: #1e9e57; }
+.chk-list li.bad { border-color: #f1b7ae; background: #fff6f5; }
+.chk-list li.bad .chk-st, .chk-list li.bad em { color: #c0392b; }
+.chk-n { font-size: 12.5px !important; color: #888 !important; }
+.chk-frame { width: 390px; height: 600px; }
+
+/* 전송 실패 · 늦게 열리는 첨부 */
+.msg.fail .bub { opacity: .75; }
+.b-x { flex: none; align-self: center; width: 18px; height: 18px; border-radius: 50%; background: #e0453a; color: #fff; font-style: normal; font-size: 12px; font-weight: 700; display: grid; place-items: center; }
+.b-failnote { font-size: 11px; color: #e0453a; text-align: right; margin-top: 3px; }
+.m-file.dl { background: #f7f8fa; }
+.m-file.dl b { color: #555; }
+.m-prog { height: 4px; border-radius: 2px; background: #e3e7ee; margin-top: 6px; overflow: hidden; }
+.m-prog span { display: block; height: 100%; background: #3d7be0; transition: width .6s; }

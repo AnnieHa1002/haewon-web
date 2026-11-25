@@ -24,7 +24,7 @@ const routes = [
   ['#/S7', 's7-gate'], ['#/S4', 's4'], ['#/S4/p/S4-FEED-001', 's4-post'], ['#/S4/msg', 's4-dm'], ['#/S2', 's2-home'], ['#/S3', 's3-home'], ['#/S3/vault', 's3-vault'],
   ['#/S12', 's12'], ['#/S12/b/구매 내역', 's12-buy'], ['#/S13', 's13'], ['#/S13/mail', 's13-mail'], ['#/S13/doran/nare_nowhere', 's13-doran'],
   ['#/S14', 's14'], ['#/S14/doran/next_stop', 's14-chat'], ['#/S14/doran/group', 's14-group'], ['#/S15/mail/trash', 's15-trash'], ['#/S15/er', 's15-er'],
-  ['#/S16', 's16'], ['#/S17', 's17'], ['#/S17/p/S17-PROD-001', 's17-post'], ['#/find?q=DW-7', 'find-dw'], ['#/find?q=망향', 'find'],
+  ['#/S16', 's16'], ['#/S14/b/사진첩', 's14-album'], ['#/S15/b/사진첩', 's15-album'], ['#/S2/sms/nare_sms', 's2-fail'], ['#/check', 'check'], ['#/reset', 'reset'], ['#/S17', 's17'], ['#/S17/p/S17-PROD-001', 's17-post'], ['#/find?q=DW-7', 'find-dw'], ['#/find?q=망향', 'find'],
 ];
 await go('#/haneul', 's12-lock');
 for (const [slug, pin] of [['haneul', '0717'], ['byeolkkot', '5050'], ['oegolsu', '0402'], ['gaudi', '1998']]) {
@@ -32,7 +32,7 @@ for (const [slug, pin] of [['haneul', '0717'], ['byeolkkot', '5050'], ['oegolsu'
 }
 for (const [h, n] of routes) await go(h, n);
 // 로그인·잠금 해제 흐름
-await page.goto(url + '#/S7'); await page.fill('input[name=id]', 'DW21-0347'); await page.fill('input[name=pw]', 'sojin0347'); await page.click('form.login-box .btn'); await page.waitForTimeout(150);
+await page.goto(url + '#/S7'); await page.fill('input[name=id]', 'DW11-0347'); await page.fill('input[name=pw]', 'sojin0347'); await page.click('form.login-box .btn'); await page.waitForTimeout(150);
 await page.screenshot({ path: `${out}/s7-in.png` });
 await go('#/S7/b/배차 기록', 's7-car');
 await page.goto(url + '#/S1/login'); await page.fill('input[name=id]', 'baram_dad'); await page.fill('input[name=pw]', '1998baram'); await page.click('form.login-box .btn'); await page.waitForTimeout(150);
