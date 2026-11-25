@@ -67,5 +67,6 @@ window.HW_PHOTOS = {
   "S2-PHOTO-005": "img/S2-PHOTO-005.jpg",
   "S2-PHOTO-008": "img/S2-PHOTO-008.jpg",
   "S12-PHOTO-001": "img/S12-PHOTO-001.jpg",
-  "S12-PHOTO-002": "img/S12-PHOTO-002.jpg"
+  "S12-PHOTO-002": "img/S12-PHOTO-002.jpg",
+  "S17-NEWS-001": "img/S17-NEWS-001.jpg"
 };
