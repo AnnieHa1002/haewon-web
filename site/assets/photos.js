@@ -85,5 +85,18 @@ window.HW_PHOTOS = {
   "S9-DW-028": "img/S9-DW-028.jpg",
   "S2-PHOTO-007": "img/S2-PHOTO-007.jpg",
   "S2-PHOTO-013": "img/S2-PHOTO-013.jpg",
-  "S5-SOC-006": "img/S5-SOC-006.jpg"
+  "S5-SOC-006": "img/S5-SOC-006.jpg",
+  "S2-DORAN-014": "img/S2-DORAN-014.jpg",
+  "S2-PHOTO-003": "img/S2-PHOTO-003.jpg",
+  "S2-PHOTO-004": "img/S2-PHOTO-004.jpg",
+  "S2-PHOTO-006": "img/S2-PHOTO-006.jpg",
+  "S2-PHOTO-009": "img/S2-PHOTO-009.jpg",
+  "S2-PHOTO-010": "img/S2-PHOTO-010.jpg",
+  "S2-PHOTO-011": "img/S2-PHOTO-011.jpg",
+  "S2-PHOTO-014": "img/S2-PHOTO-014.jpg",
+  "S2-PHOTO-016": "img/S2-PHOTO-016.jpg",
+  "S4-FEED-011": "img/S4-FEED-011.jpg",
+  "S4-FEED-012": "img/S4-FEED-012.jpg",
+  "S3-MEMO-015": "img/S3-MEMO-015.jpg",
+  "S6-ROOM-002": "img/S6-ROOM-002.jpg"
 };
